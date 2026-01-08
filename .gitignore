@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -7,11 +8,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+=======
+>>>>>>> 820411d4230ce0e519402416d6effff919ae9a1f
 node_modules
 .env
 .DS_Store
 dist
 build
+<<<<<<< HEAD
 
 # Editor directories and files
 .vscode/*
@@ -25,3 +29,5 @@ build
 *.sw?
 node_modules/
 .env
+=======
+>>>>>>> 820411d4230ce0e519402416d6effff919ae9a1f
