@@ -1,14 +1,19 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const { query, testConnection } = require('./db.js');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import { query, testConnection } from './db.js'; // Note: You MUST include the .js extension here
 
 const app = express();
-app.use(cors({ origin: ['http://localhost:5173', 'https://recruitment-web-five.vercel.app'], 
+
+// Update CORS to allow your live Vercel URL
+app.use(cors({ 
+    origin: ['http://localhost:5173', 'https://recruitment-web-five.vercel.app'], 
     credentials: true 
 }));
+
 app.use(express.json());
 
+// Run the connection test
 testConnection();
 
 // --- AUTH ---
@@ -871,10 +876,5 @@ app.get('/api/debug/tables', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📡 API endpoints ready at http://localhost:${PORT}/api`);
-});
 
-module.exports = app;
+export default app;
