@@ -1,10 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { query, testConnection } = require('../db.cjs');
+const { query, testConnection } = require('./db.cjs');
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: ['http://localhost:5173', 'https://recruitment-web-five.vercel.app'], 
+    credentials: true 
+}));
 app.use(express.json());
 
 testConnection();
