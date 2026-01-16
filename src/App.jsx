@@ -8,12 +8,14 @@ import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, Legend, ResponsiveContainer, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
+import Presentation from './Presentation';
 
 const API_BASE = "/api";
 
 export default function App() {
   const [user, setUser] = useState(null); 
   const [usernameInput, setUsernameInput] = useState("");
+  const [currentView, setCurrentView] = useState('login');
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -22,6 +24,10 @@ export default function App() {
       setUser(res.data);
     } catch (err) { alert("Login Failed."); }
   };
+
+  if (currentView === 'presentation') {
+  return <Presentation onClose={() => setCurrentView('login')} />;
+}
 
   // 1. STYLED LOGIN GATEWAY
   if (!user) {
@@ -50,6 +56,14 @@ export default function App() {
           <p className="text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest pt-4 border-t border-white/5">
             Crafted by <span className="text-indigo-400">Nawaf Al Hussain Khondokar</span>
           </p>
+          <button 
+            type="button"
+            onClick={() => setCurrentView('presentation')}
+            className="w-full mt-6 group flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300"
+          >
+            <Sparkles size={14} className="text-indigo-500 group-hover:text-white group-hover:rotate-12 transition-all" />
+            View Project Presentation
+          </button>
         </form>
       </div>
     );
