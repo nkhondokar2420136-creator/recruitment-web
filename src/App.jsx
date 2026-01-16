@@ -9,6 +9,7 @@ import {
   Tooltip, Legend, ResponsiveContainer, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
 } from 'recharts';
 import Presentation from './Presentation';
+import Presentation2 from './Presentation2';
 
 const API_BASE = "/api";
 
@@ -27,6 +28,9 @@ export default function App() {
 
   if (currentView === 'presentation') {
   return <Presentation onClose={() => setCurrentView('login')} />;
+}
+  if (currentView === 'presentation2') {
+  return <Presentation2 onClose={() => setCurrentView('login')} />;
 }
 
   // 1. STYLED LOGIN GATEWAY
@@ -62,7 +66,15 @@ export default function App() {
             className="w-full mt-6 group flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300"
           >
             <Sparkles size={14} className="text-indigo-500 group-hover:text-white group-hover:rotate-12 transition-all" />
-            View Project Presentation
+            View Project Presentation v1
+          </button>
+          <button 
+            type="button"
+            onClick={() => setCurrentView('presentation2')}
+            className="w-full mt-6 group flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300"
+          >
+            <Sparkles size={14} className="text-indigo-500 group-hover:text-white group-hover:rotate-12 transition-all" />
+            View Project Presentation v2
           </button>
         </form>
       </div>
