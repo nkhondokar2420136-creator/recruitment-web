@@ -695,7 +695,7 @@ const SLIDES = [
           >
             <FloatingElement delay={0.2}>
               <img 
-            src="./images/4HqzzSohpEDd0Ow0jyE0g.png" // or use local: "/images/logo.gif"
+            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/images/4HqzzSohpEDd0Ow0jyE0g.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-120 h-90 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           />
