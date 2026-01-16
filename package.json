@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "node api/index.cjs",
+    "server": "node api/index.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
