@@ -669,7 +669,7 @@ const SLIDES = [
           }}
           className="relative"
         >
-          <GlowEffect intensity={2}>
+          <GlowEffect intensity={0}>
             <div className="w-40 h-40 bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 rounded-[3rem] flex items-center justify-center text-white shadow-2xl shadow-indigo-100 rotate-3">
               <motion.div
                 animate={{ 
