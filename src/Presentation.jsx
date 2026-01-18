@@ -9,7 +9,229 @@ import {
   Code2, Network, Cctv, LineChart, Brain, Filter,
   Shield, DatabaseZap, Binary, Workflow, Scan
 } from 'lucide-react';
-import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, useAnimation, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
+
+const ER_STAGES = [
+  { 
+    id: 'all', 
+    label: 'Architecture Overview', 
+    scale: 0.59, x: 0, y: 0, 
+    desc: '20-table relational schema with strictly enforced referential integrity.',
+    engineNote: 'Normalization Level: 3NF'
+  },
+  { 
+    id: 'auth', 
+    label: 'Identity & RBAC', 
+    scale: 1.5, x: '78%', y: '78%', 
+    desc: 'Unified USERS table acting as a parent to specialized Candidate/Recruiter roles.',
+    engineNote: 'Uses 1:1 Identity Pattern'
+  },
+  { 
+    id: 'job', 
+    label: 'Skill Matrix Engine', 
+    scale: 1.27, x: '-60%', y: '59%', 
+    desc: 'The Skill Proficiency Matrix allows for granular search and AI matching scoring.',
+    engineNote: 'Supports Composite PKs'
+  },
+  { 
+    id: 'flow', 
+    label: 'The Workflow Engine', 
+    scale: 1.15, x: '-40%', y: '-45%', 
+    desc: 'Centralized APPLICATION state machine tracking every transition in real-time.',
+    engineNote: 'Atomic State Transitions'
+  },
+  { 
+    id: 'audit', 
+    label: 'Governance & Audit', 
+    scale: 1.78, x: '68%', y: '-50%', 
+    desc: 'Automated audit logs and archival tables ensure high-performance for active jobs.',
+    engineNote: 'Trigger-based Archiving'
+  }
+];
+
+const ERInteractiveTour = () => {
+  const [stage, setStage] = useState(0);
+  const current = ER_STAGES[stage];
+
+  return (
+    <div className="absolute inset-0 flex">
+      {/* 1. The Interactive Canvas */}
+      <div className="flex-1 relative overflow-hidden bg-[#0f172a]">
+        <motion.div
+          animate={{
+            scale: current.scale,
+            x: current.x,
+            y: current.y,
+          }}
+          transition={{ type: "spring", stiffness: 40, damping: 12 }}
+          className="w-full h-full flex items-center justify-center p-20"
+        >
+          {/* PLACE YOUR EXPORTED MERMAID IMAGE HERE */}
+          <img 
+            src="/er-diagram-high-res.png" 
+            className="max-w-none w-[1200px] shadow-2xl rounded-lg" 
+            alt="ER Diagram"
+          />
+        </motion.div>
+      </div>
+
+      {/* 2. Side Control Panel (matches your design) */}
+      <div className="w-80 bg-slate-900/80 backdrop-blur-xl border-l border-slate-800 p-8 flex flex-col gap-6 z-20">
+        <div className="space-y-2">
+          <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Architecture Tour</span>
+          <h3 className="text-xl font-bold text-white leading-tight">{current.label}</h3>
+          <p className="text-sm text-slate-400">{current.desc}</p>
+        </div>
+
+        <div className="space-y-3 mt-4">
+          {ER_STAGES.map((s, i) => (
+            <button
+              key={s.id}
+              onClick={() => setStage(i)}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                stage === i ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800'
+              }`}
+            >
+              <div className={`w-2 h-2 rounded-full ${stage === i ? 'bg-white' : 'bg-slate-600'}`} />
+              <span className="text-xs font-bold uppercase tracking-wider">{s.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-auto">
+          <HolographicCard className="p-4 bg-indigo-500/10 border border-indigo-500/20">
+             <div className="flex items-center gap-2 text-indigo-400 mb-2">
+                <DatabaseZap size={16} />
+                <span className="text-[10px] font-black uppercase">Engine Note</span>
+             </div>
+             <p className="text-[11px] text-slate-400 italic">
+               "{stage === 2 ? "History tracking ensures GDPR deletion logs." : "Optimized for Neon Serverless."}"
+             </p>
+          </HolographicCard>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+//For flowchart slide
+const ER_STAGES2 = [
+  { 
+    id: 'all', 
+    label: 'Flow Chart Overview', 
+    scale: 1.29, x: '-0.5%', y: '0%', panX: '0%', panY: '0%',
+    desc: 'NextHire frontend implementation flowchart with modular separation.',
+  },
+  { 
+    id: 'auth', 
+    label: 'System Authentication', 
+    scale: 4, x: '104%', y: '100%', panX: '104%', panY: '80%',
+    desc: 'This module covers the entry point, validation logic, and role-based redirection.',
+  },
+  { 
+    id: 'job', 
+    label: 'Admin Dashboard', 
+    scale: 4.0, x: '30%', y: '106%', panX: '-1%', panY: '106%',
+    desc: 'This module focuses on system-wide governance, reporting, and maintenance.',
+  },
+  { 
+    id: 'flow', 
+    label: 'Recruiter Dashboard', 
+    scale: 3.4, x: '35%', y: '-0%', panX: '-85%', panY: '-3%',
+    desc: 'This module details the job posting, candidate review, and the complex hiring/scheduling logic.',
+  },
+  { 
+    id: 'audit', 
+    label: 'Candidate Dashboard', 
+    scale: 4.2, x: '68%', y: '-110%', panX: '-90%', panY: '-110%',
+    desc: 'This module covers job browsing, application lifecycle, and profile management.',
+  }
+];
+
+const ERInteractiveTour2 = () => {
+  const [stage, setStage] = useState(0);
+  const current = ER_STAGES2[stage];
+  const controls = useAnimation();
+
+  useEffect(() => {
+    const startCinematicPan = async () => {
+      // PHASE 1: Smoothly transition to the new stage coordinates
+      await controls.start({
+        scale: current.scale,
+        x: current.x,
+        y: current.y,
+        transition: { type: "spring", stiffness: 40, damping: 15 }
+      });
+
+      // PHASE 2: Start the infinite "Drift" loop from that new position
+      controls.start({
+        x: [current.x, current.panX],
+        y: [current.y, current.panY],
+        transition: {
+          x: { duration: 10, ease: "linear", repeat: Infinity, repeatType: "reverse" },
+          y: { duration: 12, ease: "linear", repeat: Infinity, repeatType: "reverse" }
+        }
+      });
+    };
+
+    startCinematicPan();
+  }, [stage, controls, current]);
+
+  return (
+    <div className="absolute inset-0 flex bg-[#0f172a]">
+      <div className="flex-1 relative overflow-hidden">
+        <motion.div
+          animate={controls}
+          style={{ transformOrigin: "center center" }}
+          className="w-full h-full flex items-center justify-center p-20"
+        >
+          <img 
+            src="/frontend_flowchart.svg" 
+            className="max-w-none w-[1200px] shadow-2xl rounded-lg" 
+            alt="ER Diagram"
+          />
+        </motion.div>
+      </div>
+
+      {/* 2. Side Control Panel (matches your design) */}
+      <div className="w-80 bg-slate-900/80 backdrop-blur-xl border-l border-slate-800 p-8 flex flex-col gap-6 z-20">
+        <div className="space-y-2">
+          <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Architecture Tour</span>
+          <h3 className="text-xl font-bold text-white leading-tight">{current.label}</h3>
+          <p className="text-sm text-slate-400">{current.desc}</p>
+        </div>
+
+        <div className="space-y-3 mt-4">
+          {ER_STAGES2.map((s, i) => (
+            <button
+              key={s.id}
+              onClick={() => setStage(i)}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                stage === i ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800'
+              }`}
+            >
+              <div className={`w-2 h-2 rounded-full ${stage === i ? 'bg-white' : 'bg-slate-600'}`} />
+              <span className="text-xs font-bold uppercase tracking-wider">{s.label}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-auto">
+          <HolographicCard className="p-4 bg-indigo-500/10 border border-indigo-500/20">
+             <div className="flex items-center gap-2 text-indigo-400 mb-2">
+                <DatabaseZap size={16} />
+                <span className="text-[10px] font-black uppercase">Engine Note</span>
+             </div>
+             <p className="text-[11px] text-slate-400 italic">
+               "{stage === 2 ? "History tracking ensures GDPR deletion logs." : "Optimized for Neon Serverless."}"
+             </p>
+          </HolographicCard>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // --- Advanced Transition Presets ---
 const slideVariants = {
@@ -581,7 +803,7 @@ const SLIDES = [
             transition={{ delay: 0.4 }}
           >
             <FloatingElement delay={0.2}><img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/images/7TUU7yLatA4hACE9z-hZa.png" // or use local: "/images/logo.gif"
+            src="./images/7TUU7yLatA4hACE9z-hZa.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-120 h-120 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           /></FloatingElement>
@@ -695,7 +917,7 @@ const SLIDES = [
           >
             <FloatingElement delay={0.2}>
               <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/images/4HqzzSohpEDd0Ow0jyE0g.png" // or use local: "/images/logo.gif"
+            src="./images/4HqzzSohpEDd0Ow0jyE0g.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-120 h-90 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           />
@@ -724,6 +946,19 @@ const SLIDES = [
             </div>
           </div>
         </motion.div>
+      </div>
+    )
+  },
+  {
+    id: 13,
+    title: "Database Architecture Deep-Dive",
+    transition: fadeZoomVariants,
+    isERTour: true, // Special flag for our custom renderer
+    content: (
+      <div className="relative h-full w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-800">
+        <DataStream />
+        {/* This component is defined below */}
+        <ERInteractiveTour /> 
       </div>
     )
   },
@@ -935,7 +1170,7 @@ const SLIDES = [
         >
           <FloatingElement delay={0.2}>
             <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/images/MixCollage-16-Jan-2026-01-39-AM-3318.jpg" // or use local: "/images/logo.gif"
+            src="./images/MixCollage-16-Jan-2026-01-39-AM-3318.jpg" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-240 h-60 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           />
@@ -1124,7 +1359,7 @@ const SLIDES = [
               transition={{ delay: 0.6 }}
             >
               <FloatingElement delay={0.2}><img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/images/P1CxKHbAfR_RrkArP6frv.png" // or use local: "/images/logo.gif"
+            src="./images/P1CxKHbAfR_RrkArP6frv.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-120 h-110 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           /></FloatingElement>
@@ -1294,7 +1529,7 @@ const SLIDES = [
         >
           <FloatingElement delay={0.2}>
             <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/images/x47VX06KaBJNjhtSeun46.png" // or use local: "/images/logo.gif"
+            src="./images/x47VX06KaBJNjhtSeun46.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-120 h-140 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           />
@@ -1377,7 +1612,7 @@ const SLIDES = [
         >
           <FloatingElement delay={0.2}>
             <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/images/Gz0P3SBn--MVi8DwiYEUa.png" // or use local: "/images/logo.gif"
+            src="./images/Gz0P3SBn--MVi8DwiYEUa.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-260 h-80 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           /></FloatingElement>
@@ -1523,13 +1758,26 @@ const SLIDES = [
           >
             <FloatingElement delay={0.1}>
               <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/images/B4slmnSdbMDlSl5yHptTd.png" // or use local: "/images/logo.gif"
+            src="./images/B4slmnSdbMDlSl5yHptTd.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-120 h-120 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           />
             </FloatingElement>
           </motion.div>
         </div>
+      </div>
+    )
+  },
+  {
+    id: 13,
+    title: "Flow Chart of NexHire's Frontend",
+    transition: fadeZoomVariants,
+    isERTour2: true, // Special flag for our custom renderer
+    content: (
+      <div className="relative h-full w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-800">
+        <DataStream />
+        {/* This component is defined below */}
+        <ERInteractiveTour2 /> 
       </div>
     )
   },
