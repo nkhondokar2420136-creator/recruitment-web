@@ -68,7 +68,7 @@ const ERInteractiveTour = () => {
         >
           {/* PLACE YOUR EXPORTED MERMAID IMAGE HERE */}
           <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/34aa160daa10b409a041ac20a745993a1f3ff6e7/images/er-diagram-high-res.png" 
+            src="/er-diagram-high-res.png" 
             className="max-w-none w-[1200px] shadow-2xl rounded-lg" 
             alt="ER Diagram"
           />
@@ -187,7 +187,7 @@ const ERInteractiveTour2 = () => {
           className="w-full h-full flex items-center justify-center p-20"
         >
           <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/34aa160daa10b409a041ac20a745993a1f3ff6e7/images/frontend_flowchart.svg" 
+            src="/frontend_flowchart.svg" 
             className="max-w-none w-[1200px] shadow-2xl rounded-lg" 
             alt="ER Diagram"
           />
@@ -803,7 +803,7 @@ const SLIDES = [
             transition={{ delay: 0.4 }}
           >
             <FloatingElement delay={0.2}><img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/34aa160daa10b409a041ac20a745993a1f3ff6e7/images/7TUU7yLatA4hACE9z-hZa.png" // or use local: "/images/logo.gif"
+            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/7TUU7yLatA4hACE9z-hZa.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-120 h-120 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           /></FloatingElement>
@@ -917,7 +917,7 @@ const SLIDES = [
           >
             <FloatingElement delay={0.2}>
               <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/34aa160daa10b409a041ac20a745993a1f3ff6e7/images/4HqzzSohpEDd0Ow0jyE0g.png" // or use local: "/images/logo.gif"
+            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/4HqzzSohpEDd0Ow0jyE0g.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-120 h-90 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           />
@@ -1170,7 +1170,7 @@ const SLIDES = [
         >
           <FloatingElement delay={0.2}>
             <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/34aa160daa10b409a041ac20a745993a1f3ff6e7/images/MixCollage-16-Jan-2026-01-39-AM-3318.jpg" // or use local: "/images/logo.gif"
+            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/MixCollage-16-Jan-2026-01-39-AM-3318.jpg" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-240 h-60 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           />
@@ -1359,9 +1359,9 @@ const SLIDES = [
               transition={{ delay: 0.6 }}
             >
               <FloatingElement delay={0.2}><img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/34aa160daa10b409a041ac20a745993a1f3ff6e7/images/P1CxKHbAfR_RrkArP6frv.png" // or use local: "/images/logo.gif"
+            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/P1CxKHbAfR_RrkArP6frv.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
-            className="w-120 h-110 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
+            className="w-120 h-116 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           /></FloatingElement>
             </motion.div>
           </div>
@@ -1374,7 +1374,8 @@ const SLIDES = [
     title: "Analytics & Compliance: Data-Driven and Ethical Hiring",
     transition: fadeZoomVariants,
     content: (
-      <div className="grid grid-cols-2 gap-8">
+      <div className="space-y-8">
+        <div className="grid grid-cols-2 gap-8">
         <motion.div
           initial={{ x: -50, opacity: 0, rotateY: 45 }}
           animate={{ x: 0, opacity: 1, rotateY: 0 }}
@@ -1465,6 +1466,22 @@ const SLIDES = [
           </motion.ul>
         </motion.div>
       </div>
+      <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="flex justify-center"
+        >
+          <FloatingElement delay={0.2}>
+            <img 
+            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/b4qywInE_hi-VPAw6W_pS.jpg" // or use local: "/images/logo.gif"
+            alt="NexHire Logo"
+            className="w-252 h-75 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
+          />
+          </FloatingElement>
+        </motion.div>
+      </div>
+      
     )
   },
   {
@@ -1529,7 +1546,7 @@ const SLIDES = [
         >
           <FloatingElement delay={0.2}>
             <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/34aa160daa10b409a041ac20a745993a1f3ff6e7/images/x47VX06KaBJNjhtSeun46.png" // or use local: "/images/logo.gif"
+            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/x47VX06KaBJNjhtSeun46.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-120 h-140 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           />
@@ -1612,7 +1629,7 @@ const SLIDES = [
         >
           <FloatingElement delay={0.2}>
             <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/34aa160daa10b409a041ac20a745993a1f3ff6e7/images/Gz0P3SBn--MVi8DwiYEUa.png" // or use local: "/images/logo.gif"
+            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/Gz0P3SBn--MVi8DwiYEUa.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-260 h-80 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           /></FloatingElement>
@@ -1758,7 +1775,7 @@ const SLIDES = [
           >
             <FloatingElement delay={0.1}>
               <img 
-            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/images/B4slmnSdbMDlSl5yHptTd.png" // or use local: "/images/logo.gif"
+            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/B4slmnSdbMDlSl5yHptTd.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
             className="w-120 h-120 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           />
