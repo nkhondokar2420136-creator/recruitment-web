@@ -68,7 +68,7 @@ const ERInteractiveTour = () => {
         >
           {/* PLACE YOUR EXPORTED MERMAID IMAGE HERE */}
           <img 
-            src="/er-diagram-high-res.png" 
+            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/er-diagram-high-res.png" 
             className="max-w-none w-[1200px] shadow-2xl rounded-lg" 
             alt="ER Diagram"
           />
@@ -187,7 +187,7 @@ const ERInteractiveTour2 = () => {
           className="w-full h-full flex items-center justify-center p-20"
         >
           <img 
-            src="/frontend_flowchart.svg" 
+            src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/frontend_flowchart.svg" 
             className="max-w-none w-[1200px] shadow-2xl rounded-lg" 
             alt="ER Diagram"
           />
