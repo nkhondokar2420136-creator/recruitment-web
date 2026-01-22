@@ -7,7 +7,7 @@ import {
   Sparkles, Briefcase, Search, FileText, PieChart, ArrowRight,
   Home, Maximize2, Moon, Sun, X, Bell, Settings, User, 
   Code2, Network, Cctv, LineChart, Brain, Filter,
-  Shield, DatabaseZap, Binary, Workflow, Scan
+  Shield, DatabaseZap, Binary, Workflow, Scan, Play, Pause
 } from 'lucide-react';
 import { motion, useAnimation, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 
@@ -114,13 +114,11 @@ const ERInteractiveTour = () => {
   );
 };
 
-
-//For flowchart slide
 const ER_STAGES2 = [
   { 
     id: 'all', 
     label: 'Flow Chart Overview', 
-    scale: 1.29, x: '-0.5%', y: '0%', panX: '0%', panY: '0%',
+    scale: 1.29, x: '-0.5%', y: '0%', panX: '-0.5%', panY: '0%',
     desc: 'NextHire frontend implementation flowchart with modular separation.',
   },
   { 
@@ -149,37 +147,63 @@ const ER_STAGES2 = [
   }
 ];
 
+const STAGE_DURATIONS = {
+  all: 2500,
+  auth: 5000,
+  job: 5000,
+  flow: 14000,
+  audit: 14000
+};
+
 const ERInteractiveTour2 = () => {
   const [stage, setStage] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const current = ER_STAGES2[stage];
   const controls = useAnimation();
 
   useEffect(() => {
-    const startCinematicPan = async () => {
-      // PHASE 1: Smoothly transition to the new stage coordinates
+    const runSequence = async () => {
+      // PHASE 1: Smooth Spring Jump
       await controls.start({
         scale: current.scale,
         x: current.x,
         y: current.y,
-        transition: { type: "spring", stiffness: 40, damping: 15 }
+        transition: { 
+            type: "spring", 
+            stiffness: 40, 
+            damping: 15, 
+            mass: 1.2 
+        }
       });
 
-      // PHASE 2: Start the infinite "Drift" loop from that new position
+      // PHASE 2: Start the infinite "Drift" loop
       controls.start({
         x: [current.x, current.panX],
         y: [current.y, current.panY],
         transition: {
-          x: { duration: 10, ease: "linear", repeat: Infinity, repeatType: "reverse" },
-          y: { duration: 12, ease: "linear", repeat: Infinity, repeatType: "reverse" }
+          x: { duration: 12, ease: "linear", repeat: Infinity, repeatType: "reverse" },
+          y: { duration: 15, ease: "linear", repeat: Infinity, repeatType: "reverse" }
         }
       });
     };
 
-    startCinematicPan();
-  }, [stage, controls, current]);
+    runSequence();
+
+    // AUTO-PLAY TIMER
+    let timer;
+    if (isAutoPlaying) {
+      const duration = STAGE_DURATIONS[current.id] || 5000;
+      timer = setTimeout(() => {
+        setStage((prev) => (prev + 1) % ER_STAGES2.length);
+      }, duration);
+    }
+
+    return () => clearTimeout(timer);
+  }, [stage, controls, current, isAutoPlaying]);
 
   return (
     <div className="absolute inset-0 flex bg-[#0f172a]">
+      {/* 1. The Interactive Canvas */}
       <div className="flex-1 relative overflow-hidden">
         <motion.div
           animate={controls}
@@ -189,44 +213,60 @@ const ERInteractiveTour2 = () => {
           <img 
             src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/frontend_flowchart.svg" 
             className="max-w-none w-[1200px] shadow-2xl rounded-lg" 
-            alt="ER Diagram"
+            alt="Frontend Flowchart"
           />
         </motion.div>
       </div>
 
-      {/* 2. Side Control Panel (matches your design) */}
+      {/* 2. Side Control Panel */}
       <div className="w-80 bg-slate-900/80 backdrop-blur-xl border-l border-slate-800 p-8 flex flex-col gap-6 z-20">
-        <div className="space-y-2">
-          <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Architecture Tour</span>
-          <h3 className="text-xl font-bold text-white leading-tight">{current.label}</h3>
-          <p className="text-sm text-slate-400">{current.desc}</p>
+        <div className="flex justify-between items-center">
+          <div className="space-y-1">
+            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Logic Flow</span>
+            <h3 className="text-xl font-bold text-white leading-tight">{current.label}</h3>
+          </div>
+          <button 
+            onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+            className="p-2 rounded-full bg-slate-800 text-indigo-400 hover:bg-slate-700 transition-colors"
+          >
+            {isAutoPlaying ? <Pause size={16} /> : <Play size={16} />}
+          </button>
         </div>
+
+        <p className="text-sm text-slate-400 leading-relaxed">{current.desc}</p>
 
         <div className="space-y-3 mt-4">
           {ER_STAGES2.map((s, i) => (
             <button
               key={s.id}
-              onClick={() => setStage(i)}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
-                stage === i ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800'
+              onClick={() => {
+                setStage(i);
+                setIsAutoPlaying(false); // Manual override pauses auto-play
+              }}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all border ${
+                stage === i 
+                  ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-500/20' 
+                  : 'bg-slate-800/50 border-transparent text-slate-400 hover:bg-slate-800'
               }`}
             >
-              <div className={`w-2 h-2 rounded-full ${stage === i ? 'bg-white' : 'bg-slate-600'}`} />
-              <span className="text-xs font-bold uppercase tracking-wider">{s.label}</span>
+              <div className={`w-1.5 h-1.5 rounded-full ${stage === i ? 'bg-white animate-pulse' : 'bg-slate-600'}`} />
+              <span className="text-[10px] font-bold uppercase tracking-wider">{s.label}</span>
             </button>
           ))}
         </div>
 
         <div className="mt-auto">
-          <HolographicCard className="p-4 bg-indigo-500/10 border border-indigo-500/20">
-             <div className="flex items-center gap-2 text-indigo-400 mb-2">
+          <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl relative overflow-hidden group">
+              <div className="flex items-center gap-2 text-indigo-400 mb-2 relative z-10">
                 <DatabaseZap size={16} />
-                <span className="text-[10px] font-black uppercase">Engine Note</span>
-             </div>
-             <p className="text-[11px] text-slate-400 italic">
-               "{stage === 2 ? "History tracking ensures GDPR deletion logs." : "Optimized for Neon Serverless."}"
-             </p>
-          </HolographicCard>
+                <span className="text-[10px] font-black uppercase tracking-tighter">Implementation Detail</span>
+              </div>
+              <p className="text-[11px] text-slate-400 italic relative z-10 leading-snug">
+                {stage === 1 ? "Auth persistence handled via HttpOnly cookies and Next.js Middleware." : 
+                 stage === 4 ? "Optimized with TanStack Query for real-time application state." : 
+                 "Component architecture follows the Atomic Design pattern."}
+              </p>
+          </div>
         </div>
       </div>
     </div>
