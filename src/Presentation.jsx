@@ -7,7 +7,7 @@ import {
   Sparkles, Briefcase, Search, FileText, PieChart, ArrowRight,
   Home, Maximize2, Moon, Sun, X, Bell, Settings, User, 
   Code2, Network, Cctv, LineChart, Brain, Filter,
-  Shield, DatabaseZap, Binary, Workflow, Scan, Play, Pause
+  Shield, DatabaseZap, Binary, Workflow, Scan, Play, Pause, EyeOff, Download, CheckCircle, RefreshCw
 } from 'lucide-react';
 import { motion, useAnimation, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 
@@ -136,7 +136,7 @@ const ER_STAGES2 = [
   { 
     id: 'flow', 
     label: 'Recruiter Dashboard', 
-    scale: 3.4, x: '35%', y: '-0%', panX: '-85%', panY: '-3%',
+    scale: 3.4, x: '35%', y: '-0%', panX: '-81%', panY: '-3%',
     desc: 'This module details the job posting, candidate review, and the complex hiring/scheduling logic.',
   },
   { 
@@ -148,9 +148,9 @@ const ER_STAGES2 = [
 ];
 
 const STAGE_DURATIONS = {
-  all: 2500,
+  all: 5000,
   auth: 5000,
-  job: 5000,
+  job: 7000,
   flow: 14000,
   audit: 14000
 };
@@ -262,8 +262,8 @@ const ERInteractiveTour2 = () => {
                 <span className="text-[10px] font-black uppercase tracking-tighter">Implementation Detail</span>
               </div>
               <p className="text-[11px] text-slate-400 italic relative z-10 leading-snug">
-                {stage === 1 ? "Auth persistence handled via HttpOnly cookies and Next.js Middleware." : 
-                 stage === 4 ? "Optimized with TanStack Query for real-time application state." : 
+                {stage === 1 ? "Component architecture follows the Atomic Design pattern." : 
+                 stage === 4 ? "Component architecture follows the Atomic Design pattern." : 
                  "Component architecture follows the Atomic Design pattern."}
               </p>
           </div>
@@ -520,6 +520,264 @@ const ImagePlaceholder = ({ id, label, icon: Icon, height = "h-48", coords = "",
     )}
   </motion.div>
 );
+
+// Add this component inside your slide component or as a separate component
+const CardSwapper = () => {
+  const [swap, setSwap] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Auto-swap every 5 seconds
+  useEffect(() => {
+    if (isPaused) return;
+    
+    const interval = setInterval(() => {
+      setSwap(prev => !prev);
+    }, 15000);
+    
+    return () => clearInterval(interval);
+  }, [isPaused]);
+
+  const concurrencyCard = (
+    <motion.div
+      key="concurrency"
+      initial={{ y: 30, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -30, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 200 }}
+      whileHover={{ 
+        y: -3,
+        transition: { duration: 0.2 }
+      }}
+      onHoverStart={() => setIsPaused(true)}
+      onHoverEnd={() => setIsPaused(false)}
+      className="relative group h-1/2"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl blur-lg opacity-30 group-hover:opacity-40 transition-opacity" />
+      
+      <div className="p-5 text-white relative h-full rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="relative z-10 h-full flex flex-col">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatType: "reverse"
+                  }}
+                  className="p-1.5 bg-blue-500/20 rounded-lg"
+                >
+                  <Shield size={18} className="text-blue-400" />
+                </motion.div>
+                <h4 className="text-lg font-bold">Concurrency Safety</h4>
+              </div>
+              <p className="text-slate-300 text-sm leading-tight">
+                Ensuring data integrity in multi-user environments with real-time conflict resolution
+              </p>
+            </div>
+            
+            <motion.div
+              className="relative mt-1"
+              animate={{ 
+                rotate: [0, 360],
+              }}
+              transition={{ 
+                duration: 20,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            >
+              <Cpu size={22} className="text-blue-400 relative" />
+            </motion.div>
+          </div>
+          
+          <div className="mt-auto">
+            <div className="space-y-2 mb-3">
+              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                <motion.div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "85%" }}
+                  transition={{ delay: 0.7, duration: 1 }}
+                />
+              </div>
+              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                <motion.div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "92%" }}
+                  transition={{ delay: 0.8, duration: 1 }}
+                />
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+              <div className="flex items-center gap-1">
+                <CheckCircle size={12} className="text-emerald-400" />
+                <span>Optimistic Locking</span>
+              </div>
+              <span className="text-slate-600">•</span>
+              <div className="flex items-center gap-1">
+                <CheckCircle size={12} className="text-emerald-400" />
+                <span>Conflict Resolution</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  const gdprCard = (
+    <motion.div
+      key="gdpr"
+      initial={{ y: 30, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -30, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 200 }}
+      whileHover={{ 
+        scale: 1.01,
+        transition: { duration: 0.2 }
+      }}
+      onHoverStart={() => setIsPaused(true)}
+      onHoverEnd={() => setIsPaused(false)}
+      className="relative group h-1/2"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl blur-lg opacity-30 group-hover:opacity-40 transition-opacity" />
+      
+      <div className="p-5 bg-gradient-to-br from-indigo-600 via-indigo-600 to-purple-700 rounded-2xl text-white shadow-lg h-full relative overflow-hidden">
+        
+        <div className="relative z-10 h-full flex flex-col">
+          <div className="flex items-start justify-between mb-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    repeatType: "reverse"
+                  }}
+                  className="p-1.5 bg-white/10 rounded-lg"
+                >
+                  <Lock size={18} />
+                </motion.div>
+                <h4 className="text-lg font-bold">GDPR-Ready</h4>
+              </div>
+              <p className="text-indigo-100 text-sm leading-tight">
+                Built-in anonymization, data retention, and privacy by design
+              </p>
+            </div>
+            
+            <motion.div
+              animate={{ 
+                rotate: [0, 360],
+              }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+            >
+              <Globe size={22} className="text-white/50" />
+            </motion.div>
+          </div>
+          
+          <div className="mt-auto">
+            <div className="flex items-center justify-between mb-3">
+              {[
+                { icon: EyeOff, label: "Data Masking", color: "text-emerald-300" },
+                { icon: Calendar, label: "Auto-Expiry", color: "text-amber-300" },
+                { icon: Download, label: "Portability", color: "text-cyan-300" },
+              ].map((item, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ y: 5, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.9 + idx * 0.1 }}
+                  whileHover={{ y: -2 }}
+                  className="flex flex-col items-center gap-1"
+                >
+                  <div className="p-1.5 bg-white/10 rounded-lg">
+                    <item.icon size={14} className={item.color} />
+                  </div>
+                  <span className="text-xs text-indigo-100">{item.label}</span>
+                </motion.div>
+              ))}
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <div className="flex items-center gap-1">
+                <CheckCircle size={12} className="text-emerald-400" />
+                <span>EU Compliance</span>
+              </div>
+              <span className="text-indigo-400">•</span>
+              <div className="flex items-center gap-1">
+                <CheckCircle size={12} className="text-emerald-400" />
+                <span>Privacy Default</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  return (
+    <>
+      <AnimatePresence mode="wait">
+        {swap ? (
+          <motion.div
+            key="top-gdpr"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            {gdprCard}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="top-concurrency"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            {concurrencyCard}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      <AnimatePresence mode="wait">
+        {swap ? (
+          <motion.div
+            key="bottom-concurrency"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            {concurrencyCard}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="bottom-gdpr"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            {gdprCard}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      
+    </>
+  );
+};
 
 // --- Reusable Metric Card with Advanced Animation ---
 const MetricCard = ({ value, label, color = "indigo", icon: Icon, description, delay = 0 }) => {
@@ -989,125 +1247,139 @@ const SLIDES = [
       </div>
     )
   },
-  {
+{
     id: 4,
     title: "Key Architectural Decisions",
     transition: slideVariants,
     content: (
       <div className="space-y-8">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-slate-500 text-lg"
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="text-center mb-6"
         >
-          NexHire's design prioritizes efficiency, compliance, and user experience through innovative architecture.
-        </motion.p>
+          <motion.p
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="text-slate-600 text-lg max-w-2xl mx-auto bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent"
+          >
+            NexHire's architecture prioritizes <span className="font-bold">efficiency</span>, <span className="font-bold">compliance</span>, and <span className="font-bold">user experience</span>
+          </motion.p>
+        </motion.div>
         
-        <div className="grid grid-cols-2 gap-8">
-          <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-8" style={{ height: "calc(100vh - 180px)" }}>
+          {/* Left Column - Architectural Decisions - Scrollable if needed */}
+          <div className="space-y-6 pr-2 overflow-y-auto" style={{ maxHeight: "95%" }}>
             {[
               {
                 number: "01",
                 title: "Unified User Model",
                 description: "Single authentication for Admin, Recruiter, Candidate roles",
-                icon: Users
+                icon: Users,
+                gradient: "from-blue-500 to-cyan-400",
+                delay: 0.1
               },
               {
                 number: "02",
                 title: "Data-Driven State Machine",
                 description: "Workflow rules stored as data, not hardcoded logic",
-                icon: Cpu
+                icon: Cpu,
+                gradient: "from-purple-500 to-pink-500",
+                delay: 0.2
               },
               {
                 number: "03",
                 title: "Skill Proficiency Matrix",
                 description: "Granular skill assessment (1-10 scale) for precise matching",
-                icon: TrendingUp
+                icon: TrendingUp,
+                gradient: "from-emerald-500 to-teal-400",
+                delay: 0.3
               },
               {
                 number: "04",
                 title: "Audit-First Design",
                 description: "Every critical change automatically logged for compliance",
-                icon: FileText
+                icon: FileText,
+                gradient: "from-amber-500 to-orange-500",
+                delay: 0.4
               }
             ].map((item, index) => (
               <motion.div
                 key={item.number}
-                initial={{ x: -50, opacity: 0, scale: 0.9 }}
-                animate={{ x: 0, opacity: 1, scale: 1 }}
+                initial={{ x: -60, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
                 transition={{ 
-                  delay: index * 0.15,
+                  delay: index * 0.1 + item.delay,
                   type: "spring",
-                  stiffness: 200
+                  stiffness: 200,
+                  damping: 15
                 }}
                 whileHover={{ 
-                  x: 10,
+                  x: 5,
                   scale: 1.02,
                   transition: { type: "spring", stiffness: 400 }
                 }}
-                className="flex gap-4 items-start p-6 bg-white border border-slate-100 rounded-2xl hover:shadow-lg transition-all group relative overflow-hidden"
+                className="flex gap-5 items-start p-5 bg-white border border-slate-100 rounded-2xl hover:shadow-lg transition-all group relative overflow-hidden min-h-[100px]"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/0 to-indigo-500/0 group-hover:from-indigo-500/5 group-hover:via-indigo-500/10 group-hover:to-indigo-500/5 transition-all duration-500" />
+                {/* Fixed: Darker, more visible number */}
                 <motion.div 
-                  className="text-3xl font-black text-indigo-600 opacity-30 relative z-10"
-                  whileHover={{ scale: 1.2 }}
+                  className="relative z-10"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
-                  {item.number}
-                </motion.div>
-                <div className="flex-1 relative z-10">
-                  <div className="flex items-center gap-3 mb-2">
-                    <motion.div 
-                      className="text-indigo-600"
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.5 }}
+                  <div className="relative">
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.05, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      className="text-3xl font-black text-slate-800 p-3 rounded-xl bg-gradient-to-br from-slate-100 to-white shadow-sm relative z-10"
                     >
-                      <item.icon size={18} />
+                      {item.number}
                     </motion.div>
-                    <h4 className="text-lg font-bold text-slate-900">{item.title}</h4>
+                    {/* Subtle gradient background */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} rounded-xl opacity-10 group-hover:opacity-20 transition-opacity duration-300`} />
                   </div>
-                  <p className="text-sm text-slate-500">{item.description}</p>
+                </motion.div>
+                
+                <div className="flex-1 relative z-10 space-y-2">
+                  <div className="flex items-center gap-3">
+                    <motion.div 
+                      className={`p-2 rounded-lg bg-gradient-to-br ${item.gradient} shadow-sm`}
+                      whileHover={{ 
+                        rotate: [0, -5, 5, 0],
+                      }}
+                      transition={{ duration: 0.4 }}
+                    >
+                      <item.icon size={18} className="text-white" />
+                    </motion.div>
+                    <motion.h4 
+                      className="text-lg font-bold text-slate-900"
+                      whileHover={{ x: 2 }}
+                    >
+                      {item.title}
+                    </motion.h4>
+                  </div>
+                  
+                  <motion.p 
+                    className="text-sm text-slate-600 leading-relaxed"
+                  >
+                    {item.description}
+                  </motion.p>
                 </div>
               </motion.div>
             ))}
           </div>
           
-          <div className="space-y-6">
-            <HolographicCard className="h-1/2">
-              <div className="p-8 text-white relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800" />
-                <h4 className="text-xl font-bold mb-4 relative z-10">Concurrency Safety</h4>
-                <p className="text-slate-300 relative z-10">Ensuring data integrity in multi-user environments</p>
-                <motion.div
-                  className="absolute top-4 right-4"
-                  animate={{ 
-                    rotate: [0, 360],
-                    transition: { duration: 10, repeat: Infinity, ease: "linear" }
-                  }}
-                >
-                  <Shield size={24} className="text-indigo-400" />
-                </motion.div>
-              </div>
-            </HolographicCard>
-            
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              whileHover={{ scale: 1.02 }}
-              className="p-8 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-3xl text-white shadow-2xl shadow-indigo-100 h-1/2"
-            >
-              <h4 className="text-xl font-bold mb-4">GDPR-Ready Architecture</h4>
-              <p className="text-indigo-100">Built-in anonymization and data retention policies</p>
-              <motion.div
-                className="mt-6"
-                animate={{ 
-                  x: [0, 10, 0],
-                  transition: { duration: 2, repeat: Infinity }
-                }}
-              >
-                <Lock size={32} className="text-white/50" />
-              </motion.div>
-            </motion.div>
+          {/* Right Column - Feature Cards with Auto-Swap */}
+          <div className="space-y-6" style={{ height: "100%" }}>
+            <CardSwapper />
           </div>
         </div>
       </div>
@@ -1320,75 +1592,285 @@ const SLIDES = [
   {
     id: 7,
     title: "Key Innovations: Redefining Recruitment",
-    transition: slideVariants,
+    transition: {
+        ...slideVariants,
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -20 }
+    },
     content: (
       <div className="space-y-8">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <motion.p
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-slate-600 text-lg max-w-3xl mx-auto bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent"
+          >
+            NexHire integrates cutting-edge features to elevate the hiring experience for both recruiters and candidates
+          </motion.p>
+        </motion.div>
+        
         <div className="grid grid-cols-2 gap-8">
-          <div className="space-y-6">
-            <HolographicCard className="h-64">
-              <div className="p-8 text-white relative h-full">
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 to-slate-800" />
-                <h4 className="text-2xl font-bold mb-6 relative z-10">Intelligent Matching Engine</h4>
-                <div className="flex items-center justify-between mt-8 relative z-10">
-                  {['Applied', 'Screening', 'Interview', 'Hired'].map((stage, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ scale: 0, y: 20 }}
-                      animate={{ scale: 1, y: 0 }}
-                      transition={{ delay: idx * 0.2 }}
-                      whileHover={{ scale: 1.3, y: -10 }}
-                      className="text-center"
-                    >
-                      <motion.div 
-                        className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 ${
-                          idx < 3 ? 'bg-indigo-600' : 'bg-emerald-600'
-                        }`}
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.6 }}
+          {/* Left Column */}
+          <div className="space-y-8">
+            {/* Intelligent Matching Engine */}
+            <motion.div
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 100 }}
+              className="relative group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-cyan-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <HolographicCard className="h-64">
+                <div className="p-8 text-white relative h-full">
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl" />
+                  
+                  {/* Animated circuit pattern */}
+                  <motion.div 
+                    className="absolute inset-0 opacity-[0.02]"
+                    style={{
+                      backgroundImage: `
+                        radial-gradient(circle at 25% 25%, #00ffff 2px, transparent 2px),
+                        radial-gradient(circle at 75% 75%, #00ffff 2px, transparent 2px)
+                      `,
+                      backgroundSize: '50px 50px'
+                    }}
+                    animate={{ 
+                      backgroundPosition: ['0px 0px', '50px 50px'],
+                    }}
+                    transition={{
+                      duration: 20,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  />
+                  
+                  <div className="relative z-10 h-full flex flex-col">
+                    <div className="flex items-center gap-3 mb-6">
+                      <motion.div
+                        animate={{ 
+                          rotate: [0, 360],
+                          scale: [1, 1.1, 1]
+                        }}
+                        transition={{ 
+                          rotate: { duration: 10, repeat: Infinity, ease: "linear" },
+                          scale: { duration: 2, repeat: Infinity, repeatType: "reverse" }
+                        }}
+                        className="p-2 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg"
                       >
-                        <span className="text-lg font-bold">{idx + 1}</span>
+                        <Cpu size={24} />
                       </motion.div>
-                      <span className="text-sm text-slate-300">{stage}</span>
+                      <h4 className="text-2xl font-bold">Intelligent Matching Engine</h4>
+                    </div>
+                    
+                    <div className="flex-1 flex items-center justify-between relative">
+                      {['Applied', 'Screening', 'Interview', 'Hired', 'Rejected'].map((stage, idx) => (
+                        <motion.div
+                          key={idx}
+                          initial={{ scale: 0, y: 30, opacity: 0 }}
+                          animate={{ scale: 1, y: 0, opacity: 1 }}
+                          transition={{ 
+                            delay: idx * 0.15,
+                            type: "spring",
+                            stiffness: 200
+                          }}
+                          whileHover={{ 
+                            scale: 1.2,
+                            y: -5,
+                            transition: { type: "spring", stiffness: 400 }
+                          }}
+                          className="text-center relative"
+                        >
+                          {/* Connecting lines */}
+                          {idx < 4 && (
+                            <motion.div
+                              className="absolute top-7 -right-4 w-8 h-0.5 bg-gradient-to-r from-cyan-500/50 to-blue-500/50"
+                              initial={{ width: 0 }}
+                              animate={{ width: "32px" }}
+                              transition={{ delay: idx * 0.15 + 0.5 }}
+                            />
+                          )}
+                          
+                          {/* Stage indicator */}
+                          <motion.div 
+                            className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 relative ${
+                              stage === 'Hired' ? 'bg-gradient-to-br from-emerald-500 to-green-400' :
+                              stage === 'Rejected' ? 'bg-gradient-to-br from-rose-500 to-pink-400' :
+                              'bg-gradient-to-br from-indigo-600 to-blue-500'
+                            }`}
+                            whileHover={{ 
+                              rotate: 360,
+                              scale: 1.1
+                            }}
+                            transition={{ duration: 0.6 }}
+                          >
+                            {/* Pulse animation */}
+                            <motion.div
+                              className="absolute inset-0 rounded-full border-2 border-current opacity-20"
+                              animate={{ 
+                                scale: [1, 1.5, 1],
+                                opacity: [0.2, 0, 0.2]
+                              }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                              }}
+                            />
+                            <span className="text-sm font-bold">{idx + 1}</span>
+                          </motion.div>
+                          
+                          {/* Stage label */}
+                          <motion.span 
+                            className="text-sm text-slate-300 block"
+                            whileHover={{ scale: 1.1 }}
+                          >
+                            {stage}
+                          </motion.span>
+                          
+                          {/* Percentage indicator */}
+                          <motion.div
+                            className="h-1 w-full bg-slate-700 rounded-full mt-2 overflow-hidden"
+                            initial={{ width: 0 }}
+                            animate={{ width: "100%" }}
+                            transition={{ delay: idx * 0.15 + 0.3 }}
+                          >
+                            <motion.div
+                              className={`h-full ${
+                                stage === 'Hired' ? 'bg-emerald-500' :
+                                stage === 'Rejected' ? 'bg-rose-500' :
+                                'bg-cyan-500'
+                              }`}
+                              initial={{ width: "0%" }}
+                              animate={{ width: `${[80, 60, 40, 20, 15][idx]}%` }}
+                              transition={{ delay: idx * 0.15 + 0.8, duration: 1 }}
+                            />
+                          </motion.div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </HolographicCard>
+            </motion.div>
+
+            {/* Automated Interview Scheduling */}
+            <motion.div
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.4, type: "spring" }}
+              whileHover={{ 
+                scale: 1.02,
+                transition: { type: "spring", stiffness: 300 }
+              }}
+              className="relative group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-3xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
+              
+              <div className="p-8 bg-gradient-to-br from-indigo-600 via-indigo-600 to-purple-700 rounded-3xl text-white shadow-2xl shadow-indigo-500/30 relative overflow-hidden">
+                {/* Floating calendar icons */}
+                {[...Array(3)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute text-white/10"
+                    initial={{ 
+                      x: Math.random() * 300,
+                      y: Math.random() * 100,
+                      rotate: Math.random() * 360
+                    }}
+                    animate={{ 
+                      y: [null, Math.random() * -50],
+                      rotate: [null, Math.random() * 360]
+                    }}
+                    transition={{
+                      duration: Math.random() * 3 + 2,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <Calendar size={40} />
+                  </motion.div>
+                ))}
+                
+                <div className="relative z-10">
+                  <div className="flex items-center gap-4 mb-6">
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.1, 1],
+                        rotate: [0, 5, -5, 0]
+                      }}
+                      transition={{ 
+                        duration: 3,
+                        repeat: Infinity,
+                        repeatType: "reverse"
+                      }}
+                      className="p-3 bg-white/10 rounded-xl"
+                    >
+                      <Calendar size={24} />
                     </motion.div>
-                  ))}
+                    <div>
+                      <h4 className="text-xl font-bold">Automated Interview Scheduling</h4>
+                      <p className="text-indigo-100 text-sm mt-1">Reduces administrative burden and calendar conflicts</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-6 mt-6">
+                    <motion.div
+                      className="flex-1"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 }}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle size={16} className="text-emerald-300" />
+                        <span className="text-sm">Smart Time Slot Detection</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle size={16} className="text-emerald-300" />
+                        <span className="text-sm">Auto-Timezone Adjustment</span>
+                      </div>
+                    </motion.div>
+                    
+                    <motion.div
+                      animate={{ 
+                        x: [0, 10, 0],
+                        transition: { duration: 3, repeat: Infinity }
+                      }}
+                    >
+                      <Clock size={32} className="text-cyan-300" />
+                    </motion.div>
+                  </div>
                 </div>
               </div>
-            </HolographicCard>
-            
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              whileHover={{ scale: 1.02 }}
-              className="p-8 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-3xl text-white shadow-2xl shadow-indigo-100"
-            >
-              <h4 className="text-xl font-bold mb-4">Automated Interview Scheduling</h4>
-              <p className="text-indigo-100">Reduces administrative burden and calendar conflicts</p>
-              <motion.div
-                className="mt-6 flex items-center gap-4"
-                animate={{ 
-                  x: [0, 20, 0],
-                  transition: { duration: 3, repeat: Infinity }
-                }}
-              >
-                <Calendar size={32} className="text-white/50" />
-                <Clock size={32} className="text-white/50" />
-              </motion.div>
             </motion.div>
           </div>
           
-          <div className="space-y-6">
+          {/* Right Column */}
+          <div className="space-y-8">
             
-            
+
+            {/* Logo/Visual Element */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6 }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 1, type: "spring" }}
+              whileHover={{ 
+                scale: 1.05,
+                transition: { type: "spring", stiffness: 200 }
+              }}
+              className="flex justify-center"
             >
               <FloatingElement delay={0.2}><img 
             src="https://raw.githubusercontent.com/nkhondokar2420136-creator/recruitment-web/refs/heads/main/img/P1CxKHbAfR_RrkArP6frv.png" // or use local: "/images/logo.gif"
             alt="NexHire Logo"
-            className="w-120 h-116 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
+            className="w-120 h-110 rounded-[3rem] shadow-[0_0_40px_rgba(34,211,238,0.3)]"
           /></FloatingElement>
             </motion.div>
           </div>
@@ -2258,6 +2740,7 @@ export default function NexHirePresentation() {
                   {current === 10 && "NexHire is designed to perform at enterprise scale. It delivers sub-second response times for candidate matching, supports over one million applications, and targets 99.9% system availability. These performance goals ensure reliability even under heavy recruitment workloads."}
                   {current === 11 && "From a technical perspective, NexHire includes a fully normalized database schema with strong referential integrity. Stored procedures encapsulate business logic, while materialized views support real-time analytics. A complete change-tracking and audit system ensures transparency and maintainability."}
                   {current === 12 && "The modern interface provides intuitive, role-specific experiences that surface relevant information and streamline workflows for each user type."}
+                  {current === 13 && "The frontend of NexHire is built using React with a component-based architecture. A single login system redirects users based on roles: Admin, Recruiter, or Candidate. The Admin dashboard provides system analytics, user management, and compliance monitoring. The Recruiter dashboard displays ranked candidate matches generated by the backend. Recruiters can create jobs, schedule interviews, and update hiring stages. The Candidate dashboard allows profile creation, skill updates, and job applications. Application status is shown using real-time visual progress indicators. All actions communicate with the backend through secure RESTful APIs Business logic remains in the backend, keeping the frontend clean and secure. The interface is responsive, user-friendly, and optimized for productivity"}
                   {current === 14 && "To conclude, NexHire is an enterprise-ready, scalable, and compliance-first recruitment solution. It combines intelligent matching, automation, analytics, and ethical hiring practices into a single platform. Future enhancements include expanding NexHire into a full HR management system, applying machine learning for predictive hiring, and enabling real-time collaboration between recruiters."}
                 </motion.p>
               </div>
