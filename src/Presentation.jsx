@@ -951,19 +951,6 @@ const SLIDES = [
   },
   {
     id: 4,
-    title: "Database Architecture Deep-Dive",
-    transition: fadeZoomVariants,
-    isERTour: true, // Special flag for our custom renderer
-    content: (
-      <div className="relative h-full w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-800">
-        <DataStream />
-        {/* This component is defined below */}
-        <ERInteractiveTour /> 
-      </div>
-    )
-  },
-  {
-    id: 5,
     title: "Key Architectural Decisions",
     transition: slideVariants,
     content: (
@@ -1087,7 +1074,7 @@ const SLIDES = [
     )
   },
   {
-    id: 6,
+    id: 5,
     title: "Core Operational Features",
     transition: cubeVariants,
     content: (
@@ -1180,7 +1167,7 @@ const SLIDES = [
     )
   },
   {
-    id: 7,
+    id: 6,
     title: "System Scope: Full Hiring Lifecycle",
     transition: pageFlipVariants,
     content: (
@@ -1291,7 +1278,7 @@ const SLIDES = [
     )
   },
   {
-    id: 8,
+    id: 7,
     title: "Key Innovations: Redefining Recruitment",
     transition: slideVariants,
     content: (
@@ -1370,7 +1357,7 @@ const SLIDES = [
     )
   },
   {
-    id: 9,
+    id: 8,
     title: "Analytics & Compliance: Data-Driven and Ethical Hiring",
     transition: fadeZoomVariants,
     content: (
@@ -1485,7 +1472,7 @@ const SLIDES = [
     )
   },
   {
-    id: 10,
+    id: 9,
     title: "Core Technologies: Robust and Reliable Foundation",
     transition: cubeVariants,
     content: (
@@ -1552,6 +1539,19 @@ const SLIDES = [
           />
           </FloatingElement>
         </motion.div>
+      </div>
+    )
+  },
+  {
+    id: 10,
+    title: "Database Architecture Deep-Dive",
+    transition: fadeZoomVariants,
+    isERTour: true, // Special flag for our custom renderer
+    content: (
+      <div className="relative h-full w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-800">
+        <DataStream />
+        {/* This component is defined below */}
+        <ERInteractiveTour /> 
       </div>
     )
   },
@@ -2209,12 +2209,12 @@ export default function NexHirePresentation() {
                   {current === 0 && "Good morning/afternoon everyone. Today we will be presenting NexHire, an Intelligent Recruitment Management System. NexHire is designed to address the growing complexity of modern hiring by combining automation, data-driven decision making, and compliance-focused system design. Our objective is to help organizations hire the right talent faster, more fairly, and in full compliance with data protection regulations."}
                   {current === 1 && "Recruitment has changed dramatically in recent years. Organizations now receive an overwhelming number of applications, often across multiple platforms. At the same time, companies are expected to ensure fair hiring practices, reduce operational costs, and strictly protect candidate data. Traditional recruitment tools are no longer sufficient to manage these combined challenges effectively."}
                   {current === 2 && "Introducing NexHire - our comprehensive solution that addresses these challenges through intelligent automation, advanced analytics, and seamless workflow integration. This represents a paradigm shift in recruitment technology."}
-                  {current === 4 && "Our architectural decisions prioritize scalability, security, and user experience. We've built a foundation that supports enterprise-grade requirements while maintaining flexibility for future enhancements."}
-                  {current === 5 && "The core operational features demonstrate NexHire's capability to handle complex recruitment workflows while maintaining data integrity and compliance across all stages of the hiring process."}
-                  {current === 6 && "NexHire covers the complete hiring lifecycle, providing specialized tools for each stakeholder - from candidates and recruiters to administrators and compliance officers."}
-                  {current === 7 && "These innovations redefine what's possible in recruitment technology. Our intelligent matching engine and automated workflows significantly reduce manual effort while improving decision quality."}
-                  {current === 8 && "Analytics and compliance are built into the system's DNA. We provide tools for ethical hiring practices while delivering actionable insights for continuous improvement."}
-                  {current === 9 && "The system is built on a robust technology stack. At the core is Microsoft SQL Server, which ensures data consistency, high performance, and concurrency safety. The platform is cloud-native and supports API integrations, allowing it to scale easily and integrate with existing HR or enterprise systems."}
+                  {current === 3 && "Our architectural decisions prioritize scalability, security, and user experience. We've built a foundation that supports enterprise-grade requirements while maintaining flexibility for future enhancements."}
+                  {current === 4 && "The core operational features demonstrate NexHire's capability to handle complex recruitment workflows while maintaining data integrity and compliance across all stages of the hiring process."}
+                  {current === 5 && "NexHire covers the complete hiring lifecycle, providing specialized tools for each stakeholder - from candidates and recruiters to administrators and compliance officers."}
+                  {current === 6 && "These innovations redefine what's possible in recruitment technology. Our intelligent matching engine and automated workflows significantly reduce manual effort while improving decision quality."}
+                  {current === 7 && "Analytics and compliance are built into the system's DNA. We provide tools for ethical hiring practices while delivering actionable insights for continuous improvement."}
+                  {current === 8 && "The system is built on a robust technology stack. At the core is Microsoft SQL Server, which ensures data consistency, high performance, and concurrency safety. The platform is cloud-native and supports API integrations, allowing it to scale easily and integrate with existing HR or enterprise systems."}
                   {current === 10 && "NexHire is designed to perform at enterprise scale. It delivers sub-second response times for candidate matching, supports over one million applications, and targets 99.9% system availability. These performance goals ensure reliability even under heavy recruitment workloads."}
                   {current === 11 && "From a technical perspective, NexHire includes a fully normalized database schema with strong referential integrity. Stored procedures encapsulate business logic, while materialized views support real-time analytics. A complete change-tracking and audit system ensures transparency and maintainability."}
                   {current === 12 && "The modern interface provides intuitive, role-specific experiences that surface relevant information and streamline workflows for each user type."}
