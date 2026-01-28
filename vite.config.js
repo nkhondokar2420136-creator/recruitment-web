@@ -4,13 +4,12 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  optimizeDeps: {
-    include: ['recharts'],
+  ssr: {
+    noExternal: ['recharts']
   },
-  build: {
-    commonjsOptions: {
-      include: [/recharts/, /node_modules/],
-    },
+  optimizeDeps: {
+    include: ['recharts']
+  }
   server: {
     proxy: {
       '/api': {
