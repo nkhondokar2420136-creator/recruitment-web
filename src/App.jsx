@@ -122,33 +122,52 @@ export default function App() {
   );
 }
 
-const BiasAnalysis = ({ data, title, subtitle, xKey }) => (
-  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 group">
-    <div className="mb-8">
-      <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
-        <span className="w-1.5 h-4 bg-indigo-600 rounded-full group-hover:h-6 transition-all"></span> {title}
-      </h3>
-      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">{subtitle}</p>
-    </div>
-    <div className="h-72">
-      <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-          <XAxis dataKey={xKey} fontSize={10} fontWeight="900" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
-          <YAxis yAxisId="left" orientation="left" stroke="#cbd5e1" fontSize={10} axisLine={false} tickLine={false} />
-          <YAxis yAxisId="right" orientation="right" stroke="#4f46e5" fontSize={10} axisLine={false} tickLine={false} />
-          <Tooltip 
-            cursor={{fill: '#f8fafc'}}
-            contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '15px' }} 
-          />
-          <Bar yAxisId="left" dataKey="totalApplicants" fill="#e2e8f0" name="Applicants" radius={[8, 8, 0, 0]} barSize={40} />
-          <Line yAxisId="right" type="monotone" dataKey="hireRatePercent" stroke="#4f46e5" strokeWidth={4} dot={{ r: 6, fill: '#4f46e5', strokeWidth: 3, stroke: '#fff' }} activeDot={{ r: 8 }} name="Hire Rate %" />
-        </ComposedChart>
-      </ResponsiveContainer>
-    </div>
-  </div>
-);
+const BiasAnalysis = ({ data, title, subtitle, xKey }) => {
+  // 1. Transform Strings to Numbers and handle the lowercase keys
+  const chartData = data?.map(item => ({
+    ...item,
+    // Use the exact lowercase keys from your JSON and wrap in Number()
+    applicants: Number(item.totalapplicants || 0),
+    rate: Number(item.hireratepercent || 0),
+    // Ensure the xKey (location) is also handled correctly
+    label: item[xKey] || item.location 
+  }));
 
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 group">
+      <div className="mb-8">
+        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
+          <span className="w-1.5 h-4 bg-indigo-600 rounded-full group-hover:h-6 transition-all"></span> {title}
+        </h3>
+        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">{subtitle}</p>
+      </div>
+      <div className="h-72" style={{ minHeight: '288px' }}>
+        <ResponsiveContainer width="100%" height="100%" key={chartData?.length}>
+          <ComposedChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+            <XAxis 
+              dataKey="label" 
+              fontSize={10} 
+              fontWeight="900" 
+              axisLine={false} 
+              tickLine={false} 
+              tick={{fill: '#64748b'}} 
+            />
+            <YAxis yAxisId="left" orientation="left" stroke="#cbd5e1" fontSize={10} axisLine={false} tickLine={false} />
+            <YAxis yAxisId="right" orientation="right" stroke="#4f46e5" fontSize={10} axisLine={false} tickLine={false} />
+            <Tooltip 
+              cursor={{fill: '#f8fafc'}}
+              contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '15px' }} 
+            />
+            {/* USE THE NEW MAPPED KEYS HERE */}
+            <Bar yAxisId="left" dataKey="applicants" fill="#e2e8f0" name="Applicants" radius={[8, 8, 0, 0]} barSize={40} />
+            <Line yAxisId="right" type="monotone" dataKey="rate" stroke="#4f46e5" strokeWidth={4} dot={{ r: 6, fill: '#4f46e5', strokeWidth: 3, stroke: '#fff' }} activeDot={{ r: 8 }} name="Hire Rate %" />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
 // --- SHARED COMPONENT: BOTTLENECK ALERTS ---
 const BottleneckAlerts = ({ data }) => {
   const bottlenecks = data.filter(stage => stage.AvgDaysInStage > 7);
