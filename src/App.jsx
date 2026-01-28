@@ -234,28 +234,30 @@ const RecruiterLeaderboard = ({ data }) => {
         : 0;
 
       return (
-        <div key={idx} className="space-y-2 group">
-          <div className="flex justify-between items-end">
-            <p className="text-[11px] font-black uppercase text-slate-700 tracking-tight">
-              {recruiter.name}
-            </p>
-            <p className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
-              {conversionRate}% Conv.
-            </p>
-          </div>
-          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-            <div 
-              className="bg-slate-900 h-full transition-all duration-1000" 
-              style={{ width: `${conversionRate}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">
-            <span>{recruiter.interviews} Interviews</span>
-            <span>{recruiter.hires} Hires</span>
-          </div>
-        </div>
-      );
-    })}
+            <div key={idx} className="space-y-2 group">
+              <div className="flex justify-between items-end">
+                <p className="text-[11px] font-black uppercase text-slate-700 tracking-tight">
+                  {recruiter.name}
+                </p>
+                <p className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+                  {conversionRate}% Conv.
+                </p>
+              </div>
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-slate-900 h-full transition-all duration-1000" 
+                  style={{ width: `${conversionRate}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">
+                <span>{recruiter.interviews} Interviews</span>
+                <span>{recruiter.hires} Hires</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 
