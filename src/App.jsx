@@ -141,8 +141,8 @@ const BiasAnalysis = ({ data, title, subtitle, xKey }) => (
             cursor={{fill: '#f8fafc'}}
             contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '15px' }} 
           />
-          <Bar yAxisId="left" dataKey="TotalApplicants" fill="#e2e8f0" name="Applicants" radius={[8, 8, 0, 0]} barSize={40} />
-          <Line yAxisId="right" type="monotone" dataKey="HireRatePercent" stroke="#4f46e5" strokeWidth={4} dot={{ r: 6, fill: '#4f46e5', strokeWidth: 3, stroke: '#fff' }} activeDot={{ r: 8 }} name="Hire Rate %" />
+          <Bar yAxisId="left" dataKey="totalApplicants" fill="#e2e8f0" name="Applicants" radius={[8, 8, 0, 0]} barSize={40} />
+          <Line yAxisId="right" type="monotone" dataKey="hireRatePercent" stroke="#4f46e5" strokeWidth={4} dot={{ r: 6, fill: '#4f46e5', strokeWidth: 3, stroke: '#fff' }} activeDot={{ r: 8 }} name="Hire Rate %" />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -296,7 +296,7 @@ const SkillGapRadar = ({ data }) => {
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data.slice(0, 6)}>
             <PolarGrid stroke="#e2e8f0" />
-            <PolarAngleAxis dataKey="SkillName" tick={{ fontSize: 9, fontWeight: '900', fill: '#64748b', letterSpacing: '0.05em' }} />
+            <PolarAngleAxis dataKey="skillName" tick={{ fontSize: 9, fontWeight: '900', fill: '#64748b', letterSpacing: '0.05em' }} />
             <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
             <Radar
               name="Proficiency"
