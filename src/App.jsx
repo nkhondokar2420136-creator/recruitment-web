@@ -131,7 +131,7 @@ const BiasAnalysis = ({ data, title, subtitle, xKey }) => (
       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">{subtitle}</p>
     </div>
     <div className="h-72">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={400}>
         <ComposedChart data={data}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
           <XAxis dataKey={xKey} fontSize={10} fontWeight="900" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
@@ -293,7 +293,7 @@ const SkillGapRadar = ({ data }) => {
         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Candidate Proficiency Matrix</p>
       </div>
       <div className="flex-1 min-h-[280px]">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={400}>
           <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data.slice(0, 6)}>
             <PolarGrid stroke="#e2e8f0" />
             <PolarAngleAxis dataKey="SkillName" tick={{ fontSize: 9, fontWeight: '900', fill: '#64748b', letterSpacing: '0.05em' }} />
