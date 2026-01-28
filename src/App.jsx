@@ -214,88 +214,90 @@ const BottleneckAlerts = ({ data }) => {
 
 // --- SHARED COMPONENT: RECRUITER LEADERBOARD ---
 const RecruiterLeaderboard = ({ data }) => {
-  const sortedData = [...data].sort((a, b) => b.SuccessfulHires - a.SuccessfulHires).slice(0, 5);
+  // 1. Map and Convert during sort
+  const sortedData = [...data]
+    .map(r => ({
+      ...r,
+      // Convert strings to numbers for math
+      hires: Number(r.successfulhires || 0),
+      interviews: Number(r.interviewsconducted || 0),
+      name: r.recruitername
+    }))
+    .sort((a, b) => b.hires - a.hires)
+    .slice(0, 5);
 
   return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm h-full">
-      <div className="mb-8">
-        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
-          <span className="w-1.5 h-4 bg-indigo-600 rounded-full"></span>
-          Top <span className="text-indigo-600 ml-1">Recruiters</span>
-        </h3>
-        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Hiring Efficiency Intel</p>
-      </div>
-      <div className="space-y-6">
-        {sortedData.map((recruiter, idx) => {
-          const conversionRate = recruiter.InterviewsConducted > 0 
-            ? ((recruiter.SuccessfulHires / recruiter.InterviewsConducted) * 100).toFixed(0) 
-            : 0;
+    // ... container code ...
+    {sortedData.map((recruiter, idx) => {
+      const conversionRate = recruiter.interviews > 0 
+        ? ((recruiter.hires / recruiter.interviews) * 100).toFixed(0) 
+        : 0;
 
-          return (
-            <div key={idx} className="space-y-2 group">
-              <div className="flex justify-between items-end">
-                <p className="text-[11px] font-black uppercase text-slate-700 tracking-tight group-hover:text-indigo-600 transition-colors">{recruiter.RecruiterName}</p>
-                <p className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">{conversionRate}% Conv.</p>
-              </div>
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-slate-900 h-full transition-all duration-1000 ease-out group-hover:bg-indigo-600" 
-                  style={{ width: `${conversionRate}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">
-                <span>{recruiter.InterviewsConducted} Interviews</span>
-                <span>{recruiter.SuccessfulHires} Hires</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+      return (
+        <div key={idx} className="space-y-2 group">
+          <div className="flex justify-between items-end">
+            <p className="text-[11px] font-black uppercase text-slate-700 tracking-tight">
+              {recruiter.name}
+            </p>
+            <p className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+              {conversionRate}% Conv.
+            </p>
+          </div>
+          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+            <div 
+              className="bg-slate-900 h-full transition-all duration-1000" 
+              style={{ width: `${conversionRate}%` }}
+            />
+          </div>
+          <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">
+            <span>{recruiter.interviews} Interviews</span>
+            <span>{recruiter.hires} Hires</span>
+          </div>
+        </div>
+      );
+    })}
   );
 };
 
 // --- SHARED COMPONENT: VACANCY UTILIZATION ---
 const VacancyUtilization = ({ data }) => {
   return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm h-full">
-      <div className="mb-8">
-        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
-          <span className="w-1.5 h-4 bg-emerald-500 rounded-full"></span>
-          Vacancy <span className="text-emerald-600 ml-1">Utilization</span>
-        </h3>
-        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Fulfillment Analytics</p>
-      </div>
-      <div className="space-y-6">
-        {data.slice(0, 5).map((job, idx) => {
-          const total = job.FilledPositions + job.RemainingVacancies;
-          const percent = total > 0 ? (job.FilledPositions / total) * 100 : 0;
-          const isCritical = percent < 25;
+    // ... container code ...
+    <div className="space-y-6">
+      {data.slice(0, 5).map((job, idx) => {
+        // Normalize keys and convert to numbers
+        const filled = Number(job.filledpositions || 0);
+        const remaining = Number(job.remainingvacancies || 0);
+        const totalApps = Number(job.totalapplications || 0);
+        const title = job.jobtitle;
+        
+        const totalVacancies = filled + remaining;
+        const percent = totalVacancies > 0 ? (filled / totalVacancies) * 100 : 0;
+        const isCritical = percent < 25;
 
-          return (
-            <div key={idx} className="space-y-2">
-              <div className="flex justify-between items-center">
-                <p className="text-[11px] font-black uppercase text-slate-900 truncate max-w-[140px] tracking-tighter">
-                  {job.JobTitle}
-                </p>
-                <span className={`text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-tighter ${isCritical ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
-                  {job.FilledPositions} / {total} Filled
-                </span>
-              </div>
-              <div className="w-full bg-slate-100 h-3 rounded-xl overflow-hidden p-0.5 border border-slate-200/50">
-                <div 
-                  className={`h-full rounded-lg transition-all duration-1000 ${isCritical ? 'bg-red-500' : 'bg-emerald-500'}`}
-                  style={{ width: `${percent}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-[0.15em]">
-                <span>{job.TotalApplications} Applied</span>
-                <span>{job.RemainingVacancies} Left</span>
-              </div>
+        return (
+          <div key={idx} className="space-y-2">
+            <div className="flex justify-between items-center">
+              <p className="text-[11px] font-black uppercase text-slate-900 truncate max-w-[140px] tracking-tighter">
+                {title}
+              </p>
+              <span className={`text-[9px] font-black px-2 py-1 rounded-lg uppercase ${isCritical ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                {filled} / {totalVacancies} Filled
+              </span>
             </div>
-          );
-        })}
-      </div>
+            <div className="w-full bg-slate-100 h-3 rounded-xl overflow-hidden p-0.5 border border-slate-200/50">
+              <div 
+                className={`h-full rounded-lg transition-all duration-1000 ${isCritical ? 'bg-red-500' : 'bg-emerald-500'}`}
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-[0.15em]">
+              <span>{totalApps} Applied</span>
+              <span>{remaining} Left</span>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
