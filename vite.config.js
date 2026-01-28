@@ -13,7 +13,9 @@ export default defineConfig({
       },
     },
   },
-  optimizeDeps: {
-    include: ['recharts'],
+  build: {
+    commonjsOptions: {
+      include: [/recharts/, /node_modules/],
+    },
   },
 })
