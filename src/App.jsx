@@ -315,11 +315,11 @@ const SkillGapRadar = ({ data }) => {
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data.slice(0, 6)}>
             <PolarGrid stroke="#e2e8f0" />
-            <PolarAngleAxis dataKey="skillName" tick={{ fontSize: 9, fontWeight: '900', fill: '#64748b', letterSpacing: '0.05em' }} />
+            <PolarAngleAxis dataKey="skillname" tick={{ fontSize: 9, fontWeight: '900', fill: '#64748b', letterSpacing: '0.05em' }} />
             <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
             <Radar
               name="Proficiency"
-              dataKey="SkillGap"
+              dataKey="skillgap"
               stroke="#7c3aed"
               strokeWidth={3}
               fill="#7c3aed"
