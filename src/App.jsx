@@ -124,14 +124,20 @@ export default function App() {
 
 const BiasAnalysis = ({ data, title, subtitle, xKey }) => {
   // 1. Transform Strings to Numbers and handle the lowercase keys
-  const chartData = data?.map(item => ({
-    ...item,
-    // Use the exact lowercase keys from your JSON and wrap in Number()
-    applicants: Number(item.totalapplicants || 0),
-    rate: Number(item.hireratepercent || 0),
-    // Ensure the xKey (location) is also handled correctly
-    label: item[xKey] || item.location 
-  }));
+  const chartData = data?.map(item => {
+    // 1. Find the X-axis value dynamically (handles location, experience, etc.)
+    // This looks for the xKey exactly, or the lowercase version of it
+    const xValue = item[xKey] || item[xKey.toLowerCase()] || item.location || item.experiencelevel;
+
+    return {
+      ...item,
+      // Map metrics using lowercase keys from your JSON
+      applicants: Number(item.totalapplicants || 0),
+      rate: Number(item.hireratepercent || 0),
+      // Assign the found value to 'label'
+      label: xValue 
+    };
+  });
 
   return (
     <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 group">
