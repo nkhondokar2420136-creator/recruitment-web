@@ -1,1895 +1,1180 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { 
-  Users, Briefcase, BarChart3, Settings, LogOut, X,
-  Search, Clock, ShieldAlert, ChevronRight, CheckCircle, Trash2, UserCircle, Plus, Star, FileText, Calendar, BriefcaseBusiness, AlertCircle, UserPlus, Check, Sparkles, LayoutDashboard, Database
-} from 'lucide-react';
-import { 
-  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, 
-  Tooltip, Legend, ResponsiveContainer, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
-} from 'recharts';
-import Presentation from './Presentation';
-import Presentation2 from './Presentation2';
+// App.jsx
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import './App.css';
 
-const API_BASE = "/api";
-
-export default function App() {
-  const [user, setUser] = useState(null); 
-  const [usernameInput, setUsernameInput] = useState("");
-  const [currentView, setCurrentView] = useState('login');
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post(`${API_BASE}/login`, { username: usernameInput });
-      setUser(res.data);
-    } catch (err) { alert("Login Failed."); }
-  };
-
-  if (currentView === 'presentation') {
-  return <Presentation onClose={() => setCurrentView('login')} />;
-}
-  if (currentView === 'presentation2') {
-  return <Presentation2 onClose={() => setCurrentView('login')} />;
-}
-
-  // 1. STYLED LOGIN GATEWAY
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 font-sans selection:bg-indigo-500/30">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-950 to-slate-950"></div>
-        <form onSubmit={handleLogin} className="relative bg-white/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-md space-y-8">
-          <div className="text-center space-y-2">
-            <h1 className="text-4xl font-extrabold text-white tracking-tighter">Nex<span className="text-indigo-500">Hire</span></h1>
-            <p className="text-slate-400 text-xs font-black uppercase tracking-[0.3em]">Professional Gateway</p>
-          </div>
-          <div className="space-y-4">
-            <div className="relative group">
-              <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-500 transition-colors" size={20} />
-              <input 
-                type="text" 
-                required 
-                placeholder="Username" 
-                className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-slate-800 rounded-2xl text-white placeholder:text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium" 
-                value={usernameInput} 
-                onChange={(e) => setUsernameInput(e.target.value)} 
-              />
-            </div>
-            <button type="submit" className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98]">Sign In</button>
-          </div>
-          <p className="text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest pt-4 border-t border-white/5">
-            Crafted by <span className="text-indigo-400">Nawaf Al Hussain Khondokar</span>
-          </p>
-          <button 
-            type="button"
-            onClick={() => setCurrentView('presentation')}
-            className="w-full mt-6 group flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300"
-          >
-            <Sparkles size={14} className="text-indigo-500 group-hover:text-white group-hover:rotate-12 transition-all" />
-            View Project Presentation v1
-          </button>
-          <button 
-            type="button"
-            onClick={() => setCurrentView('presentation2')}
-            className="w-full mt-6 group flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300"
-          >
-            <Sparkles size={14} className="text-indigo-500 group-hover:text-white group-hover:rotate-12 transition-all" />
-            View Project Presentation v2
-          </button>
-        </form>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans selection:bg-indigo-100">
-      {/* NEXHIRE TOP NAVIGATION */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-5 flex justify-between items-center sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-xl shadow-slate-200">
-            <Sparkles size={20} fill="currentColor"/>
-          </div>
-          <span className="font-black text-2xl tracking-tighter text-slate-900">Nex<span className="text-indigo-600">Hire</span></span>
-        </div>
-        <div className="flex items-center gap-6">
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-black text-slate-900 tracking-tight">{user.Username}</p>
-            <p className="text-[10px] text-indigo-600 font-black uppercase tracking-widest">{user.RoleID === 1 ? 'Administrator' : user.RoleID === 2 ? 'Recruiter' : 'Talent Partner'}</p>
-          </div>
-          <div className="h-8 w-[1px] bg-slate-100 mx-2"></div>
-          <button onClick={() => setUser(null)} className="group p-2.5 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-xl transition-all">
-            <LogOut size={20} className="group-active:scale-90 transition-transform" />
-          </button>
-        </div>
-      </nav>
-
-      <main className="flex-1 p-8 max-w-[1600px] mx-auto w-full">
-        {user.RoleID === 1 && <AdminDashboard />}
-        {user.RoleID === 2 && <RecruiterDashboard user={user} />}
-        {user.RoleID === 3 && <CandidateDashboard user={user} />}
-      </main>
-      
-      {/* SIGNATURE FOOTER */}
-      <footer className="py-10 border-t border-slate-100 flex flex-col items-center gap-3">
-        <div className="flex items-center gap-0 text-slate-900 font-black text-lg tracking-tighter">
-           Nex<span className="text-indigo-600">Hire</span>
-        </div>
-        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
-          Platform architect: <span className="text-indigo-600">Nawaf Al Hussain Khondokar</span>
-        </p>
-      </footer>
-    </div>
-  );
-}
-
-const BiasAnalysis = ({ data, title, subtitle, xKey }) => {
-  // 1. Transform Strings to Numbers and handle the lowercase keys
-  const chartData = data?.map(item => {
-    // 1. Find the X-axis value dynamically (handles location, experience, etc.)
-    // This looks for the xKey exactly, or the lowercase version of it
-    const xValue = item[xKey] || item[xKey.toLowerCase()] || item.location || item.experiencelevel;
-
-    return {
-      ...item,
-      // Map metrics using lowercase keys from your JSON
-      applicants: Number(item.totalapplicants || 0),
-      rate: Number(item.hireratepercent || 0),
-      // Assign the found value to 'label'
-      label: xValue 
-    };
-  });
-
-  return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 group">
-      <div className="mb-8">
-        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
-          <span className="w-1.5 h-4 bg-indigo-600 rounded-full group-hover:h-6 transition-all"></span> {title}
-        </h3>
-        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">{subtitle}</p>
-      </div>
-      <div className="h-72" style={{ minHeight: '288px' }}>
-        <ResponsiveContainer width="100%" height="100%" key={chartData?.length}>
-          <ComposedChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis 
-              dataKey="label" 
-              fontSize={10} 
-              fontWeight="900" 
-              axisLine={false} 
-              tickLine={false} 
-              tick={{fill: '#64748b'}} 
-            />
-            <YAxis yAxisId="left" orientation="left" stroke="#cbd5e1" fontSize={10} axisLine={false} tickLine={false} />
-            <YAxis yAxisId="right" orientation="right" stroke="#4f46e5" fontSize={10} axisLine={false} tickLine={false} />
-            <Tooltip 
-              cursor={{fill: '#f8fafc'}}
-              contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '15px' }} 
-            />
-            {/* USE THE NEW MAPPED KEYS HERE */}
-            <Bar yAxisId="left" dataKey="applicants" fill="#e2e8f0" name="Applicants" radius={[8, 8, 0, 0]} barSize={40} />
-            <Line yAxisId="right" type="monotone" dataKey="rate" stroke="#4f46e5" strokeWidth={4} dot={{ r: 6, fill: '#4f46e5', strokeWidth: 3, stroke: '#fff' }} activeDot={{ r: 8 }} name="Hire Rate %" />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-};
-// --- SHARED COMPONENT: BOTTLENECK ALERTS ---
-const BottleneckAlerts = ({ data }) => {
-  const bottlenecks = data.filter(stage => stage.AvgDaysInStage > 7);
-  return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-red-200/20 group h-full">
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
-            <span className="w-1.5 h-4 bg-red-500 rounded-full group-hover:h-6 transition-all"></span>
-            Pipeline <span className="text-red-600 ml-1">Bottlenecks</span>
-          </h3>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Exceeding 7-day target</p>
-        </div>
-        <div className="p-2 bg-red-50 text-red-500 rounded-xl">
-          <AlertCircle size={18} />
-        </div>
-      </div>
-      <div className="space-y-4">
-        {bottlenecks.length > 0 ? bottlenecks.map((item, idx) => (
-          <div key={idx} className="flex items-center justify-between p-4 bg-red-50/30 border border-red-100/50 rounded-2xl group/item hover:bg-red-50 transition-colors">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-red-600 font-black text-xs border border-red-100">
-                {item.AvgDaysInStage}d
-              </div>
-              <div>
-                <p className="text-[11px] font-black uppercase text-slate-900 tracking-tight">{item.StatusName}</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{item.ApplicationsInStage} Candidates Stuck</p>
-              </div>
-            </div>
-            <ChevronRight size={14} className="text-red-300 group-hover/item:translate-x-1 transition-transform"/>
-          </div>
-        )) : (
-          <div className="text-center py-10 bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
-            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
-                <CheckCircle className="text-emerald-500" size={24} />
-            </div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Flow State: Healthy</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// --- SHARED COMPONENT: RECRUITER LEADERBOARD ---
-const RecruiterLeaderboard = ({ data }) => {
-  const sortedData = [...data]
-    .map(r => ({
-      ...r,
-      hires: Number(r.successfulhires || 0),
-      interviews: Number(r.interviewsconducted || 0),
-      name: r.recruitername
-    }))
-    .sort((a, b) => b.hires - a.hires)
-    .slice(0, 5);
-
-  return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm h-full">
-      <div className="mb-8">
-        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
-          <span className="w-1.5 h-4 bg-indigo-600 rounded-full"></span>
-          Top <span className="text-indigo-600 ml-1">Recruiters</span>
-        </h3>
-        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Hiring Efficiency Intel</p>
-      </div>
-
-      <div className="space-y-6">
-        {sortedData.map((recruiter, idx) => {
-          const conversionRate = recruiter.interviews > 0 
-            ? ((recruiter.hires / recruiter.interviews) * 100).toFixed(0) 
-            : 0;
-
-          return (
-            <div key={idx} className="space-y-2 group">
-              <div className="flex justify-between items-end">
-                <p className="text-[11px] font-black uppercase text-slate-700 tracking-tight group-hover:text-indigo-600 transition-colors">
-                  {recruiter.name}
-                </p>
-                <p className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
-                  {conversionRate}% Conv.
-                </p>
-              </div>
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-slate-900 h-full transition-all duration-1000 ease-out group-hover:bg-indigo-600" 
-                  style={{ width: `${conversionRate}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">
-                <span>{recruiter.interviews} Interviews</span>
-                <span>{recruiter.hires} Hires</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// --- SHARED COMPONENT: VACANCY UTILIZATION ---
-const VacancyUtilization = ({ data }) => {
-  return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm h-full">
-      {/* Header section must be inside the same parent div */}
-      <div className="mb-8">
-        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
-          <span className="w-1.5 h-4 bg-emerald-500 rounded-full"></span>
-          Vacancy <span className="text-emerald-600 ml-1">Utilization</span>
-        </h3>
-        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Fulfillment Analytics</p>
-      </div>
-
-      <div className="space-y-6">
-        {data.slice(0, 5).map((job, idx) => {
-          // Normalize keys and convert to numbers
-          const filled = Number(job.filledpositions || 0);
-          const remaining = Number(job.remainingvacancies || 0);
-          const totalApps = Number(job.totalapplications || 0);
-          const title = job.jobtitle;
-          
-          const totalVacancies = filled + remaining;
-          const percent = totalVacancies > 0 ? (filled / totalVacancies) * 100 : 0;
-          const isCritical = percent < 25;
-
-          return (
-            <div key={idx} className="space-y-2">
-              <div className="flex justify-between items-center">
-                <p className="text-[11px] font-black uppercase text-slate-900 truncate max-w-[140px] tracking-tighter">
-                  {title}
-                </p>
-                <span className={`text-[9px] font-black px-2 py-1 rounded-lg uppercase ${isCritical ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                  {filled} / {totalVacancies} Filled
-                </span>
-              </div>
-              <div className="w-full bg-slate-100 h-3 rounded-xl overflow-hidden p-0.5 border border-slate-200/50">
-                <div 
-                  className={`h-full rounded-lg transition-all duration-1000 ${isCritical ? 'bg-red-500' : 'bg-emerald-500'}`}
-                  style={{ width: `${percent}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-[0.15em]">
-                <span>{totalApps} Applied</span>
-                <span>{remaining} Left</span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// --- SHARED COMPONENT: SKILL GAP RADAR ---
-const SkillGapRadar = ({ data }) => {
-  return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm h-full flex flex-col">
-      <div className="mb-6">
-        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
-          <span className="w-1.5 h-4 bg-violet-600 rounded-full"></span>
-          Skill <span className="text-violet-600 ml-1">Gap Analysis</span>
-        </h3>
-        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Candidate Proficiency Matrix</p>
-      </div>
-      <div className="flex-1 min-h-[280px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data.slice(0, 6)}>
-            <PolarGrid stroke="#e2e8f0" />
-            <PolarAngleAxis dataKey="skillname" tick={{ fontSize: 9, fontWeight: '900', fill: '#64748b', letterSpacing: '0.05em' }} />
-            <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
-            <Radar
-              name="Proficiency"
-              dataKey="skillgap"
-              stroke="#7c3aed"
-              strokeWidth={3}
-              fill="#7c3aed"
-              fillOpacity={0.15}
-            />
-            <Tooltip 
-              contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }} 
-            />
-          </RadarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-};
-
-// --- SHARED COMPONENT: GHOSTING ALERT ---
-const GhostingAlert = ({ data }) => {
-  const highRisk = data.filter(c => c.DaysSinceLastContact > 14);
-
-  return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm h-full flex flex-col">
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h3 className="text-sm font-black uppercase tracking-widest text-orange-600 rounded-full group-hover:h-6  flex items-center gap-2">
-             <span className="w-1.5 h-4 bg-orange-500 rounded-full"></span>
-             Ghosting <span className="text-slate-900 ml-1">Alerts</span>
-          </h3>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Inactivity {'>'} 14 Days</p>
-        </div>
-        <div className="bg-orange-100 text-orange-600 p-2 rounded-xl border border-orange-200">
-          <ShieldAlert size={18} />
-        </div>
-      </div>
-      
-      <div className="space-y-3 overflow-y-auto max-h-64 pr-2 custom-scrollbar">
-        {highRisk.length > 0 ? highRisk.map((candidate, idx) => (
-          <div key={idx} className="p-4 bg-orange-50/30 border border-orange-100/50 rounded-2xl flex justify-between items-center group hover:bg-orange-50 transition-colors">
-            <div>
-              <p className="text-[11px] font-black uppercase text-slate-800 tracking-tight">{candidate.CandidateName}</p>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{candidate.JobTitle}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs font-black text-orange-600">{candidate.DaysSinceLastContact}d</p>
-              <p className="text-[8px] font-black text-orange-400 uppercase tracking-widest">No Response</p>
-            </div>
-          </div>
-        )) : (
-          <div className="flex-1 flex flex-col items-center justify-center py-10 text-center bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
-            <Check size={24} className="text-emerald-500 mb-2" />
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Queue Clean</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// --- SHARED COMPONENT: USER PROVISIONING MODAL ---
-const UserModal = ({ isOpen, onClose, onSave }) => {
-  const [formData, setFormData] = useState({ 
-    username: '', email: '', password: '', 
-    fullName: '', location: '', yearsOfExperience: 0 
-  });
-
-  if (!isOpen) return null;
-
-  const handleSubmit = () => {
-    if (!formData.username || !formData.email || !formData.password) {
-      alert("Required: Username, Email, Password");
-      return;
-    }
-    onSave(formData);
-  };
-
-  const inputClass = "w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300";
-  const labelClass = "text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 block ml-1";
-
-  return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-[100] p-4">
-      <div className="bg-white rounded-[3rem] w-full max-w-xl p-10 shadow-2xl relative border border-white/20 animate-in fade-in zoom-in duration-300">
-        <button onClick={onClose} className="absolute top-8 right-8 text-slate-300 hover:text-slate-900 transition-colors"><X size={24}/></button>
-        
-        <header className="mb-8">
-            <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Provision <span className="text-indigo-600">Candidate</span></h3>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">New Talent Profile Activation</p>
-        </header>
-        
-        <div className="grid grid-cols-2 gap-6">
-          <div className="col-span-1">
-            <label className={labelClass}>Username</label>
-            <input placeholder="jdoe_dev" className={inputClass} onChange={(e) => setFormData({...formData, username: e.target.value})} />
-          </div>
-          <div className="col-span-1">
-            <label className={labelClass}>Email Address</label>
-            <input placeholder="john@company.com" className={inputClass} onChange={(e) => setFormData({...formData, email: e.target.value})} />
-          </div>
-          <div className="col-span-2">
-            <label className={labelClass}>Full Legal Name</label>
-            <input placeholder="John Doe" className={inputClass} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
-          </div>
-          <div className="col-span-1">
-            <label className={labelClass}>Location</label>
-            <input placeholder="New York, NY" className={inputClass} onChange={(e) => setFormData({...formData, location: e.target.value})} />
-          </div>
-          <div className="col-span-1">
-            <label className={labelClass}>Years of Exp</label>
-            <input type="number" placeholder="5" className={inputClass} onChange={(e) => setFormData({...formData, yearsOfExperience: parseInt(e.target.value) || 0})} />
-          </div>
-          <div className="col-span-2 pt-4 border-t border-slate-50 mt-2">
-            <label className={labelClass}>Security: Initial Password</label>
-            <input type="password" placeholder="••••••••" className={`${inputClass} bg-indigo-50/30 border-indigo-100`} onChange={(e) => setFormData({...formData, password: e.target.value})} />
-          </div>
-        </div>
-
-        <div className="flex gap-4 mt-10">
-          <button onClick={onClose} className="flex-1 py-4 text-[11px] font-black uppercase text-slate-400 hover:text-slate-900 transition-colors tracking-widest">Abort</button>
-          <button onClick={handleSubmit} className="flex-[2] py-4 bg-slate-900 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200 active:scale-[0.98]">Deploy Profile</button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// --- SHARED COMPONENT: APPLICATION FUNNEL CARD ---
-const ApplicationFunnelCard = ({ data }) => {
-  const maxVal = data.length > 0 ? Math.max(...data.map(d => d.ApplicationCount)) : 0;
-
-  return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col h-full group">
-      <div className="mb-10">
-        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
-          <span className="w-1.5 h-4 bg-slate-900 rounded-full group-hover:bg-indigo-600 transition-colors"></span>
-          Application <span className="text-indigo-600 ml-1">Funnel</span>
-        </h3>
-        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Conversion Pipeline Intel</p>
-      </div>
-
-      <div className="space-y-6 flex-1 flex flex-col justify-center">
-        {data.map((stage, index) => (
-          <div key={index} className="space-y-2">
-            <div className="flex justify-between items-end">
-              <span className="text-[10px] font-black uppercase text-slate-600 tracking-tight">{stage.StatusName}</span>
-              <span className="text-sm font-black text-slate-900">{stage.ApplicationCount}</span>
-            </div>
-            <div className="h-3 bg-slate-50 rounded-xl overflow-hidden border border-slate-100 p-0.5">
-              <div 
-                className="h-full bg-slate-900 rounded-lg transition-all duration-1000 ease-out group-hover:bg-indigo-600"
-                style={{ width: `${maxVal > 0 ? (stage.ApplicationCount / maxVal) * 100 : 0}%` }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-
-// --- MAIN ADMIN DASHBOARD ---
-function AdminDashboard({ user }) {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [locationBias, setLocationBias] = useState([]);
-  const [experienceBias, setExperienceBias] = useState([]);
-  const [bottlenecks, setBottlenecks] = useState([]);
-  const [recruiterPerf, setRecruiterPerf] = useState([]);
-  const [vacancyData, setVacancyData] = useState([]);
-  const [skillGaps, setSkillGaps] = useState([]);
-  const [reports, setReports] = useState({ selected: 'vw_ApplicationFunnel', data: [] });
-  const [users, setUsers] = useState([]);
-  const [audit, setAudit] = useState([]);
-  const [silentRejections, setSilentRejections] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
-  const [funnelData, setFunnelData] = useState([]);
-  const [jobList, setJobList] = useState([]);
-  const [candidateList, setCandidateList] = useState([]);
-  const [appDetailedList, setAppDetailedList] = useState([]);
-  const [skillList, setSkillList] = useState([]);
-  const [newSkillName, setNewSkillName] = useState('');
-  const [jobArchive, setJobArchive] = useState([]);
-  const [appArchive, setAppArchive] = useState([]);
-  const [entitySubTab, setEntitySubTab] = useState('jobs');
-
-  // LOGIC REMAINS UNTOUCHED
-  const handleSaveCandidate = async (formData) => {
-    try {
-      await axios.post(`${API_BASE}/admin/users/candidate`, formData);
-      setIsModalOpen(false);
-      fetchUsers();
-      alert("Candidate user created successfully!");
-    } catch (err) {
-      alert("Creation failed: " + (err.response?.data?.error || err.message));
-    }
-  };
-
-  const fetchArchives = async () => {
-    try {
-      const [jobs, apps] = await Promise.all([
-        axios.get(`${API_BASE}/admin/archives/jobs`),
-        axios.get(`${API_BASE}/admin/archives/applications`)
-      ]);
-      setJobArchive(jobs.data);
-      setAppArchive(apps.data);
-    } catch (err) { console.error(err); }
-  };
-
-  const reportList = [
-    'vw_ApplicationFunnel', 'vw_SkillGapAnalysis', 'vw_TimeToHire', 
-    'vw_RecruiterPerformance', 'vw_Bias_Location', 'vw_Bias_Experience',
-    'vw_HiringBottlenecks', 'vw_SilentRejections', 'vw_VacancyUtilization'
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [herName, setHerName] = useState('');
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [selectedReason, setSelectedReason] = useState(null);
+  const [usedReasons, setUsedReasons] = useState([]);
+  const [isScratched, setIsScratched] = useState(false);
+  const [scratchPercentage, setScratchPercentage] = useState(0);
+  const [timeTogether, setTimeTogether] = useState('');
+  const [compliment, setCompliment] = useState('');
+  const [showLetter, setShowLetter] = useState(false);
+  const [bucketList, setBucketList] = useState([]);
+  const [konamiCode, setKonamiCode] = useState([]);
+  const [showSecret, setShowSecret] = useState(false);
+  const [nicknames] = useState(['Love', 'Baby', 'Sweetheart', 'Gorgeous', 'My World', 'Sunshine', 'Darling', 'Angel']);
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [cursorTrail, setCursorTrail] = useState([]);
+  
+  const canvasRef = useRef(null);
+  const isDrawing = useRef(false);
+  const { scrollYProgress } = useScroll();
+  
+  // Your surname - CHANGE THIS
+  const YOUR_SURNAME = 'Smith';
+  
+  // Anniversary date - CHANGE THIS
+  const ANNIVERSARY_DATE = new Date('2023-01-15');
+  
+  // Reasons I love you
+  const reasons = [
+    "The way your eyes light up when you talk about something you're passionate about",
+    "How you always remember the little details I mention in passing",
+    "Your laugh that makes everyone around you smile",
+    "The way you crinkle your nose when you're confused",
+    "How you sing in the car even when you don't know the words",
+    "Your stubbornness that drives me crazy but I secretly love",
+    "The way you care for people without expecting anything back",
+    "How you always know when I need a hug",
+    "Your terrible puns that make me groan but secretly laugh",
+    "The way you look when you first wake up",
+    "How you talk to animals like they're people",
+    "Your dedication to everything you do",
+    "The way you make ordinary moments feel special",
+    "How you always believe in me, even when I don't believe in myself",
+    "Your smile that could light up the darkest room",
+    "The way you dance when you think no one is watching",
+    "How you remember everyone's birthday",
+    "Your curiosity and love for learning new things",
+    "The way you hold my hand in crowded places",
+    "How you're still amazed by simple things like sunsets",
+    "Your kindness to strangers",
+    "The way you crinkle your nose when you're concentrating",
+    "How you always find the best memes to send me",
+    "Your passion for justice and equality",
+    "The way you look at me like I'm the only person in the world"
   ];
 
+  // Compliments for generator
+  const compliments = [
+    "You have the most beautiful smile I've ever seen",
+    "You're smarter than you give yourself credit for",
+    "Your presence makes any room brighter",
+    "You have impeccable taste in music",
+    "You're an amazing listener",
+    "Your creativity inspires me every day",
+    "You're stronger than you know",
+    "You make ordinary moments feel magical",
+    "Your laugh is my favorite sound",
+    "You have a heart of gold",
+    "You're absolutely gorgeous, inside and out",
+    "You make me want to be a better person",
+    "Your hugs are the best medicine",
+    "You're my favorite notification",
+    "You have the best sense of humor",
+    "You're incredibly talented at everything you do",
+    "Your kindness changes people's lives",
+    "You're my greatest adventure",
+    "You have the most amazing eyes",
+    "You're perfectly imperfect in all the right ways"
+  ];
+
+  // Bucket list items
+  const initialBucketList = [
+    { id: 1, text: "Visit Japan during cherry blossom season", completed: false },
+    { id: 2, text: "Take a cooking class together", completed: false },
+    { id: 3, text: "Go stargazing in the desert", completed: false },
+    { id: 4, text: "Learn to dance salsa", completed: false },
+    { id: 5, text: "Road trip along the coast", completed: false },
+    { id: 6, text: "See the Northern Lights", completed: false },
+    { id: 7, text: "Have a picnic in Central Park", completed: false },
+    { id: 8, text: "Go to a music festival", completed: false },
+    { id: 9, text: "Take a hot air balloon ride", completed: false },
+    { id: 10, text: "Write a book together", completed: false }
+  ];
+
+  // Memories timeline
+  const memories = [
+    { 
+      id: 1, 
+      date: "January 15, 2023", 
+      title: "The Day We Met", 
+      description: "I still remember what you were wearing. I didn't know then that I was meeting the love of my life.",
+      icon: "💕"
+    },
+    { 
+      id: 2, 
+      date: "February 14, 2023", 
+      title: "Our First Valentine's", 
+      description: "We barely knew each other but I already knew you were special.",
+      icon: "🌹"
+    },
+    { 
+      id: 3, 
+      date: "March 20, 2023", 
+      title: "First Trip Together", 
+      description: "Getting lost in that little beach town is still one of my favorite memories.",
+      icon: "✈️"
+    },
+    { 
+      id: 4, 
+      date: "June 5, 2023", 
+      title: "The Day You Became Mine", 
+      description: "When you said yes, my heart grew three sizes.",
+      icon: "💍"
+    },
+    { 
+      id: 5, 
+      date: "September 10, 2023", 
+      title: "Our First Concert", 
+      description: "You sang every word and I sang watching you.",
+      icon: "🎵"
+    },
+    { 
+      id: 6, 
+      date: "December 25, 2023", 
+      title: "First Christmas Together", 
+      description: "Matching pajamas and too much hot chocolate.",
+      icon: "🎄"
+    }
+  ];
+
+  // Favorites gallery
+  const favorites = [
+    { category: "Movie", item: "Eternal Sunshine of the Spotless Mind", emoji: "🎬" },
+    { category: "Song", item: "Lover - Taylor Swift", emoji: "🎵" },
+    { category: "Food", item: "Sushi and Ramen", emoji: "🍜" },
+    { category: "Coffee Order", item: "Vanilla Latte with Oat Milk", emoji: "☕" },
+    { category: "Book", item: "The Seven Husbands of Evelyn Hugo", emoji: "📚" },
+    { category: "Season", item: "Autumn", emoji: "🍂" },
+    { category: "Animal", item: "Elephants", emoji: "🐘" },
+    { category: "Place", item: "The beach at sunset", emoji: "🌅" }
+  ];
+
+  // Parallax effects
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, -200]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, -400]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+
+  // Konami code sequence
+  const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+
   useEffect(() => {
-    if (activeTab === 'overview') loadOverview();
-    if (activeTab === 'users') fetchUsers();
-    if (activeTab === 'reports') loadReport(reports.selected);
-    if (activeTab === 'entities') fetchEntities();
-    if (activeTab === 'maintenance') fetchArchives();
-  }, [activeTab]);
+    if (showConfetti) {
+      setTimeout(() => setShowConfetti(false), 5000);
+    }
+  }, [showConfetti]);
 
-  const loadOverview = async () => {
-    try {
-      const [auditRes, locRes, expRes, bottleRes, perfRes, vacRes, skillRes, silentRes, funnelRes] = await Promise.all([
-        axios.get(`${API_BASE}/admin/audit-logs`),
-        axios.get(`${API_BASE}/admin/reports/vw_Bias_Location`),
-        axios.get(`${API_BASE}/admin/reports/vw_Bias_Experience`),
-        axios.get(`${API_BASE}/admin/reports/vw_HiringBottlenecks`),
-        axios.get(`${API_BASE}/admin/reports/vw_RecruiterPerformance`),
-        axios.get(`${API_BASE}/admin/reports/vw_VacancyUtilization`),
-        axios.get(`${API_BASE}/admin/reports/vw_SkillGapAnalysis`),
-        axios.get(`${API_BASE}/admin/reports/vw_SilentRejections`),
-        axios.get(`${API_BASE}/admin/analytics/funnel`)
-      ]);
-      setAudit(auditRes.data);
-      setLocationBias(locRes.data);
-      setExperienceBias(expRes.data);
-      setBottlenecks(bottleRes.data);
-      setRecruiterPerf(perfRes.data);
-      setVacancyData(vacRes.data);
-      setSkillGaps(skillRes.data);
-      setSilentRejections(silentRes.data);
-      setFunnelData(funnelRes.data);
-    } catch (err) { console.error(err); }
-  };
+  useEffect(() => {
+    const diffTime = Math.abs(new Date() - ANNIVERSARY_DATE);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const years = Math.floor(diffDays / 365);
+    const months = Math.floor((diffDays % 365) / 30);
+    const days = diffDays % 30;
+    setTimeTogether(`${years} years, ${months} months, ${days} days`);
+  }, []);
 
-  const fetchUsers = () => { axios.get(`${API_BASE}/admin/users`).then(res => setUsers(res.data)); };
+  useEffect(() => {
+    setBucketList(initialBucketList);
+  }, []);
 
-  const toggleUserStatus = async (userId) => {
-    try {
-      await axios.put(`${API_BASE}/admin/users/${userId}/toggle`);
-      fetchUsers();
-    } catch (err) { alert("Update failed"); }
-  };
-
-  const loadReport = (view) => {
-    axios.get(`${API_BASE}/admin/reports/${view}`).then(res => 
-      setReports(prev => ({ ...prev, selected: view, data: res.data }))
-    );
-  };
-
-  const fetchEntities = async () => {
-    try {
-      const [jobs, candidates, apps, skills] = await Promise.all([
-        axios.get(`${API_BASE}/admin/jobs?t=${Date.now()}`),
-        axios.get(`${API_BASE}/admin/candidates?t=${Date.now()}`),
-        axios.get(`${API_BASE}/admin/applications-detailed?t=${Date.now()}`),
-        axios.get(`${API_BASE}/admin/skills?t=${Date.now()}`)
-      ]);
-      setJobList(jobs.data);
-      setCandidateList(candidates.data);
-      setAppDetailedList(apps.data);
-      setSkillList(skills.data || []);
-    } catch (err) { console.error(err); }
-  };
-
-  const handleAddSkill = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post(`${API_BASE}/admin/skills`, { SkillName: newSkillName });
-      setNewSkillName('');
-      fetchEntities();
-    } catch (err) { alert(err.response?.data?.error || "Error"); }
-  };
-
-  const runMaintenance = async (proc) => {
-    try {
-      await axios.post(`${API_BASE}/admin/maintenance`, { procedure: proc });
-      alert(`${proc} success!`);
-      fetchArchives();
-    } catch (err) { alert(err.message); }
-  };
-
-  const filteredUsers = (users || []).filter(u => {
-    const matchesSearch = u.Username.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'all' || u.RoleID.toString() === roleFilter.toString();
-    return matchesSearch && matchesRole;
-  });
-
-  // STYLES
-  const tabBtnClass = (t) => `px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === t ? 'bg-slate-900 text-white shadow-lg shadow-slate-200 scale-105' : 'text-slate-400 hover:bg-slate-50'}`;
-  const subTabBtnClass = (sub) => `text-[10px] font-black uppercase px-6 py-2 rounded-full transition-all ${entitySubTab === sub ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`;
-
-  return (
-    <div className="p-8 max-w-[1600px] mx-auto space-y-8 animate-in fade-in duration-700">
-      
-      {/* GLOBAL ADMIN HEADER */}
-      <header className="flex flex-col md:flex-row justify-between items-center bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm gap-6">
-        <div>
-          <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Admin<span className="text-indigo-600">Intelligence</span></h2>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">System Control & Heuristics</p>
-        </div>
-        <nav className="flex bg-slate-50 p-1.5 rounded-[1.5rem] border border-slate-100">
-          {['overview', 'users', 'entities', 'reports', 'maintenance'].map(t => (
-            <button key={t} onClick={() => setActiveTab(t)} className={tabBtnClass(t)}> {t} </button>
-          ))}
-        </nav>
-      </header>
-
-      {activeTab === 'overview' && (
-        <div className="space-y-8">
-          {/* BIAS ANALYTICS SECTION */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white rounded-[3rem] p-2 border border-slate-100 shadow-sm"><BiasAnalysis data={locationBias} title="Geographic Bias" subtitle="Regional Hire Velocity" xKey="Location" /></div>
-            <div className="bg-white rounded-[3rem] p-2 border border-slate-100 shadow-sm"><BiasAnalysis data={experienceBias} title="Experience Bias" subtitle="Experience Band Performance" xKey="ExperienceGroup" /></div>
-          </div>
-
-          {/* SHARED INTEL GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-             <SkillGapRadar data={skillGaps} />
-             <RecruiterLeaderboard data={recruiterPerf} />
-             <VacancyUtilization data={vacancyData} />
-             <GhostingAlert data={silentRejections} />
-             <BottleneckAlerts data={bottlenecks} />
-             <ApplicationFunnelCard data={funnelData} />
-          </div>
-
-          {/* AUDIT TRAIL */}
-          <section className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
-                   <span className="w-1.5 h-4 bg-slate-900 rounded-full"></span> System Logs
-                </h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 ml-3.5">Real-time Transactional Audit</p>
-              </div>
-              <ShieldAlert size={20} className="text-slate-200" />
-            </div>
-            <div className="overflow-x-auto rounded-2xl border border-slate-50">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50/50 border-b border-slate-100">
-                  <tr className="text-[9px] font-black uppercase text-slate-400 tracking-widest">
-                    <th className="p-5">Object</th><th className="p-5">Op</th><th className="p-5">Change</th><th className="p-5">User</th><th className="p-5 text-right">Time</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {audit.slice(0, 10).map(log => (
-                    <tr key={log.AuditID} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="p-5 text-[11px] font-black text-slate-900 uppercase">{log.TableName}</td>
-                      <td className="p-5 text-[10px] font-black"><span className="px-2 py-1 rounded bg-indigo-50 text-indigo-600">{log.Operation}</span></td>
-                      <td className="p-5 text-[10px] font-medium text-slate-500 max-w-xs truncate">{log.OldValue} <span className="text-slate-300">→</span> {log.NewValue}</td>
-                      <td className="p-5 font-mono text-[10px] text-slate-400 italic font-bold">{log.ChangedBy}</td>
-                      <td className="p-5 text-[10px] text-slate-400 text-right font-bold">{new Date(log.ChangedAt).toLocaleTimeString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </div>
-      )}
-
-      {activeTab === 'users' && (
-        <div className="space-y-6">
-          <div className="flex flex-col lg:row justify-between items-center bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm gap-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-indigo-600 text-white p-3 rounded-2xl shadow-lg shadow-indigo-100"><Users size={20} /></div>
-              <div>
-                <h3 className="text-lg font-black uppercase tracking-tight text-slate-900">User <span className="text-indigo-600">Registry</span></h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Global Identity Access Management</p>
-              </div>
-            </div>
-
-            <div className="flex flex-1 max-w-3xl gap-4 w-full">
-              <div className="relative flex-1 group">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={16} />
-                <input 
-                  type="text" placeholder="FILTER BY IDENTITY..." 
-                  className="w-full bg-slate-50 border border-slate-100 rounded-[1.25rem] pl-12 pr-6 py-4 text-[11px] font-black uppercase tracking-widest focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all"
-                  value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <select 
-                className="bg-slate-50 border border-slate-100 rounded-[1.25rem] px-6 py-4 text-[11px] font-black uppercase tracking-widest outline-none cursor-pointer focus:ring-4 focus:ring-indigo-500/5"
-                value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}
-              >
-                <option value="all">All Roles</option>
-                <option value="1">Admins</option>
-                <option value="2">Recruiters</option>
-                <option value="3">Candidates</option>
-              </select>
-            </div>
-
-            <button onClick={() => setIsModalOpen(true)} className="px-8 py-4 bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest rounded-[1.25rem] hover:bg-indigo-600 transition-all flex items-center gap-3 shadow-xl shadow-slate-200">
-              <UserPlus size={16} /> Create Candidate
-            </button>
-          </div>
-
-          <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
-            <table className="w-full text-left">
-              <thead className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                <tr><th className="px-10 py-6">Username</th><th className="px-10 py-6">Role</th><th className="px-10 py-6">Status</th><th className="px-10 py-6 text-right">Operational Toggle</th></tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {filteredUsers.map(u => (
-                  <tr key={u.UserID} className="hover:bg-slate-50/30 transition-colors group">
-                    <td className="px-10 py-6 font-black text-slate-900 flex items-center gap-4 text-xs uppercase tracking-tight">
-                      <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white text-[11px] shadow-sm group-hover:bg-indigo-600 transition-colors">{u.Username.substring(0, 2).toUpperCase()}</div>
-                      {u.Username}
-                    </td>
-                    <td className="px-10 py-6">
-                      <span className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-lg ${u.RoleID === 1 ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : u.RoleID === 2 ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-slate-50 text-slate-600 border border-slate-100'}`}>
-                        {u.RoleID === 1 ? 'Admin' : u.RoleID === 2 ? 'Recruiter' : 'Candidate'}
-                      </span>
-                    </td>
-                    <td className="px-10 py-6">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${u.IsActive ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></span>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${u.IsActive ? 'text-emerald-600' : 'text-red-600'}`}> {u.IsActive ? 'Active' : 'Offline'} </span>
-                      </div>
-                    </td>
-                    <td className="px-10 py-6 text-right">
-                      <button onClick={() => toggleUserStatus(u.UserID)} className={`text-[10px] font-black uppercase px-6 py-2.5 rounded-xl transition-all ${u.IsActive ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white'}`}>
-                        {u.IsActive ? 'Revoke Access' : 'Restore Access'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <UserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSaveCandidate} />
-        </div>
-      )}
-
-      {activeTab === 'entities' && (
-  <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 pb-10">
+  // Custom cursor effect
+  useEffect(() => {
+    const moveCursor = (e) => {
+      setCursorPosition({ x: e.clientX, y: e.clientY });
+      setCursorTrail(prev => [...prev.slice(-15), { x: e.clientX, y: e.clientY, id: Date.now() }]);
+    };
     
-    {/* SUB-NAVIGATION TOGGLE */}
-    <div className="flex gap-4 bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm w-fit mx-auto">
-      {['jobs', 'applications', 'candidates', 'skills'].map(sub => (
-        <button 
-          key={sub} 
-          onClick={() => setEntitySubTab(sub)} 
-          className={subTabBtnClass(sub)}
-        > 
-          {sub} 
-        </button>
-      ))}
-    </div>
+    window.addEventListener('mousemove', moveCursor);
+    return () => window.removeEventListener('mousemove', moveCursor);
+  }, []);
 
-    {/* SKILL INJECTION FORM (Conditional) */}
-    {entitySubTab === 'skills' && (
-      <div className="bg-indigo-50/50 p-6 rounded-[2.5rem] border border-dashed border-indigo-200 flex flex-col items-center">
-        <form onSubmit={handleAddSkill} className="flex gap-4 w-full max-w-3xl">
-          <input 
-            type="text" 
-            placeholder="INJECT NEW SKILL INTO SYSTEM..." 
-            className="flex-1 bg-white border border-indigo-100 rounded-2xl px-6 py-4 text-[11px] font-black uppercase outline-none shadow-sm focus:ring-4 focus:ring-indigo-500/10"
-            value={newSkillName} 
-            onChange={(e) => setNewSkillName(e.target.value)}
-          />
-          <button type="submit" className="px-10 py-4 bg-slate-900 text-white text-[11px] font-black uppercase rounded-2xl hover:bg-indigo-600 shadow-xl transition-all">
-            Append Skill
-          </button>
-        </form>
-      </div>
-    )}
-
-    {/* DATA REGISTRY TABLE */}
-    <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
-      <table className="w-full text-left">
-        <thead className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-          <tr>
-            {entitySubTab === 'jobs' && (
-              <>
-                <th className="p-8">Title Pattern</th>
-                <th className="p-8">Node</th>
-                <th className="p-8">Min Tenure</th>
-                <th className="p-8 text-right">Slot Count</th>
-              </>
-            )}
-            {entitySubTab === 'applications' && (
-              <>
-                <th className="p-8">Subject</th>
-                <th className="p-8">Application Vector</th>
-                <th className="p-8">State</th>
-                <th className="p-8 text-right">Origin Date</th>
-              </>
-            )}
-            {entitySubTab === 'candidates' && (
-              <>
-                <th className="p-8">Name</th>
-                <th className="p-8">Experience</th>
-                <th className="p-8">Location</th>
-                <th className="p-8 text-right">Email Path</th>
-              </>
-            )}
-            {entitySubTab === 'skills' && (
-              <>
-                <th className="p-8">UID</th>
-                <th className="p-8">Skill Definition</th>
-                <th className="p-8 text-right">Integrity</th>
-              </>
-            )}
-          </tr>
-        </thead>
-        
-        <tbody className="divide-y divide-slate-50">
-          {/* JOBS DATA */}
-          {entitySubTab === 'jobs' && jobList.map(j => (
-            <tr key={j.JobID} className="hover:bg-slate-50/50 group transition-colors">
-              <td className="p-8 font-black uppercase text-xs text-slate-900 tracking-tight">{j.JobTitle}</td>
-              <td className="p-8 text-[11px] font-bold text-slate-400">{j.Location}</td>
-              <td className="p-8 font-mono text-[11px] font-black text-indigo-600">{j.MinExperience} YRS</td>
-              <td className="p-8 text-right font-black text-slate-900">{j.Vacancies}</td>
-            </tr>
-          ))}
-
-          {/* APPLICATIONS DATA */}
-          {entitySubTab === 'applications' && appDetailedList.map(a => (
-            <tr key={a.ApplicationID} className="hover:bg-slate-50/50 group transition-colors">
-              <td className="p-8 font-black uppercase text-xs text-slate-900">{a.FullName}</td>
-              <td className="p-8 text-[11px] font-bold text-slate-400">{a.JobTitle}</td>
-              <td className="p-8"> 
-                <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg font-black uppercase text-[10px] tracking-widest">
-                  {a.StatusName}
-                </span> 
-              </td>
-              <td className="p-8 text-right text-[10px] font-black text-slate-300">
-                {new Date(a.AppliedDate).toLocaleDateString()}
-              </td>
-            </tr>
-          ))}
-
-          {/* CANDIDATES DATA - Corrected Variable and Properties */}
-          {entitySubTab === 'candidates' && candidateList.map(c => (
-            <tr key={c.CandidateID} className="hover:bg-slate-50/50 group transition-colors">
-              <td className="p-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-slate-900 text-white rounded-lg flex items-center justify-center text-[10px] font-black italic">
-                    {(c.FullName || "??").substring(0, 2).toUpperCase()}
-                  </div>
-                  <span className="font-black uppercase text-xs text-slate-900">{c.FullName}</span>
-                </div>
-              </td>
-              <td className="p-8 font-mono text-[11px] font-black text-indigo-600">
-                {c.YearsOfExperience || 0} YRS
-              </td>
-              <td className="p-8 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
-                {c.Location || 'NODE_UNSET'}
-              </td>
-              <td className="p-8 text-right text-[15px] font-black text-slate-400 italic font-mono opacity-80">
-                {c.Email || 'PRIVATE@SYSTEM.INT'}
-              </td>
-            </tr>
-          ))}
-
-          {/* SKILLS DATA */}
-          {entitySubTab === 'skills' && skillList.map(s => (
-            <tr key={s.SkillID} className="hover:bg-slate-50/50 group">
-              <td className="p-8 font-mono text-[12px] text-slate-500"># {s.SkillID}</td>
-              <td className="p-8 font-black uppercase text-xs text-slate-800">{s.SkillName}</td>
-              <td className="p-8 text-right"> 
-                <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
-                  Immutable
-                </span> 
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* EMPTY STATE HANDLER */}
-      {((entitySubTab === 'jobs' && jobList.length === 0) || 
-        (entitySubTab === 'candidates' && candidateList.length === 0)) && (
-        <div className="p-20 text-center text-slate-300 italic font-bold text-xs uppercase tracking-[0.3em]">
-          No data entries detected in this node.
-        </div>
-      )}
-    </div>
-  </div>
-)}
-
-      {activeTab === 'reports' && (
-        <div className="space-y-8 animate-in fade-in duration-500">
-          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center gap-6 max-w-2xl mx-auto">
-            <div className="p-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-100"><BarChart3 size={20} /></div>
-            <div className="flex-1">
-               <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-1">Select Heuristic Model</label>
-               <select 
-                className="w-full bg-transparent font-black text-sm outline-none cursor-pointer text-slate-900 uppercase tracking-tight"
-                value={reports.selected} onChange={(e) => loadReport(e.target.value)}
-              >
-                {reportList.map(r => <option key={r} value={r}>{r.replace('vw_', '').split('_').join(' ')}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden p-2">
-            <div className="overflow-x-auto rounded-[2.5rem] border border-slate-50">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 border-b border-slate-100">
-                  {reports.data[0] && <tr className="text-[9px] font-black uppercase text-slate-400 tracking-widest">
-                    {Object.keys(reports.data[0]).map(k => <th key={k} className="p-6">{k}</th>)}
-                  </tr>}
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {reports.data.map((row, i) => (
-                    <tr key={i} className="hover:bg-indigo-50/30 transition-colors">
-                      {Object.values(row).map((v, j) => <td key={j} className="p-6 text-[11px] font-bold text-slate-700 tracking-tight">{v?.toString() || 'NULL'}</td>)}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'maintenance' && (
-        <div className="space-y-12 animate-in zoom-in-95 duration-500">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div className="p-12 bg-white border border-slate-100 rounded-[3rem] text-center space-y-6 shadow-sm group hover:shadow-2xl transition-all">
-              <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto text-slate-900 font-black text-xl border border-slate-100 group-hover:bg-slate-900 group-hover:text-white transition-all">DB</div>
-              <div>
-                <h4 className="font-black uppercase tracking-tight text-xl text-slate-900">Data Archival</h4>
-                <p className="text-[11px] font-medium text-slate-400 leading-relaxed uppercase tracking-widest mt-2">Prune system state: Offload stale objects</p>
-              </div>
-              <button onClick={() => runMaintenance('sp_ArchiveOldData')} className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase text-xs tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-200">Initiate sp_ArchiveOldData</button>
-            </div>
-
-            <div className="p-12 bg-white border border-slate-100 rounded-[3rem] text-center space-y-6 shadow-sm group hover:shadow-2xl transition-all">
-              <div className="w-20 h-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-600 font-black text-xl border border-rose-100 group-hover:bg-rose-600 group-hover:text-white transition-all">RG</div>
-              <div>
-                <h4 className="font-black uppercase tracking-tight text-xl text-rose-600">Compliance Flush</h4>
-                <p className="text-[11px] font-medium text-slate-400 leading-relaxed uppercase tracking-widest mt-2">PII Anonymization: GDPR Compliance Loop</p>
-              </div>
-              <button onClick={() => runMaintenance('sp_AnonymizeArchivedCandidates')} className="w-full py-5 bg-rose-600 text-white rounded-[1.5rem] font-black uppercase text-xs tracking-widest hover:bg-rose-700 transition-all shadow-xl shadow-rose-100">Initiate sp_AnonymizeFlush</button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            {/* Archive Lists */}
-            {[ { title: 'Job Archive Vector', data: jobArchive, color: 'slate' }, { title: 'Application Archive Vector', data: appArchive, color: 'rose' } ].map((archive, i) => (
-              <div key={i} className="bg-white border border-slate-100 rounded-[3rem] p-10 shadow-sm h-[500px] flex flex-col">
-                <h3 className={`font-black uppercase text-sm mb-8 flex items-center gap-3 ${archive.color === 'rose' ? 'text-rose-600' : 'text-slate-900'}`}>
-                  <span className={`w-2 h-5 rounded-full ${archive.color === 'rose' ? 'bg-rose-500' : 'bg-slate-900'}`}></span>
-                  {archive.title}
-                </h3>
-                <div className="overflow-y-auto flex-1 custom-scrollbar pr-4">
-                  <table className="w-full text-left">
-                    <thead className="sticky top-0 bg-white border-b border-slate-50 uppercase font-black text-[9px] text-slate-300 tracking-[0.2em]">
-                      <tr><th className="pb-4">Name</th><th className="pb-4">Job Title</th><th className="pb-4 text-right">Commit Date</th></tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {archive.data.length > 0 ? archive.data.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="py-5 font-black uppercase text-[11px] text-slate-800 tracking-tight">{item.FullName || `ID: ${item.CandidateID}`}</td>
-                          <td className="py-5 font-black uppercase text-[11px] text-slate-800 tracking-tight">{item.JobTitle || item.FullName || `ID: ${item.CandidateID}`}</td>
-                          <td className="py-5 text-right text-[10px] font-black text-slate-400">{new Date(item.ArchivedAt).toLocaleDateString()}</td>
-                        </tr>
-                      )) : (
-                        <tr><td colSpan="2" className="py-20 text-center text-[10px] font-black text-slate-300 uppercase italic tracking-widest">No Archived Records Found</td></tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// --- RECRUITER DASHBOARD (RE-ENGINEERED: INTEL DESIGN ETHOS) ---
-function RecruiterDashboard({ user }) {
-  const [matches, setMatches] = useState([]);
-  const [myJobs, setMyJobs] = useState([]);
-  const [archivedJobs, setArchivedJobs] = useState([]);
-  const [activeTab, setActiveTab] = useState('active');
-  const [availableSkills, setAvailableSkills] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedJob, setSelectedJob] = useState(null); 
-  
-  const [showMatchModal, setShowMatchModal] = useState(false);
-  const [selectedMatch, setSelectedMatch] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const [summary, setSummary] = useState({ ActiveJobs: 0, NewApplications: 0, InterviewsToday: 0 });
-
-  const [schedStart, setSchedStart] = useState("");
-  const [schedEnd, setSchedEnd] = useState("");
-
-  const [newJob, setNewJob] = useState({ 
-    title: '', description: '', location: '', minExp: 0, vacancies: 1, requirements: [] 
-  });
-
-  const fetchData = async () => {
-    try {
-      const [activeRes, archivedRes, skillsRes, summaryRes] = await Promise.all([
-        axios.get(`${API_BASE}/recruiter/jobs/${user.UserID}`),
-        axios.get(`${API_BASE}/recruiter/jobs/archived/${user.UserID}`),
-        axios.get(`${API_BASE}/skills`),
-        axios.get(`${API_BASE}/recruiter/summary/${user.UserID}`)
-      ]);
-      
-      setMyJobs(activeRes.data);
-      setArchivedJobs(archivedRes.data);
-      setAvailableSkills(skillsRes.data);
-      setSummary(summaryRes.data);
-
-      if (activeRes.data.length > 0 && !selectedJob) {
-        setSelectedJob(activeRes.data[0]);
-      }
-    } catch (err) { console.error("Data fetch error", err); }
-  };
-
-  const loadMatches = (jobId) => {
-    axios.get(`${API_BASE}/recruiter/matches/${jobId}`)
-      .then(res => setMatches(res.data))
-      .catch(() => setMatches([]));
-  };
-
-  useEffect(() => { fetchData(); }, []);
-
+  // Konami code listener
   useEffect(() => {
-    if (selectedJob) {
-      loadMatches(selectedJob.JobID);
-    }
-  }, [selectedJob]);
-
-  const handleStatusUpdate = async (applicationId, newStatusId, statusLabel) => {
-    try {
-        const res = await axios.put(`${API_BASE}/recruiter/applications/${applicationId}/status`, {
-            newStatusId,
-            userId: user.UserID,
-            notes: `Candidate moved to ${statusLabel} via Dashboard.`
-        });
-        alert(res.data.message);
-        setShowMatchModal(false);
-        if (selectedJob) loadMatches(selectedJob.JobID);
-        fetchData();
-    } catch (err) {
-        alert("Status Update Failed: " + (err.response?.data?.error || "Invalid transition."));
-    }
-  };
-
-  const handleScheduleSubmit = async (e) => {
-    e.preventDefault();
-    const formattedStart = schedStart.replace('T', ' ') + ":00";
-    const formattedEnd = schedEnd.replace('T', ' ') + ":00";
-
-    try {
-        const response = await axios.post(`${API_BASE}/recruiter/interviews`, {
-            applicationId: selectedMatch.ApplicationID,
-            recruiterUserId: user.UserID,
-            startTime: formattedStart,
-            endTime: formattedEnd
-        });
-        alert(response.data.message);
-        setSchedStart("");
-        setSchedEnd("");
-        setShowMatchModal(false);
-        fetchData();
-    } catch (err) {
-        alert("Scheduling Error: " + (err.response?.data?.error || "Check recruiter availability."));
-    }
-  };
-
-  const handlePostJob = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post(`${API_BASE}/recruiter/jobs`, { ...newJob, userId: user.UserID });
-      setShowForm(false);
-      setNewJob({ title: '', description: '', location: '', minExp: 0, vacancies: 1, requirements: [] });
-      fetchData();
-      alert("Job Published!");
-    } catch (err) { alert("Error: " + (err.response?.data?.error || "Check database.")); }
-  };
-
-  const handleDeleteJob = async (jobId, e) => {
-    e.stopPropagation();
-    if (!window.confirm("Archive this job?")) return;
-    try {
-        await axios.delete(`${API_BASE}/recruiter/jobs/${jobId}`);
-        if (selectedJob?.JobID === jobId) setSelectedJob(null);
-        fetchData();
-    } catch (err) { alert("Error archiving job."); }
-  };
-
-  const handleRestoreJob = async (jobId, e) => {
-    e.stopPropagation();
-    try {
-        await axios.put(`${API_BASE}/recruiter/jobs/restore/${jobId}`);
-        fetchData();
-    } catch (err) { alert("Error restoring job."); }
-  };
-
-  const handleHireCandidate = async (applicationId) => {
-    if(!window.confirm("Confirm hiring? This will decrement vacancies and record the status change.")) return;
-    try {
-      const res = await axios.post(`${API_BASE}/recruiter/hire`, {
-        applicationId: applicationId,
-        userId: user.UserID
+    const handleKeyDown = (e) => {
+      setKonamiCode(prev => {
+        const newCode = [...prev, e.key];
+        if (newCode.length > konamiSequence.length) {
+          newCode.shift();
+        }
+        
+        if (JSON.stringify(newCode) === JSON.stringify(konamiSequence)) {
+          setShowSecret(true);
+          setTimeout(() => setShowSecret(false), 5000);
+        }
+        
+        return newCode;
       });
-      alert(res.data.message);
-      setShowMatchModal(false);
-      fetchData(); 
-      if(selectedJob) loadMatches(selectedJob.JobID); 
-    } catch (err) {
-      alert("Hiring Failed: " + (err.response?.data?.error || "Server Error"));
-    }
-  };
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
-  const toggleSkill = (skillId) => {
-    const exists = newJob.requirements.find(r => r.skillId === skillId);
-    if (exists) {
-      setNewJob({ ...newJob, requirements: newJob.requirements.filter(r => r.skillId !== skillId) });
+  // Scratch card initialization
+  useEffect(() => {
+    if (canvasRef.current && !isAuthenticated) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      canvas.width = 400;
+      canvas.height = 200;
+      
+      ctx.fillStyle = '#c0c0c0';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = '#a0a0a0';
+      for (let i = 0; i < 1000; i++) {
+        ctx.fillRect(
+          Math.random() * canvas.width,
+          Math.random() * canvas.height,
+          2,
+          2
+        );
+      }
+      
+      ctx.font = 'bold 24px Poppins';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('SCRATCH HERE', canvas.width/2, canvas.height/2);
+    }
+  }, [isAuthenticated]);
+
+  // Name entry handlers
+  const handleNameSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const name = formData.get('fullName');
+    
+    if (name.toLowerCase().includes(YOUR_SURNAME.toLowerCase())) {
+      setHerName(name);
+      setIsAuthenticated(true);
+      setShowConfetti(true);
     } else {
-      setNewJob({ ...newJob, requirements: [...newJob.requirements, { skillId, minProficiency: 5, isMandatory: false }] });
+      alert(`Only ${YOUR_SURNAME}s allowed here ❤️`);
     }
   };
 
-  const updateSkillReq = (skillId, field, value) => {
-    const updated = newJob.requirements.map(r => r.skillId === skillId ? { ...r, [field]: value } : r);
-    setNewJob({ ...newJob, requirements: updated });
-  };
-
-  const openMatchBreakdown = (match) => {
-    setSelectedMatch(match);
-    setShowMatchModal(true);
-  };
-
-  const runAutoReject = async () => {
-    const confirmed = window.confirm("Reject ALL unqualified candidates? Proceed?");
-    if (!confirmed) return;
-    setIsProcessing(true);
-    try {
-        const response = await axios.post(`${API_BASE}/recruiter/run-auto-reject`);
-        alert(response.data.message);
-        fetchData(); 
-    } catch (err) {
-        alert("Error: " + (err.response?.data?.error || "Execution failed"));
-    } finally {
-        setIsProcessing(false);
+  // Reason jar handler
+  const getRandomReason = () => {
+    const availableReasons = reasons.filter(r => !usedReasons.includes(r));
+    if (availableReasons.length === 0) {
+      setUsedReasons([]);
+      const newReason = reasons[Math.floor(Math.random() * reasons.length)];
+      setSelectedReason(newReason);
+      setUsedReasons([newReason]);
+    } else {
+      const newReason = availableReasons[Math.floor(Math.random() * availableReasons.length)];
+      setSelectedReason(newReason);
+      setUsedReasons([...usedReasons, newReason]);
     }
+  };
+
+  // Scratch card handlers
+  const startDrawing = (e) => {
+    isDrawing.current = true;
+    draw(e);
+  };
+
+  const stopDrawing = () => {
+    isDrawing.current = false;
+  };
+
+  const draw = (e) => {
+    if (!isDrawing.current) return;
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    let clientX, clientY;
+    if (e.touches) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    
+    const x = (clientX - rect.left) * scaleX;
+    const y = (clientY - rect.top) * scaleY;
+    
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 20, 0, Math.PI * 2);
+    ctx.fill();
+    
+    checkScratchPercentage();
+  };
+
+  const checkScratchPercentage = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    
+    let scratchedPixels = 0;
+    for (let i = 3; i < pixels.length; i += 4) {
+      if (pixels[i] === 0) scratchedPixels++;
+    }
+    
+    const percentage = (scratchedPixels / (canvas.width * canvas.height)) * 100;
+    setScratchPercentage(percentage);
+    if (percentage > 30 && !isScratched) setIsScratched(true);
+  };
+
+  const resetCard = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    ctx.fillStyle = '#c0c0c0';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = '#a0a0a0';
+    for (let i = 0; i < 1000; i++) {
+      ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+    }
+    
+    ctx.font = 'bold 24px Poppins';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SCRATCH HERE', canvas.width/2, canvas.height/2);
+    
+    setIsScratched(false);
+    setScratchPercentage(0);
+  };
+
+  // Compliment generator
+  const generateCompliment = () => {
+    const randomCompliment = compliments[Math.floor(Math.random() * compliments.length)];
+    setCompliment(randomCompliment);
+  };
+
+  // Bucket list toggle
+  const toggleBucketItem = (id) => {
+    setBucketList(bucketList.map(item => 
+      item.id === id ? { ...item, completed: !item.completed } : item
+    ));
   };
 
   return (
-    <div className="space-y-10 relative animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="app">
+      {/* Custom Cursor */}
+      <div 
+        className="custom-cursor"
+        style={{ 
+          left: cursorPosition.x - 10, 
+          top: cursorPosition.y - 10,
+          position: 'fixed',
+          width: '20px',
+          height: '20px',
+          background: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ff6b6b\'%3E%3Cpath d=\'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z\'/%3E%3C/svg%3E")',
+          backgroundSize: 'contain',
+          pointerEvents: 'none',
+          zIndex: 99999
+        }}
+      />
       
-      {/* MODAL SECTION - INTEL OVERLAY */}
-      {showMatchModal && selectedMatch && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
-            <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onClick={() => setShowMatchModal(false)}></div>
-            <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in duration-300">
-                <div className="p-8 border-b bg-slate-50 flex justify-between items-center">
-                    <div>
-                        <h3 className="text-2xl font-black uppercase tracking-tighter">{selectedMatch.FullName}</h3>
-                        <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mt-1">Personnel Match Report • SCORE: {selectedMatch.TotalMatchScore}</p>
-                    </div>
-                    <button onClick={() => setShowMatchModal(false)} className="p-3 hover:bg-slate-200 rounded-full transition"><X size={20}/></button>
-                </div>
-                
-                <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto">
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="bg-slate-100 p-6 rounded-3xl text-black">
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Exp Index</p>
-                            <p className="text-3xl font-black">+{selectedMatch.ExperienceScore}</p>
-                        </div>
-                        <div className="bg-indigo-600 p-6 rounded-3xl text-white">
-                            <p className="text-[9px] font-black text-indigo-200 uppercase tracking-widest mb-1">Geographic Bonus</p>
-                            <p className="text-3xl font-black">+{selectedMatch.LocationBonus}</p>
-                        </div>
-                    </div>
+      {/* Cursor Trail */}
+      {cursorTrail.map((pos, i) => (
+        <div
+          key={pos.id}
+          className="cursor-trail"
+          style={{
+            left: pos.x - 5,
+            top: pos.y - 5,
+            position: 'fixed',
+            width: '10px',
+            height: '10px',
+            background: 'rgba(255, 107, 107, ' + (0.3 - i * 0.02) + ')',
+            borderRadius: '50%',
+            pointerEvents: 'none',
+            zIndex: 99998
+          }}
+        />
+      ))}
 
-                    <div className="space-y-4 pt-4">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Skill Alignment Analysis</h4>
-                        {selectedMatch.SkillsDetails?.map((s, idx) => (
-                            <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                <div className="flex justify-between text-xs font-black uppercase mb-3">
-                                    <span>{s.SkillName} {s.IsMandatory && <span className="text-red-500 font-bold ml-1">CRITICAL</span>}</span>
-                                    <span className={s.CandidateLevel >= s.RequiredLevel ? "text-emerald-600" : "text-amber-600"}>
-                                        LVL {s.CandidateLevel} / {s.RequiredLevel}
-                                    </span>
-                                </div>
-                                <div className="h-1.5 bg-slate-200 rounded-full relative">
-                                    <div className="absolute h-full bg-indigo-600 rounded-full transition-all duration-1000" style={{ width: `${s.CandidateLevel * 10}%` }}></div>
-                                    <div className="absolute h-4 w-1 bg-indigo-500 -top-1.5 rounded-full" style={{ left: `${s.RequiredLevel * 10}%` }}></div>
-                                </div>
-                            </div>
-                        )) || <div className="text-center py-10 text-slate-400 italic text-sm">No skill data linked.</div>}
-                    </div>
-
-                    {selectedMatch.StatusID === 3 && (
-                        <div className="mt-8 p-8 bg-indigo-50 rounded-[32px] border border-indigo-100">
-                            <h4 className="text-sm font-black uppercase mb-6 flex items-center gap-2 tracking-tight">
-                                <Calendar size={18} className="text-indigo-600" /> Interface: Schedule Session
-                            </h4>
-                            <form onSubmit={handleScheduleSubmit} className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-[9px] font-black text-slate-400 block mb-1 uppercase tracking-widest">Inception</label>
-                                        <input type="datetime-local" required className="w-full p-3 bg-white border-2 border-transparent focus:border-indigo-500 rounded-2xl text-xs font-bold outline-none transition" value={schedStart} onChange={(e) => setSchedStart(e.target.value)}/>
-                                    </div>
-                                    <div>
-                                        <label className="text-[9px] font-black text-slate-400 block mb-1 uppercase tracking-widest">Termination</label>
-                                        <input type="datetime-local" required className="w-full p-3 bg-white border-2 border-transparent focus:border-indigo-500 rounded-2xl text-xs font-bold outline-none transition" value={schedEnd} onChange={(e) => setSchedEnd(e.target.value)}/>
-                                    </div>
-                                </div>
-                                <button type="submit" className="w-full bg-indigo-600 text-white py-4 rounded-2xl text-xs font-black uppercase hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 tracking-widest">Transmit Interview Slot</button>
-                            </form>
-                        </div>
-                    )}
-                </div>
-
-                <div className="p-8 bg-slate-100 border-t border-slate-100 flex justify-between items-center">
-                    <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">Current Protocol</span>
-                        <span className="text-sm font-black text-indigo-400 uppercase tracking-tighter">{selectedMatch.StatusName || 'Applied'}</span>
-                    </div>
-                    <div className="flex gap-3">
-                        {![4, 5].includes(selectedMatch.StatusID) && (
-                            <button onClick={() => handleStatusUpdate(selectedMatch.ApplicationID, 5, 'Rejected')} className="px-6 py-3 text-[10px] font-black uppercase bg-red-400 text-white rounded-2xl hover:bg-red-500 hover:text-white transition-all tracking-widest">Terminate</button>
-                        )}
-                        {(selectedMatch.StatusID === 1 || !selectedMatch.StatusID) && (
-                            <button onClick={() => handleStatusUpdate(selectedMatch.ApplicationID, 2, 'Screening')} className="px-6 py-3 text-[10px] font-black uppercase bg-indigo-600 text-white rounded-2xl shadow-lg hover:bg-indigo-700 transition-all tracking-widest">Initialize Screening</button>
-                        )}
-                        {selectedMatch.StatusID === 2 && (
-                            <button onClick={() => handleStatusUpdate(selectedMatch.ApplicationID, 3, 'Interview')} className="px-6 py-3 text-[10px] font-black uppercase bg-amber-500 text-white rounded-2xl shadow-lg hover:bg-amber-600 transition-all tracking-widest">Progress to Interview</button>
-                        )}
-                        {selectedMatch.StatusID === 3 && (
-                            <button onClick={() => handleHireCandidate(selectedMatch.ApplicationID)} className="px-8 py-3 text-[10px] font-black uppercase bg-emerald-600 text-white rounded-2xl shadow-lg hover:bg-emerald-700 transition-all flex items-center gap-2 tracking-widest"><UserPlus size={14}/> Execute Hire</button>
-                        )}
-                    </div>
-                </div>
+      <AnimatePresence mode="wait">
+        {!isAuthenticated ? (
+          /* NAME ENTRY SCREEN */
+          <motion.div 
+            key="name-entry"
+            className="name-entry"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {/* Floating hearts background */}
+            <div className="floating-hearts">
+              {[...Array(20)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="heart-bg"
+                  initial={{ 
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    scale: 0.5 + Math.random() * 1.5,
+                    opacity: 0.6
+                  }}
+                  animate={{ 
+                    y: -300,
+                    opacity: [0.6, 0.4, 0.2, 0]
+                  }}
+                  transition={{
+                    duration: 10 + Math.random() * 10,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                >
+                  ❤️
+                </motion.div>
+              ))}
             </div>
-        </div>
-      )}
 
-      {/* HEADER SECTION - REBRANDED */}
-      <div className="flex flex-col md:flex-row justify-between items-center bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm gap-6">
-        <div>
-            <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Recruiter<span className="text-indigo-600">Intelligence</span></h2>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">Acquisition Flow & Selection Strategy</p>
-        </div>
-        <div className="flex gap-4">
-            <button
-                onClick={runAutoReject}
-                disabled={isProcessing}
-                className={`flex items-center gap-2 px-8 py-4 rounded-2xl text-[10px] font-black uppercase transition-all shadow-xl tracking-widest
-                    ${isProcessing 
-                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                        : 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-200'
-                    }`}
+            <motion.div 
+              className="entry-container"
+              initial={{ scale: 0.8, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: "spring", duration: 1 }}
             >
-                <ShieldAlert size={16} />
-                {isProcessing ? "Purging Pipeline..." : "Auto-Purge Unqualified"}
-            </button>
-            <button onClick={() => setShowForm(!showForm)} className="bg-slate-900 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 shadow-2xl hover:bg-indigo-600  transition-all hover:text-white tracking-widest">
-                {showForm ? 'Abort Creation' : <><Plus size={18}/> Create Posting</>}
-            </button>
-        </div>
-      </div>
-
-      {/* --- COMMAND MODULES (SUMMARY METRICS) --- */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="bg-white p-8 rounded-[40px] border-2 border-slate-100 shadow-sm flex items-center justify-between group hover:border-indigo-500 transition-all">
-            <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Active Deployments</p>
-                <h3 className="text-4xl font-black text-slate-900">{summary.ActiveJobs}</h3>
-            </div>
-            <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-900 group-hover:bg-indigo-600 group-hover:text-white transition-all"><Briefcase size={32} /></div>
-        </div>
-        
-        <div className="bg-white p-8 rounded-[40px] border-2 border-slate-100 shadow-sm flex items-center justify-between group hover:border-amber-500 transition-all relative">
-            <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Awaiting Review</p>
-                <h3 className="text-4xl font-black text-slate-900">{summary.NewApplications}</h3>
-            </div>
-            <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-900 group-hover:bg-amber-500 group-hover:text-white transition-all"><Users size={32} /></div>
-            {summary.NewApplications > 0 && (
-                <span className="absolute -top-3 -right-3 bg-amber-500 text-white text-[9px] px-3 py-1.5 rounded-full font-black animate-bounce uppercase tracking-tighter border-4 border-white">Critcal Review</span>
-            )}
-        </div>
-
-        <div className="bg-white p-8 rounded-[40px] border-2 border-slate-100 shadow-sm flex items-center justify-between group hover:border-purple-500 transition-all">
-            <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Interviews Today</p>
-                <h3 className="text-4xl font-black text-slate-900">{summary.InterviewsToday}</h3>
-            </div>
-            <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-900 group-hover:bg-purple-600 group-hover:text-white transition-all"><Calendar size={32} /></div>
-        </div>
-      </div>
-
-      {/* JOB POSTING CONSTRUCTOR */}
-      {showForm && (
-        <form onSubmit={handlePostJob} className="bg-slate-50 p-10 rounded-[48px] border-4 border-slate-900 shadow-2xl grid grid-cols-1 md:grid-cols-3 gap-10 animate-in slide-in-from-top-8 duration-500">
-            <div className="md:col-span-2 space-y-6">
-                <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-slate-500 ml-2 tracking-widest">Job Designation</label>
-                    <input placeholder="e.g. Senior Intelligence Analyst" className="w-full p-5 bg-white border-2 border-transparent focus:border-indigo-500 rounded-[24px] outline-none font-bold shadow-sm transition" required value={newJob.title} onChange={e => setNewJob({...newJob, title: e.target.value})}/>
-                </div>
-                <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-slate-500 ml-2 tracking-widest">Description</label>
-                    <textarea placeholder="Outline the key objectives..." className="w-full p-5 bg-white border-2 border-transparent focus:border-indigo-500 rounded-[24px] outline-none h-40 font-bold shadow-sm transition" required value={newJob.description} onChange={e => setNewJob({...newJob, description: e.target.value})}/>
-                </div>
-                
-                <div className="pt-4">
-                    <h4 className="text-[10px] font-black uppercase text-slate-900 mb-6 tracking-[0.3em] flex items-center gap-2">
-                        <Settings size={14}/> Technical Requirements
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4">
-                        {availableSkills.map(skill => {
-                            const req = newJob.requirements.find(r => r.skillId === skill.SkillID);
-                            return (
-                                <div key={skill.SkillID} className={`p-4 rounded-2xl border-2 transition-all ${req ? 'border-indigo-600 bg-indigo-50 scale-[0.98]' : 'bg-white border-transparent'}`}>
-                                    <label className="flex items-center gap-3 cursor-pointer mb-3">
-                                        <input type="checkbox" checked={!!req} onChange={() => toggleSkill(skill.SkillID)} className="w-5 h-5 rounded accent-indigo-600" />
-                                        <span className="text-xs font-black uppercase tracking-tight">{skill.SkillName}</span>
-                                    </label>
-                                    {req && (
-                                        <div className="flex items-center justify-between gap-4 pt-2 border-t border-indigo-200">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[9px] font-black text-indigo-400">MIN LVL:</span>
-                                                <input type="number" min="1" max="10" className="w-12 p-1 text-[10px] border-2 border-indigo-200 rounded-lg font-black text-center" value={req.minProficiency} onChange={(e) => updateSkillReq(skill.SkillID, 'minProficiency', e.target.value)}/>
-                                            </div>
-                                            <label className="text-[9px] font-black flex items-center gap-2 text-indigo-600">
-                                                <input type="checkbox" checked={req.isMandatory} onChange={(e) => updateSkillReq(skill.SkillID, 'isMandatory', e.target.checked)} className="accent-indigo-600" /> MANDATORY
-                                            </label>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </div>
-            <div className="space-y-6">
-                <div className="bg-white p-8 rounded-[32px] shadow-sm space-y-6">
-                    <div>
-                        <label className="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Location</label>
-                        <input placeholder="Location" className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none font-bold transition" required value={newJob.location} onChange={e => setNewJob({...newJob, location: e.target.value})}/>
-                    </div>
-                    <div>
-                        <label className="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Experience Floor (Years)</label>
-                        <input type="number" className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none font-black transition" value={newJob.minExp} onChange={e => setNewJob({...newJob, minExp: e.target.value})}/>
-                    </div>
-                    <div>
-                        <label className="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Vacancies</label>
-                        <input type="number" className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none font-black transition" value={newJob.vacancies} onChange={e => setNewJob({...newJob, vacancies: e.target.value})}/>
-                    </div>
-                    <button type="submit" className="w-full bg-slate-200 text-black py-6 rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl hover:bg-slate-900 hover:text-white transition-all transform active:scale-95">Publish</button>
-                </div>
-            </div>
-        </form>
-      )}
-
-      {/* MAIN INTELLIGENCE GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 space-y-6">
-            <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.4em] flex items-center gap-3">
-                <span className="w-8 h-1 bg-indigo-600 rounded-full"></span>
-                LIVE MATCH ENGINE {selectedJob && <span className="text-indigo-600">— {selectedJob.JobTitle}</span>}
-            </h3>
-            <div className="bg-white rounded-[40px] shadow-xl border-2 border-slate-100 overflow-hidden">
-                <table className="w-full text-left">
-                <thead className="bg-slate-100 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                    <tr>
-                        <th className="px-10 py-6">Candidate Name</th>
-                        <th className="px-10 py-6 text-center">Compatibility Index</th>
-                        <th className="px-10 py-6 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                    {matches.length > 0 ? matches.map((m, i) => (
-                        <tr key={i} className="group hover:bg-slate-50 transition-all duration-300">
-                            <td className="px-10 py-8">
-                                <div className="font-black text-slate-900 uppercase text-sm tracking-tight">{m.FullName}</div>
-                                <div className="text-[9px] font-black uppercase text-indigo-500 tracking-widest mt-1 flex items-center gap-1">
-                                    <div className="w-1 h-1 bg-indigo-500 rounded-full"></div> {m.StatusName}
-                                </div>
-                            </td>
-                            <td className="px-10 py-8 text-center">
-                                <span className="text-2xl font-black text-slate-900 bg-slate-100 px-4 py-2 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all">{m.TotalMatchScore}</span>
-                            </td>
-                            <td className="px-10 py-8 text-right">
-                                <button onClick={() => openMatchBreakdown(m)} className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase hover:bg-indigo-600 transition-all tracking-widest shadow-lg shadow-slate-200">Review & Manage</button>
-                            </td>
-                        </tr>
-                    )) : (
-                        <tr><td colSpan="3" className="px-10 py-20 text-center text-slate-400 text-[10px] font-black uppercase tracking-widest">No matching personnel identified for this posting.</td></tr>
-                    )}
-                </tbody>
-                </table>
-            </div>
-        </div>
-        
-        {/* SIDEBAR TABS (HARDWARE CONTROL BOARD) */}
-        <div className="space-y-6">
-            <div className="bg-slate-100 p-2 rounded-[28px] flex gap-2">
-                <button 
-                    onClick={() => setActiveTab('active')} 
-                    className={`flex-1 py-4 text-[9px] font-black uppercase tracking-[0.2em] rounded-[20px] transition-all duration-300 ${activeTab === 'active' ? 'bg-slate-900 text-white shadow-xl scale-105' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                    Active Deployments ({myJobs.length})
-                </button>
-                <button 
-                    onClick={() => setActiveTab('archive')} 
-                    className={`flex-1 py-4 text-[9px] font-black uppercase tracking-[0.2em] rounded-[20px] transition-all duration-300 ${activeTab === 'archive' ? 'bg-slate-900 text-white shadow-xl scale-105' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                    Archived ({archivedJobs.length})
-                </button>
-            </div>
-
-            <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
-                {(activeTab === 'active' ? myJobs : archivedJobs).map(job => (
-                    <div key={job.JobID} onClick={() => setSelectedJob(job)} className={`p-8 rounded-[32px] border-4 cursor-pointer transition-all relative group ${selectedJob?.JobID === job.JobID ? 'border-indigo-600 bg-white shadow-2xl translate-x-2' : 'bg-white border-transparent hover:border-slate-200'}`}>
-                        <div className="absolute top-6 right-6 flex gap-2">
-                            {activeTab === 'active' ? (
-                                <button onClick={(e) => handleDeleteJob(job.JobID, e)} className="text-slate-300 hover:text-red-500 transition-colors p-2"><Trash2 size={18}/></button>
-                            ) : (
-                                <button onClick={(e) => handleRestoreJob(job.JobID, e)} className="text-slate-300 hover:text-emerald-500 transition-colors p-2"><Clock size={18}/></button>
-                            )}
-                        </div>
-                        <div className="pr-10 mb-4">
-                            <h4 className={`font-black text-sm uppercase tracking-tight leading-tight ${selectedJob?.JobID === job.JobID ? 'text-indigo-600' : 'text-slate-900 group-hover:text-indigo-500'}`}>{job.JobTitle}</h4>
-                            <div className="flex gap-2 mt-2">
-                                <span className={`text-[8px] px-2 py-1 rounded-md font-black uppercase tracking-widest ${activeTab === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{activeTab === 'active' ? 'Online' : 'Archived'}</span>
-                                <span className="text-[8px] px-2 py-1 bg-indigo-600 text-white rounded-md font-black uppercase tracking-widest">ID: {job.JobID}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between border-t border-slate-50 pt-4 mt-4">
-                            <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest">{job.Location}</p>
-                            <p className="text-[9px] text-slate-900 font-black uppercase bg-slate-50 px-3 py-1 rounded-full">{job.Vacancies} OPENINGS</p>
-                        </div>
-                    </div>
-                ))}
-                { (activeTab === 'active' ? myJobs : archivedJobs).length === 0 && (
-                    <div className="text-center py-20 text-slate-400 text-[10px] font-black uppercase tracking-widest italic border-2 border-dashed border-slate-200 rounded-[32px]">No data strings found</div>
-                )}
-            </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-// --- CANDIDATE DASHBOARD ---
-function CandidateDashboard({ user }) {
-  const [jobs, setJobs] = useState([]);
-  const [myApps, setMyApps] = useState([]);
-  const [profile, setProfile] = useState({ skills: [], docs: [] });
-  const [allSkills, setAllSkills] = useState([]);
-  const [interviews, setInterviews] = useState([]);
-  const [newSkill, setNewSkill] = useState({ id: "", level: 5 });
-  const [selectedGap, setSelectedGap] = useState(null);
-  const [inspectingJobId, setInspectingJobId] = useState(null);
-
-  const API_BASE = "/api";
-
-  const refreshData = async () => {
-    try {
-      const [jobsRes, appsRes, profileRes, docsRes, skillsRes, interviewRes] = await Promise.all([
-        axios.get(`${API_BASE}/candidate/recommendations/${user.UserID}`),
-        axios.get(`${API_BASE}/candidate/apps/${user.UserID}`),
-        axios.get(`${API_BASE}/candidate/profile/${user.UserID}`),
-        axios.get(`${API_BASE}/candidate/documents/${user.UserID}`),
-        axios.get(`${API_BASE}/skills`),
-        axios.get(`${API_BASE}/candidate/interviews/${user.UserID}`)
-      ]);
-      setJobs(jobsRes.data);
-      setMyApps(appsRes.data);
-      setProfile({ ...profileRes.data, docs: docsRes.data });
-      setAllSkills(skillsRes.data);
-      setInterviews(interviewRes.data);
-    } catch (err) {
-      console.error("Data refresh failed", err);
-    }
-  };
-
-  useEffect(() => { refreshData(); }, []);
-
-  const handleConfirmInterview = async (scheduleId) => {
-    try {
-      await axios.put(`${API_BASE}/candidate/interviews/confirm`, { 
-        scheduleId, 
-        userId: user.UserID 
-      });
-      refreshData();
-    } catch (err) {
-      alert("Confirmation failed: " + err.response?.data?.error || err.message);
-    }
-  };
-
-  const checkSkillGap = async (jobId) => {
-    if (inspectingJobId === jobId) { setInspectingJobId(null); return; }
-    try {
-      const res = await axios.get(`${API_BASE}/candidate/skill-gap/${jobId}/${user.UserID}`);
-      setSelectedGap(res.data);
-      setInspectingJobId(jobId);
-    } catch (err) { console.error("Failed to fetch skill gap"); }
-  };
-
-  const handleWithdraw = async (appId) => {
-    if (!window.confirm("Confirm withdrawal?")) return;
-    try {
-      await axios.post(`${API_BASE}/withdraw`, { appId, userId: user.UserID });
-      await refreshData();
-    } catch (err) { console.error(err); alert("Withdrawal failed."); }
-  };
-
-  const updateProfile = async () => {
-    await axios.put(`${API_BASE}/candidate/profile`, { userId: user.UserID, location: profile.Location, yearsOfExperience: profile.YearsOfExperience });
-    alert("Profile Updated");
-    refreshData();
-  };
-
-  const addSkill = async () => {
-    if(!newSkill.id) return;
-    await axios.post(`${API_BASE}/candidate/skills`, { userId: user.UserID, skillId: newSkill.id, proficiency: newSkill.level });
-    setNewSkill({ id: "", level: 5 });
-    refreshData();
-  };
-
-  const uploadDoc = async () => {
-    const name = prompt("Enter Document Name:");
-    if(name) {
-        await axios.post(`${API_BASE}/candidate/documents`, { userId: user.UserID, docName: name });
-        refreshData();
-    }
-  };
-
-  return (
-    <div className="space-y-10 max-w-7xl mx-auto p-6 pb-20">
-      
-      {/* HEADER SECTION */}
-      <header className="flex flex-col md:flex-row justify-between items-center bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm gap-6">
-        <div>
-          <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Dashboard<span className="text-indigo-600">.</span></h2>
-          <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-1">Welcome back, {user.Username}</p>
-        </div>
-        <div className="flex gap-3">
-            <div className="bg-white px-6 py-3 rounded-2xl shadow-sm flex items-center gap-3">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">System Active</span>
-            </div>
-        </div>
-      </header>
-
-      {/* SECTION 1: PROFILE & SKILLS */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <section className="lg:col-span-1 bg-white p-8 rounded-[40px] shadow-sm space-y-8">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-slate-900 rounded-3xl flex items-center justify-center text-white shadow-xl rotate-3">
-              <UserCircle size={32} />
-            </div>
-            <div>
-              <h2 className="font-black text-xl uppercase tracking-tight">Talent Profile</h2>
-              <p className="text-[10px] text-indigo-600 font-black uppercase tracking-widest">Candidate ID: #{user.UserID}</p>
-            </div>
-          </div>
-
-          <div className="space-y-5">
-            <div className="group">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Preferred Location</label>
-              <input className="w-full mt-1.5 p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl text-sm font-bold transition-all outline-none" value={profile.Location || ""} onChange={e => setProfile({...profile, Location: e.target.value})}/>
-            </div>
-            <div>
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Total Experience (Years)</label>
-              <input type="number" className="w-full mt-1.5 p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl text-sm font-bold transition-all outline-none" value={profile.YearsOfExperience || 0} onChange={e => setProfile({...profile, YearsOfExperience: e.target.value})}/>
-            </div>
-            <button onClick={updateProfile} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase shadow-xl shadow-indigo-700/20 hover:bg-indigo-600 transition-all active:scale-[0.98]">Update Profile</button>
-          </div>
-
-          <div className="pt-6 border-t space-y-4">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verified Documents</h3>
-            <div className="space-y-2">
-              {profile.docs?.map(d => (
-                <div key={d.DocumentID} className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-transparent hover:border-slate-200 transition group cursor-default">
-                  <div className="flex items-center gap-3 text-xs font-bold text-slate-700">
-                    <div className="p-2 bg-white rounded-lg shadow-sm group-hover:text-indigo-600 transition">
-                        <FileText size={16}/> 
-                    </div>
-                    {d.DocumentName}
-                  </div>
-                  <CheckCircle size={14} className="text-emerald-500" />
-                </div>
-              ))}
-            </div>
-            <button onClick={uploadDoc} className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-400 hover:border-indigo-400 hover:text-indigo-500 hover:bg-indigo-50 transition-all">Add New Document</button>
-          </div>
-        </section>
-
-        <section className="lg:col-span-2 bg-white p-8 rounded-[40px]  shadow-sm flex flex-col">
-          <div className="flex justify-between items-center mb-10">
-            <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-3">
-              <div className="w-3 h-3 bg-indigo-600 rounded-full"></div> Professional Skills Matrix
-            </h3>
-            <span className="text-[10px] font-black bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full uppercase tracking-widest">
-                {profile.skills?.length || 0} Skills Active
-            </span>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 flex-1">
-            <div className="space-y-8">
-              {profile.skills?.map(s => (
-                <div key={s.SkillID} className="group">
-                  <div className="flex justify-between text-[10px] font-black uppercase tracking-tighter mb-2">
-                    <span className="group-hover:text-indigo-600 transition">{s.SkillName}</span>
-                    <span className="text-slate-400">Level {s.ProficiencyLevel} / 10</span>
-                  </div>
-                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
-                    <div className="h-full bg-indigo-600 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(37,99,235,0.3)]" style={{ width: `${s.ProficiencyLevel * 10}%` }}></div>
-                  </div>
-                </div>
-              ))}
-              {profile.skills?.length === 0 && (
-                  <div className="h-full flex flex-col items-center justify-center text-slate-300 space-y-2 opacity-50 italic">
-                      <BarChart3 size={40} />
-                      <p className="text-xs font-bold uppercase tracking-widest">No skills added yet</p>
-                  </div>
-              )}
-            </div>
-            
-            <div className="bg-slate-50 p-8 rounded-[35px] space-y-6 h-fit text-white  border hover:border-indigo-600 hover:shadow-2xl hover:-translate-y-1 shadow-indigo-900/20">
-              <div>
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">Skill Acquisition</h4>
-                  <p className="text-xs text-slate-400 font-bold">Add or update your expertise level to improve job matching.</p>
-              </div>
-              <select className="w-full p-4 bg-slate-100 hover:border-indigo-600 hover:shadow-2xl hover:-translate-y-1 border-none rounded-2xl text-sm font-bold text-black outline-none focus:ring-2 ring-indigo-500 transition-all" value={newSkill.id} onChange={e => setNewSkill({...newSkill, id: e.target.value})}>
-                <option value="">Select Skill...</option>
-                {allSkills.map(s => <option key={s.SkillID} value={s.SkillID} className="text-black">{s.SkillName}</option>)}
-              </select>
-              <div className="space-y-3">
-                 <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-black uppercase text-slate-400">Proficiency Level</label>
-                    <span className="font-black text-xl text-indigo-400">{newSkill.level}</span>
-                 </div>
-                 <input type="range" min="1" max="10" className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" value={newSkill.level} onChange={e => setNewSkill({...newSkill, level: e.target.value})}/>
-              </div>
-              <button onClick={addSkill} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase shadow-xl shadow-indigo-600/20 hover:bg-indigo-600 transition-all active:scale-[0.98]">Add Skill</button>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* UPCOMING INTERVIEWS */}
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-            <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
-                <Calendar className="text-indigo-600" /> Upcoming Interviews 
-            </h2>
-            <div className="h-px flex-1 bg-slate-100 mx-6 hidden md:block"></div>
-            <span className="bg-amber-100 text-amber-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest">
-                {interviews.length} Scheduled
-            </span>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {interviews.length > 0 ? interviews.map((meeting) => (
-            <div key={meeting.ScheduleID} className="bg-white p-6 rounded-[35px] border-2 border-transparent shadow-sm hover:shadow-xl hover:border-slate-100 transition-all group relative">
-              <div className="flex justify-between items-start mb-6">
-                <div className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${meeting.TimeStatus === 'Upcoming' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
-                  {meeting.TimeStatus}
-                </div>
-                {meeting.CandidateConfirmed ? (
-                  <div className="flex items-center gap-1.5 text-emerald-500 text-[9px] font-black uppercase tracking-widest">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div> Confirmed
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 text-amber-500 text-[9px] font-black uppercase tracking-widest animate-pulse">
-                    <AlertCircle size={14} /> Confirmation Required
-                  </div>
-                )}
-              </div>
-
-              <h3 className="font-black text-lg leading-tight group-hover:text-indigo-600 transition">{meeting.JobTitle}</h3>
-              <p className="text-xs text-slate-400 font-bold mb-6 italic tracking-tight">Interview with {meeting.RecruiterName}</p>
+              <motion.h1
+                animate={{ 
+                  textShadow: [
+                    "0 0 20px rgba(255,107,107,0.3)",
+                    "0 0 40px rgba(255,107,107,0.6)",
+                    "0 0 20px rgba(255,107,107,0.3)"
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                For My Valentine
+              </motion.h1>
               
-              <div className="grid grid-cols-2 gap-3 mb-8">
-                <div className="bg-slate-50 p-3 rounded-2xl">
-                  <label className="text-[8px] font-black text-slate-400 uppercase block mb-1">Date</label>
-                  <div className="flex items-center gap-2 text-[11px] font-black">
-                    <Calendar size={12} className="text-indigo-500" />
-                    {new Date(meeting.InterviewStart).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
-                  </div>
-                </div>
-                <div className="bg-slate-50 p-3 rounded-2xl">
-                  <label className="text-[8px] font-black text-slate-400 uppercase block mb-1">Time</label>
-                  <div className="flex items-center gap-2 text-[11px] font-black">
-                    <Clock size={12} className="text-indigo-500" />
-                    {new Date(meeting.InterviewStart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                </div>
-              </div>
-
-              {!meeting.CandidateConfirmed && meeting.TimeStatus === 'Upcoming' && (
-                <button 
-                  onClick={() => handleConfirmInterview(meeting.ScheduleID)}
-                  className="w-full py-4 bg-amber-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-600 transition shadow-lg shadow-amber-200"
+              <p className="subtitle">Enter your full name to enter...</p>
+              
+              <form onSubmit={handleNameSubmit}>
+                <input
+                  type="text"
+                  name="fullName"
+                  placeholder="Your Full Name"
+                  className="name-input"
+                  autoFocus
+                />
+                
+                <motion.button
+                  type="submit"
+                  className="enter-button"
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(255,107,107,0.5)" }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  Confirm Attendance
-                </button>
-              )}
-            </div>
-          )) : (
-            <div className="col-span-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-[35px] p-16 text-center">
-              <Calendar size={48} className="mx-auto text-slate-200 mb-4" />
-              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">No upcoming interviews scheduled</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* JOBS & TRACKING */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <section className="lg:col-span-2 space-y-6">
-          <div className="flex items-center justify-between">
-              <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
-                <Star className="text-indigo-600" /> AI Recommendations
-              </h2>
-              <span className="text-[9px] font-black bg-slate-900 text-white px-3 py-1 rounded-lg uppercase tracking-widest">Engine v2.0</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {jobs.map(job => {
-              const alreadyApplied = myApps.some(app => app.JobID === job.JobID);
-              return (
-                <div key={job.JobID} className={`bg-white p-7 rounded-[40px] border-2 transition-all relative overflow-hidden group ${alreadyApplied ? 'opacity-70 bg-slate-50 border-transparent' : 'hover:border-indigo-600 hover:shadow-2xl hover:-translate-y-1'}`}>
-                  {job.TotalMatchScore && !alreadyApplied && (
-                    <div className="absolute top-0 right-0 bg-indigo-600 text-white px-5 py-2.5 rounded-bl-[25px] font-black text-[10px] tracking-tighter">
-                      {Math.round(job.TotalMatchScore)}% MATCH
-                    </div>
-                  )}
-                  {alreadyApplied && (
-                    <div className="absolute top-0 right-0 bg-emerald-500 text-white px-5 py-2.5 rounded-bl-[25px] font-black text-[10px] flex items-center gap-1.5 tracking-widest">
-                      <Check size={12} strokeWidth={4} /> APPLIED
-                    </div>
-                  )}
-                  
-                  <div className="mb-6">
-                      <h3 className="font-black text-xl leading-tight mb-1 group-hover:text-indigo-600 transition">{job.JobTitle}</h3>
-                      <div className="flex items-center gap-2 text-[10px] text-slate-400 font-black uppercase tracking-widest">
-                          <span>{job.Location}</span>
-                          <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                          <span>{job.MinExperience}yr+ Exp</span>
-                      </div>
-                  </div>
-
-                  {inspectingJobId === job.JobID && selectedGap && (
-                    <div className="mb-6 p-5 bg-slate-50 rounded-[25px] space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
-                      <p className="text-[9px] font-black uppercase text-slate-600 tracking-widest border-b border-slate-300 pb-2">Gap Analysis</p>
-                      {selectedGap.map((skill, i) => (
-                        <div key={i} className="flex flex-col gap-1.5">
-                          <div className="flex items-center justify-between text-[10px] font-bold">
-                            <span className={`${skill.Status === 'Missing' ? 'text-rose-400' : 'text-slate-500'}`}>
-                              {skill.SkillName} {skill.IsMandatory ? '*' : ''}
-                            </span>
-                            <span className="text-slate-500">{skill.CandidateLevel}/{skill.RequiredLevel}</span>
-                          </div>
-                          <div className="h-1 bg-slate-300 rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full ${skill.Status === 'Missing' ? 'bg-rose-500' : 'bg-emerald-500'}`} style={{ width: `${(skill.CandidateLevel/skill.RequiredLevel)*100}%` }}></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex gap-3">
-                      <button onClick={() => checkSkillGap(job.JobID)} className="flex-1 py-4 bg-slate-50 border border-slate-200 text-slate-600 rounded-2xl font-black text-[10px] hover:bg-slate-100 transition-all uppercase tracking-widest">
-                        {inspectingJobId === job.JobID ? 'Close' : 'Analysis'}
-                      </button>
-                      {alreadyApplied ? (
-                        <button disabled className="flex-[2] py-4 bg-slate-200 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-not-allowed">Application Sent</button>
-                      ) : (
-                        <button onClick={() => axios.post(`${API_BASE}/apply`, { jobId: job.JobID, userId: user.UserID }).then(refreshData)} className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] hover:bg-indigo-600 transition-all uppercase tracking-widest shadow-lg shadow-indigo-200 active:scale-[0.98]">Quick Apply</button>
-                      )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="lg:col-span-1 space-y-6">
-          <h2 className="text-xl font-black uppercase tracking-tight">Active Tracking</h2>
-          <div className="bg-white rounded-[40px] border shadow-sm overflow-hidden divide-y divide-slate-50">
-            {myApps.length > 0 ? myApps.map(app => (
-              <div key={app.ApplicationID} className="p-6 flex items-center justify-between group hover:bg-slate-50 transition-colors">
-                <div className="min-w-0">
-                  <h4 className="font-black text-sm uppercase truncate w-36 mb-1">{app.JobTitle}</h4>
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${
-                        app.StatusName === 'Rejected' ? 'bg-rose-500' : 
-                        app.StatusName === 'Hired' ? 'bg-emerald-500' : 'bg-indigo-500'
-                    }`}></span>
-                    <p className={`text-[10px] font-black uppercase tracking-widest ${
-                        app.StatusName === 'Rejected' ? 'text-rose-500' : 
-                        app.StatusName === 'Hired' ? 'text-emerald-500' : 'text-indigo-500'
-                    }`}> {app.StatusName} </p>
-                  </div>
-                </div>
-                <button onClick={() => handleWithdraw(app.ApplicationID)} className="p-3 text-slate-200 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
-                  <Trash2 size={18}/>
-                </button>
-              </div>
-            )) : (
-              <div className="p-20 text-center flex flex-col items-center gap-3">
-                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
-                    <Briefcase size={24} />
-                </div>
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">No Applications</p>
+                  Open Your Valentine's Gift
+                  <span className="button-heart">❤️</span>
+                </motion.button>
+              </form>
+              
+              <motion.p 
+                className="hint"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.7 }}
+                transition={{ delay: 1 }}
+              >
+                Hint: You'll need my surname 💕
+              </motion.p>
+            </motion.div>
+          </motion.div>
+        ) : (
+          /* MAIN WEBSITE */
+          <motion.div
+            key="main-site"
+            className="main-site"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            {/* Confetti */}
+            {showConfetti && (
+              <div className="confetti-container">
+                {[...Array(100)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="confetti"
+                    initial={{ 
+                      y: -100, 
+                      x: Math.random() * window.innerWidth,
+                      rotate: 0 
+                    }}
+                    animate={{ 
+                      y: window.innerHeight + 100,
+                      rotate: 360 * 5
+                    }}
+                    transition={{ 
+                      duration: 3 + Math.random() * 2,
+                      ease: "linear",
+                      delay: Math.random() * 2
+                    }}
+                    style={{
+                      background: `hsl(${Math.random() * 360}, 100%, 70%)`,
+                      left: Math.random() * 100 + "%"
+                    }}
+                  />
+                ))}
               </div>
             )}
-          </div>
-          
-          <div className="bg-indigo-600 rounded-[40px] p-8 text-white shadow-xl shadow-indigo-200 relative overflow-hidden group">
-              <div className="relative z-10">
-                <h4 className="font-black text-lg uppercase tracking-tight leading-tight mb-2">Need to polish your profile?</h4>
-                <p className="text-xs font-bold text-indigo-100 mb-6">Completing your skills matrix increases your visibility to recruiters by 40%.</p>
-                <div className="h-1.5 w-full bg-indigo-700 rounded-full mb-4">
-                    <div className="h-full bg-white rounded-full w-2/3"></div>
+
+            {/* Secret Easter Egg */}
+            {showSecret && (
+              <motion.div 
+                className="secret-easter-egg"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+              >
+                <div className="secret-content">
+                  <span className="secret-icon">🥚</span>
+                  <h3>✨ Secret Unlocked! ✨</h3>
+                  <p>You found the Konami code! You're officially a legend.</p>
+                  <p className="secret-message">I love you more than video games... almost 😉</p>
                 </div>
-                <p className="text-[9px] font-black uppercase tracking-widest text-indigo-200">Profile Completion: 65%</p>
+              </motion.div>
+            )}
+
+            {/* Floating Nicknames */}
+            <div className="floating-nicknames">
+              {nicknames.map((nickname, i) => (
+                <motion.div
+                  key={i}
+                  className="nickname-bubble"
+                  initial={{ 
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    scale: 0
+                  }}
+                  animate={{ 
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    scale: 0.8 + Math.random() * 0.5
+                  }}
+                  transition={{
+                    duration: 20 + Math.random() * 10,
+                    repeat: Infinity,
+                    repeatType: "reverse"
+                  }}
+                  whileHover={{ scale: 1.2 }}
+                >
+                  {nickname}
+                </motion.div>
+              ))}
+            </div>
+
+            {/* LANDING SECTION */}
+            <section className="landing-section">
+              <motion.div className="parallax-layer layer-1" style={{ y: y1 }} />
+              <motion.div className="parallax-layer layer-2" style={{ y: y2 }} />
+              
+              <div className="landing-content">
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", duration: 1.5 }}
+                  className="hero-image"
+                >
+                  <div className="photo-frame">
+                    <div className="placeholder-photo">
+                      <span>📸</span>
+                      <p className="photo-caption">Our photo here</p>
+                    </div>
+                  </div>
+                </motion.div>
+                
+                <motion.h1
+                  initial={{ y: 100, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
+                  style={{ opacity }}
+                >
+                  Happy Valentine's Day,{' '}
+                  <motion.span
+                    animate={{ 
+                      color: ['#ff6b6b', '#ff8e8e', '#ffb3b3', '#ff6b6b']
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    {herName.split(' ')[0]}
+                  </motion.span>
+                </motion.h1>
+                
+                <motion.p
+                  className="time-together"
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.6, duration: 0.8 }}
+                >
+                  <span className="label">Time since we became us:</span>
+                  <span className="time">{timeTogether}</span>
+                </motion.p>
+                
+                <motion.div
+                  className="scroll-indicator"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1, duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+                >
+                  <span>Scroll down for more love</span>
+                  <div className="arrow">↓</div>
+                </motion.div>
               </div>
-              <Plus className="absolute -bottom-4 -right-4 text-indigo-500 w-32 h-32 opacity-20 group-hover:rotate-90 transition-transform duration-1000" />
-          </div>
-        </section>
-      </div>
+            </section>
+
+            {/* MEMORY TIMELINE */}
+            <section className="timeline-section">
+              <motion.h2 
+                className="section-title"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                Our Journey Together
+              </motion.h2>
+              
+              <div className="timeline">
+                {memories.map((memory, index) => (
+                  <motion.div 
+                    key={memory.id}
+                    className={`timeline-item ${index % 2 === 0 ? 'left' : 'right'}`}
+                    initial={{ opacity: 0, x: index % 2 === 0 ? -100 : 100 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.2 }}
+                  >
+                    <div className="timeline-content">
+                      <div className="timeline-icon">{memory.icon}</div>
+                      <div className="timeline-date">{memory.date}</div>
+                      <h3>{memory.title}</h3>
+                      <p>{memory.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+
+            {/* REASON JAR */}
+            <section className="reason-jar-section">
+              <motion.h2 
+                className="section-title"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                Reasons I Love You
+              </motion.h2>
+              
+              <div className="jar-container">
+                <motion.div 
+                  className="jar"
+                  initial={{ scale: 0.8 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ type: "spring", duration: 1 }}
+                >
+                  <div className="jar-lid">
+                    <motion.div 
+                      className="lid-handle"
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 4, repeat: Infinity }}
+                    />
+                  </div>
+                  <div className="jar-body">
+                    <div className="jar-content">
+                      <AnimatePresence mode="wait">
+                        {selectedReason ? (
+                          <motion.div
+                            key={selectedReason}
+                            className="reason-paper"
+                            initial={{ scale: 0, rotate: 180, opacity: 0 }}
+                            animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                            exit={{ scale: 0, rotate: -180, opacity: 0 }}
+                            transition={{ type: "spring", duration: 0.6 }}
+                          >
+                            <p>{selectedReason}</p>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            className="jar-placeholder"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                          >
+                            <span>❤️</span>
+                            <p>Click the lid to pull out a reason</p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    {[...Array(15)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="floating-heart-jar"
+                        initial={{ 
+                          x: Math.random() * 100 - 50,
+                          y: Math.random() * 200,
+                          opacity: 0.3,
+                          scale: 0.5 + Math.random()
+                        }}
+                        animate={{ 
+                          y: [-20, -40, -20],
+                          opacity: [0.3, 0.6, 0.3]
+                        }}
+                        transition={{
+                          duration: 3 + Math.random() * 2,
+                          repeat: Infinity,
+                          delay: Math.random() * 2
+                        }}
+                      >
+                        ❤️
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+                
+                <motion.button
+                  className="pull-reason"
+                  onClick={getRandomReason}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                >
+                  <span className="pull-icon">🎯</span>
+                  Pull a New Reason
+                </motion.button>
+                
+                <motion.p className="reason-counter">
+                  {usedReasons.length} / {reasons.length} reasons discovered
+                </motion.p>
+              </div>
+            </section>
+
+            {/* SCRATCH CARD */}
+            <section className="scratch-card-section">
+              <motion.h2
+                className="section-title"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                Scratch to Reveal Your Gift
+              </motion.h2>
+              
+              <div className="scratch-container">
+                <div className="scratch-card-wrapper">
+                  <div className="prize-reveal">
+                    <AnimatePresence mode="wait">
+                      {isScratched ? (
+                        <motion.div
+                          key="prize"
+                          className="prize-content"
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: "spring", duration: 0.6 }}
+                        >
+                          <div className="prize-icon">🎁</div>
+                          <h3>One Lifetime Supply of Love</h3>
+                          <p>Plus:</p>
+                          <ul>
+                            <li>✨ Unlimited hugs</li>
+                            <li>🍳 Breakfast in bed</li>
+                            <li>🎬 Movie night of your choice</li>
+                            <li>💆‍♀️ Shoulder massage whenever you want</li>
+                            <li>☕ Morning coffee made just for you</li>
+                            <li>📚 Unlimited bedtime stories</li>
+                          </ul>
+                          <motion.button
+                            className="reset-button"
+                            onClick={resetCard}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                          >
+                            Scratch Again
+                          </motion.button>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="scratch"
+                          className="scratch-area"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                        >
+                          <canvas
+                            ref={canvasRef}
+                            onMouseDown={startDrawing}
+                            onMouseMove={draw}
+                            onMouseUp={stopDrawing}
+                            onMouseLeave={stopDrawing}
+                            onTouchStart={startDrawing}
+                            onTouchMove={draw}
+                            onTouchEnd={stopDrawing}
+                          />
+                          <div className="scratch-progress">
+                            <div 
+                              className="progress-bar"
+                              style={{ width: `${Math.min(scratchPercentage, 100)}%` }}
+                            />
+                            <span>{Math.min(Math.round(scratchPercentage), 100)}% scratched</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* WORD CLOUD */}
+            <section className="word-cloud-section">
+              <motion.h2
+                className="section-title"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                When I Think of You
+              </motion.h2>
+              
+              <div className="word-cloud">
+                {['Beautiful', 'Smart', 'Funny', 'Kind', 'Strong', 'Creative', 'Passionate', 'Sweet', 'Caring', 'Amazing', 'Perfect', 'Mine'].map((word, i) => (
+                  <motion.span
+                    key={word}
+                    className="cloud-word"
+                    initial={{ opacity: 0, scale: 0 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    whileHover={{ scale: 1.3, color: '#ff6b6b' }}
+                    style={{
+                      fontSize: `${Math.random() * 30 + 20}px`,
+                      left: `${Math.random() * 80 + 10}%`,
+                      top: `${Math.random() * 80 + 10}%`,
+                      animationDelay: `${Math.random() * 5}s`,
+                      rotate: `${Math.random() * 30 - 15}deg`
+                    }}
+                  >
+                    {word}
+                  </motion.span>
+                ))}
+              </div>
+            </section>
+
+            {/* FAVORITES GALLERY */}
+            <section className="favorites-section">
+              <motion.h2
+                className="section-title"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                Things You Love
+              </motion.h2>
+              
+              <div className="favorites-grid">
+                {favorites.map((fav, index) => (
+                  <motion.div
+                    key={fav.category}
+                    className="favorite-card"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ 
+                      scale: 1.1,
+                      boxShadow: "0 0 30px rgba(255,107,107,0.3)",
+                      rotate: [0, -2, 2, 0]
+                    }}
+                  >
+                    <div className="favorite-emoji">{fav.emoji}</div>
+                    <h3>{fav.category}</h3>
+                    <p>{fav.item}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+
+            {/* FUTURE BUCKET LIST */}
+            <section className="bucket-list-section">
+              <motion.h2
+                className="section-title"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                Our Future Adventures
+              </motion.h2>
+              
+              <div className="bucket-list">
+                {bucketList.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    className={`bucket-item ${item.completed ? 'completed' : ''}`}
+                    initial={{ opacity: 0, x: -50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ x: 10 }}
+                  >
+                    <motion.div 
+                      className="bucket-check"
+                      onClick={() => toggleBucketItem(item.id)}
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      {item.completed ? '✅' : '⬜'}
+                    </motion.div>
+                    <span className="bucket-text">{item.text}</span>
+                  </motion.div>
+                ))}
+              </div>
+              
+              <motion.p 
+                className="bucket-note"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+              >
+                Click the boxes to check off our adventures! 💕
+              </motion.p>
+            </section>
+
+            {/* LOVE LETTER */}
+            <section className="love-letter-section">
+              <motion.h2
+                className="section-title"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                A Letter For You
+              </motion.h2>
+              
+              <motion.div 
+                className="love-letter-container"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <motion.div 
+                  className="love-letter"
+                  whileHover={{ scale: 1.02, boxShadow: "0 0 50px rgba(255,107,107,0.4)" }}
+                >
+                  <div className="letter-header">
+                    <span className="letter-date">February 14, 2026</span>
+                    <span className="letter-salutation">My Dearest {herName.split(' ')[0]},</span>
+                  </div>
+                  
+                  <div className="letter-body">
+                    <p>
+                      I've tried to write this letter a hundred times in my head, but words always feel too small 
+                      to capture what I feel when I think of you. So instead of trying to find the perfect words, 
+                      I just want you to know this:
+                    </p>
+                    
+                    <p>
+                      Before you, I didn't know what it felt like to be truly seen. You don't just look at me - 
+                      you <span className="highlight" onClick={() => setShowLetter(!showLetter)}>see me</span>. 
+                      Every quirk, every flaw, every weird habit - and somehow, you love me more because of them.
+                    </p>
+                    
+                    <AnimatePresence>
+                      {showLetter && (
+                        <motion.div 
+                          className="letter-popup"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                        >
+                          <span className="popup-icon">👀</span>
+                          <p>The way you see the best in me even when I don't see it myself. That's your superpower.</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    
+                    <p>
+                      You've made me a believer in love stories. Not the fairy tale kind, but the real kind - 
+                      the kind that's messy and beautiful and chooses each other every single day.
+                    </p>
+                    
+                    <p>
+                      This website is just a small glimpse of how much you mean to me. Every memory, every reason, 
+                      every little detail - they're all threads in the tapestry of us. And I can't wait to see 
+                      what we weave next.
+                    </p>
+                    
+                    <p className="letter-signature">
+                      Forever yours,<br />
+                      [Your Name] ❤️
+                    </p>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </section>
+
+            {/* COMPLIMENT GENERATOR */}
+            <section className="compliment-section">
+              <motion.h2
+                className="section-title"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                Need a Pick-Me-Up?
+              </motion.h2>
+              
+              <motion.div 
+                className="compliment-container"
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+              >
+                <motion.div 
+                  className="compliment-machine"
+                  animate={{ 
+                    boxShadow: compliment ? [
+                      "0 0 30px rgba(255,107,107,0.3)",
+                      "0 0 60px rgba(255,107,107,0.6)",
+                      "0 0 30px rgba(255,107,107,0.3)"
+                    ] : "0 0 30px rgba(255,107,107,0.2)"
+                  }}
+                  transition={{ duration: 1.5, repeat: compliment ? Infinity : 0 }}
+                >
+                  <AnimatePresence mode="wait">
+                    {compliment ? (
+                      <motion.div
+                        key={compliment}
+                        className="compliment-display"
+                        initial={{ scale: 0, rotateX: 90 }}
+                        animate={{ scale: 1, rotateX: 0 }}
+                        exit={{ scale: 0, rotateX: -90 }}
+                        transition={{ type: "spring" }}
+                      >
+                        <span className="compliment-quote">"</span>
+                        <p>{compliment}</p>
+                        <span className="compliment-quote">"</span>
+                      </motion.div>
+                    ) : (
+                      <motion.p className="compliment-placeholder">
+                        Press the button for a compliment 💝
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                  
+                  <motion.button
+                    className="compliment-button"
+                    onClick={generateCompliment}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <span className="button-icon">✨</span>
+                    Give Me Love
+                    <span className="button-icon">✨</span>
+                  </motion.button>
+                  
+                  {compliment && (
+                    <motion.p 
+                      className="compliment-counter"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.7 }}
+                    >
+                      One of {compliments.length} reasons you're amazing
+                    </motion.p>
+                  )}
+                </motion.div>
+              </motion.div>
+            </section>
+
+            {/* GIFT REVEAL */}
+            <section className="gift-reveal-section">
+              <motion.div className="gift-container">
+                <motion.h2
+                  className="section-title"
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                >
+                  One More Surprise...
+                </motion.h2>
+                
+                <motion.div 
+                  className="gift-box"
+                  initial={{ scale: 0.8 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ 
+                    rotate: [0, -5, 5, -5, 5, 0],
+                    transition: { duration: 0.5 }
+                  }}
+                >
+                  <div className="gift-lid">
+                    <motion.div 
+                      className="gift-ribbon"
+                      animate={{ 
+                        y: [0, -3, 0],
+                        rotate: [0, 2, -2, 0]
+                      }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                  </div>
+                  <div className="gift-body">
+                    <div className="gift-bow" />
+                    <div className="gift-tag">
+                      <span>To: {herName.split(' ')[0]}</span>
+                      <span>From: Your Valentine</span>
+                    </div>
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  className="gift-message"
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <h3>Your real gift is waiting...</h3>
+                  <p className="gift-hint">Check under your pillow 💝</p>
+                  <div className="gift-voucher">
+                    <h4>🎀 One Special Date Night 🎀</h4>
+                    <p>Redeemable anytime, anywhere of your choosing</p>
+                    <p className="voucher-details">Includes: Dinner, movie, and unlimited hand-holding</p>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </section>
+
+            {/* FOOTER */}
+            <footer className="footer">
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+              >
+                <p>Made with 💕 just for you, {herName.split(' ')[0]}</p>
+                <p className="footer-date">Valentine's Day 2026</p>
+                <div className="footer-hearts">
+                  ❤️ ❤️ ❤️
+                </div>
+              </motion.div>
+            </footer>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-}
+};
+
+export default App;
