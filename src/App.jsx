@@ -30,6 +30,7 @@ import {
 import './App.css';
 
 const App = () => {
+  // IMPORTANT: Start with isAuthenticated = false to show login screen
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [herName, setHerName] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
@@ -45,6 +46,8 @@ const App = () => {
   const [showSecret, setShowSecret] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [activeSection, setActiveSection] = useState(0);
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [cursorTrail, setCursorTrail] = useState([]);
   
   const canvasRef = useRef(null);
   const isDrawing = useRef(false);
@@ -54,7 +57,7 @@ const App = () => {
   // Your surname - only for login
   const YOUR_SURNAME = 'Al-Hussain';
   
-  // Her name
+  // Her first name
   const HER_FIRST_NAME = 'Iqra';
   
   // Anniversary date
@@ -72,7 +75,7 @@ const App = () => {
     { name: 'পাখি', meaning: 'Pakhi - Bird', icon: '🦋' }
   ];
 
-  // Reasons I love you - more poetic
+  // Reasons I love you
   const reasons = [
     "The way your eyes crinkle when you smile, like the universe winking at me",
     "How you say my name, like it's the most important word in any language",
@@ -115,7 +118,7 @@ const App = () => {
     "You are the answer to prayers I never knew how to say"
   ];
 
-  // Bucket list items - more romantic
+  // Bucket list items
   const initialBucketList = [
     { id: 1, text: "Watch the cherry blossoms bloom in Japan", completed: false, icon: Cherry },
     { id: 2, text: "Get lost in the streets of Venice together", completed: false, icon: Compass },
@@ -129,7 +132,7 @@ const App = () => {
     { id: 10, text: "Watch the sunrise from a mountaintop", completed: false, icon: Sun }
   ];
 
-  // Memories timeline - more personal to you both
+  // Memories timeline
   const memories = [
     { 
       id: 1, 
@@ -181,7 +184,7 @@ const App = () => {
     }
   ];
 
-  // Favorites gallery - personalized
+  // Favorites gallery
   const favorites = [
     { category: "Movie", item: "Eternal Sunshine of the Spotless Mind", emoji: "🎬", icon: Film, color: "#ff6b6b" },
     { category: "Song", item: "Lover - Taylor Swift", emoji: "🎵", icon: Music, color: "#ff8e8e" },
@@ -199,17 +202,16 @@ const App = () => {
   const y3 = useTransform(scrollYProgress, [0, 1], [0, -600]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
-  const rotate = useTransform(scrollYProgress, [0, 1], [0, 180]);
 
   // Konami code sequence
   const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 
+  // Initialize bucket list
   useEffect(() => {
-    if (showConfetti) {
-      setTimeout(() => setShowConfetti(false), 5000);
-    }
-  }, [showConfetti]);
+    setBucketList(initialBucketList);
+  }, []);
 
+  // Calculate time together
   useEffect(() => {
     const diffTime = Math.abs(new Date() - ANNIVERSARY_DATE);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -219,11 +221,7 @@ const App = () => {
     setTimeTogether(`${years} ${years === 1 ? 'year' : 'years'}, ${months} ${months === 1 ? 'month' : 'months'}, ${days} ${days === 1 ? 'day' : 'days'}`);
   }, []);
 
-  useEffect(() => {
-    setBucketList(initialBucketList);
-  }, []);
-
-  // Custom cursor effect - more subtle
+  // Custom cursor effect
   useEffect(() => {
     const moveCursor = (e) => {
       setCursorPosition({ x: e.clientX, y: e.clientY });
@@ -256,7 +254,7 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Scratch card initialization
+  // Scratch card initialization - ONLY when not authenticated
   useEffect(() => {
     if (canvasRef.current && !isAuthenticated) {
       const canvas = canvasRef.current;
@@ -291,8 +289,10 @@ const App = () => {
     }
   }, [isAuthenticated]);
 
-  // Track active section for animations
+  // Track active section for animations - only when authenticated
   useEffect(() => {
+    if (!isAuthenticated) return;
+    
     const handleScroll = () => {
       const sections = document.querySelectorAll('section');
       const scrollPosition = window.scrollY + window.innerHeight / 2;
@@ -309,13 +309,16 @@ const App = () => {
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isAuthenticated]);
 
-  // Cursor state
-  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
-  const [cursorTrail, setCursorTrail] = useState([]);
+  // Confetti timeout
+  useEffect(() => {
+    if (showConfetti) {
+      setTimeout(() => setShowConfetti(false), 5000);
+    }
+  }, [showConfetti]);
 
-  // Name entry handlers
+  // Name entry handler
   const handleNameSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -446,72 +449,77 @@ const App = () => {
 
   return (
     <div className="app" ref={containerRef}>
-      {/* Custom Cursor - Minimal Heart */}
-      <motion.div 
-        className="custom-cursor"
-        style={{ 
-          left: cursorPosition.x - 15, 
-          top: cursorPosition.y - 15,
-          position: 'fixed',
-          width: '30px',
-          height: '30px',
-          pointerEvents: 'none',
-          zIndex: 99999
-        }}
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.7, 1, 0.7]
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity
-        }}
-      >
-        <Heart size={30} fill="#ff6b6b" color="#ff6b6b" />
-      </motion.div>
-      
-      {/* Cursor Trail - Floating Hearts */}
-      {cursorTrail.map((pos, i) => (
-        <motion.div
-          key={pos.id}
-          className="cursor-trail"
-          style={{
-            left: pos.x - 8,
-            top: pos.y - 8,
-            position: 'fixed',
-            pointerEvents: 'none',
-            zIndex: 99998
-          }}
-          initial={{ opacity: 0.5, scale: 0.5 }}
-          animate={{ opacity: 0, scale: 1.5 }}
-          transition={{ duration: 0.8 }}
-        >
-          <Heart size={16} fill={`rgba(255, 107, 107, ${0.3 - i * 0.03})`} color="transparent" />
-        </motion.div>
-      ))}
+      {/* Custom Cursor - Only show when authenticated */}
+      {isAuthenticated && (
+        <>
+          <motion.div 
+            className="custom-cursor"
+            style={{ 
+              left: cursorPosition.x - 15, 
+              top: cursorPosition.y - 15,
+              position: 'fixed',
+              width: '30px',
+              height: '30px',
+              pointerEvents: 'none',
+              zIndex: 99999
+            }}
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.7, 1, 0.7]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity
+            }}
+          >
+            <Heart size={30} fill="#ff6b6b" color="#ff6b6b" />
+          </motion.div>
+          
+          {/* Cursor Trail */}
+          {cursorTrail.map((pos, i) => (
+            <motion.div
+              key={pos.id}
+              className="cursor-trail"
+              style={{
+                left: pos.x - 8,
+                top: pos.y - 8,
+                position: 'fixed',
+                pointerEvents: 'none',
+                zIndex: 99998
+              }}
+              initial={{ opacity: 0.5, scale: 0.5 }}
+              animate={{ opacity: 0, scale: 1.5 }}
+              transition={{ duration: 0.8 }}
+            >
+              <Heart size={16} fill={`rgba(255, 107, 107, ${0.3 - i * 0.03})`} color="transparent" />
+            </motion.div>
+          ))}
+        </>
+      )}
 
       <AnimatePresence mode="wait">
         {!isAuthenticated ? (
-          /* NAME ENTRY SCREEN - More elegant */
+          /* LOGIN SCREEN - This will show first because isAuthenticated starts as false */
           <motion.div 
             key="name-entry"
             className="name-entry"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
           >
             {/* Animated background gradient */}
             <div className="entry-gradient" />
             
-            {/* Floating hearts - more organized */}
+            {/* Floating hearts */}
             <div className="floating-hearts">
               {[...Array(15)].map((_, i) => (
                 <motion.div
                   key={i}
                   className="heart-bg"
                   initial={{ 
-                    x: Math.random() * window.innerWidth,
-                    y: Math.random() * window.innerHeight,
+                    x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+                    y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
                     rotate: Math.random() * 360,
                     scale: 0
                   }}
@@ -613,13 +621,14 @@ const App = () => {
             </motion.div>
           </motion.div>
         ) : (
-          /* MAIN WEBSITE - Redesigned */
+          /* MAIN WEBSITE - Only shows after successful login */
           <motion.div
             key="main-site"
             className="main-site"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
           >
             {/* Confetti Celebration */}
             {showConfetti && (
@@ -630,12 +639,12 @@ const App = () => {
                     className="confetti"
                     initial={{ 
                       y: -50, 
-                      x: Math.random() * window.innerWidth,
+                      x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
                       rotate: 0,
                       scale: 0
                     }}
                     animate={{ 
-                      y: window.innerHeight + 100,
+                      y: (typeof window !== 'undefined' ? window.innerHeight : 1000) + 100,
                       rotate: 720,
                       scale: [0, 1, 0.8, 1, 0]
                     }}
@@ -657,7 +666,7 @@ const App = () => {
               </div>
             )}
 
-            {/* Secret Easter Egg - More beautiful */}
+            {/* Secret Easter Egg */}
             {showSecret && (
               <motion.div 
                 className="secret-easter-egg"
@@ -688,7 +697,7 @@ const App = () => {
               </motion.div>
             )}
 
-            {/* Floating Nicknames - Elegant Constellation */}
+            {/* Floating Nicknames - Constellation */}
             <div className="nickname-constellation">
               {nicknames.map((nickname, i) => {
                 const angle = (i / nicknames.length) * Math.PI * 2;
@@ -737,14 +746,14 @@ const App = () => {
                 {nicknames.map((_, i) => {
                   const angle1 = (i / nicknames.length) * Math.PI * 2;
                   const radius1 = 200 + i * 30;
-                  const x1 = Math.cos(angle1) * radius1 + window.innerWidth / 2;
-                  const y1 = Math.sin(angle1) * radius1 + window.innerHeight / 2;
+                  const x1 = Math.cos(angle1) * radius1 + (typeof window !== 'undefined' ? window.innerWidth / 2 : 500);
+                  const y1 = Math.sin(angle1) * radius1 + (typeof window !== 'undefined' ? window.innerHeight / 2 : 500);
                   
                   const nextI = (i + 1) % nicknames.length;
                   const angle2 = (nextI / nicknames.length) * Math.PI * 2;
                   const radius2 = 200 + nextI * 30;
-                  const x2 = Math.cos(angle2) * radius2 + window.innerWidth / 2;
-                  const y2 = Math.sin(angle2) * radius2 + window.innerHeight / 2;
+                  const x2 = Math.cos(angle2) * radius2 + (typeof window !== 'undefined' ? window.innerWidth / 2 : 500);
+                  const y2 = Math.sin(angle2) * radius2 + (typeof window !== 'undefined' ? window.innerHeight / 2 : 500);
                   
                   return (
                     <motion.line
@@ -765,7 +774,7 @@ const App = () => {
               </svg>
             </div>
 
-            {/* LANDING SECTION - More elegant */}
+            {/* LANDING SECTION */}
             <section className="landing-section">
               <motion.div className="parallax-layer layer-1" style={{ y: y1 }} />
               <motion.div className="parallax-layer layer-2" style={{ y: y2 }} />
@@ -848,7 +857,7 @@ const App = () => {
               </div>
             </section>
 
-            {/* MEMORY TIMELINE - Redesigned */}
+            {/* MEMORY TIMELINE */}
             <section className="timeline-section">
               <motion.h2 
                 className="section-title"
@@ -864,8 +873,6 @@ const App = () => {
               
               <div className="timeline-modern">
                 {memories.map((memory, index) => {
-                  const Icon = index % 2 === 0 ? Heart : Star;
-                  
                   return (
                     <motion.div 
                       key={memory.id}
@@ -885,9 +892,6 @@ const App = () => {
                         </div>
                         <h3>{memory.title}</h3>
                         <p>{memory.description}</p>
-                        <div className="timeline-card-decoration">
-                          <Icon size={20} color={memory.color} fill={memory.color} opacity={0.2} />
-                        </div>
                       </div>
                     </motion.div>
                   );
@@ -895,7 +899,7 @@ const App = () => {
               </div>
             </section>
 
-            {/* REASON JAR - More romantic */}
+            {/* REASON JAR */}
             <section className="reason-jar-section">
               <motion.h2 
                 className="section-title"
@@ -1044,7 +1048,7 @@ const App = () => {
               </div>
             </section>
 
-            {/* SCRATCH CARD - More elegant */}
+            {/* SCRATCH CARD */}
             <section className="scratch-card-section-modern">
               <motion.h2
                 className="section-title"
@@ -1174,7 +1178,7 @@ const App = () => {
               </div>
             </section>
 
-            {/* WORD CLOUD - More artistic */}
+            {/* WORD CLOUD */}
             <section className="word-cloud-section-modern">
               <motion.h2
                 className="section-title"
@@ -1235,7 +1239,11 @@ const App = () => {
                       style={{
                         fontSize: `${item.size}px`,
                         color: item.color,
-                        textShadow: `0 0 20px ${item.color}40`
+                        textShadow: `0 0 20px ${item.color}40`,
+                        left: '50%',
+                        top: '50%',
+                        position: 'absolute',
+                        transform: 'translate(-50%, -50%)'
                       }}
                     >
                       {item.word}
@@ -1245,7 +1253,7 @@ const App = () => {
               </div>
             </section>
 
-            {/* FAVORITES GALLERY - Redesigned */}
+            {/* FAVORITES GALLERY */}
             <section className="favorites-section-modern">
               <motion.h2
                 className="section-title"
@@ -1297,7 +1305,7 @@ const App = () => {
               </div>
             </section>
 
-            {/* FUTURE BUCKET LIST - More inspiring */}
+            {/* FUTURE BUCKET LIST */}
             <section className="bucket-list-section-modern">
               <motion.h2
                 className="section-title"
@@ -1358,7 +1366,7 @@ const App = () => {
               </motion.p>
             </section>
 
-            {/* LOVE LETTER - More intimate */}
+            {/* LOVE LETTER */}
             <section className="love-letter-section-modern">
               <motion.h2
                 className="section-title"
@@ -1478,7 +1486,7 @@ const App = () => {
               </motion.div>
             </section>
 
-            {/* COMPLIMENT GENERATOR - More magical */}
+            {/* COMPLIMENT GENERATOR */}
             <section className="compliment-section-modern">
               <motion.h2
                 className="section-title"
@@ -1567,7 +1575,7 @@ const App = () => {
               </motion.div>
             </section>
 
-            {/* GIFT REVEAL - More enchanting */}
+            {/* GIFT REVEAL */}
             <section className="gift-reveal-section-modern">
               <motion.div className="gift-container-modern">
                 <motion.h2
@@ -1694,7 +1702,7 @@ const App = () => {
               </motion.div>
             </section>
 
-            {/* FOOTER - More meaningful */}
+            {/* FOOTER */}
             <footer className="footer-modern">
               <motion.div
                 className="footer-content"
