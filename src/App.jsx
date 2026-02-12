@@ -17,7 +17,7 @@ const App = () => {
   const [bucketList, setBucketList] = useState([]);
   const [konamiCode, setKonamiCode] = useState([]);
   const [showSecret, setShowSecret] = useState(false);
-  const [nicknames] = useState(['Love', 'Baby', 'Sweetheart', 'Gorgeous', 'My World', 'Sunshine', 'Darling', 'Angel']);
+  const [nicknames] = useState(['Jaan', 'Shona', 'Amar Lokkhi Bou', 'Baccha', 'Babu', 'Moyna', 'Jaan Pakhi Moyna', 'Pakhi']);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [cursorTrail, setCursorTrail] = useState([]);
   
