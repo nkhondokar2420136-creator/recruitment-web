@@ -26,10 +26,10 @@ const App = () => {
   const { scrollYProgress } = useScroll();
   
   // Your surname - CHANGE THIS
-  const YOUR_SURNAME = 'Smith';
+  const YOUR_SURNAME = 'Al-Hussain';
   
   // Anniversary date - CHANGE THIS
-  const ANNIVERSARY_DATE = new Date('2023-01-15');
+  const ANNIVERSARY_DATE = new Date('2024-11-28');
   
   // Reasons I love you
   const reasons = [
