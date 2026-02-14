@@ -1,1762 +1,1895 @@
-// App.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { 
-  Heart, 
-  Sparkles, 
-  Gift, 
-  Coffee, 
-  Film, 
-  Music, 
-  Book, 
-  Plane, 
-  Star, 
-  Moon, 
-  Sun, 
-  Camera, 
-  MapPin, 
-  Calendar, 
-  Clock, 
-  Send, 
-  Volume2, 
-  VolumeX,
-  Cherry,
-  Gem,
-  Crown,
-  Infinity,
-  Feather,
-  Compass
+  Users, Briefcase, BarChart3, Settings, LogOut, X,
+  Search, Clock, ShieldAlert, ChevronRight, CheckCircle, Trash2, UserCircle, Plus, Star, FileText, Calendar, BriefcaseBusiness, AlertCircle, UserPlus, Check, Sparkles, LayoutDashboard, Database
 } from 'lucide-react';
-import './App.css';
+import { 
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, 
+  Tooltip, Legend, ResponsiveContainer, Cell, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
+} from 'recharts';
+import Presentation from './Presentation';
+import Presentation2 from './Presentation2';
 
-const App = () => {
-  // IMPORTANT: Start with isAuthenticated = false to show login screen
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [herName, setHerName] = useState('');
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [selectedReason, setSelectedReason] = useState(null);
-  const [usedReasons, setUsedReasons] = useState([]);
-  const [isScratched, setIsScratched] = useState(false);
-  const [scratchPercentage, setScratchPercentage] = useState(0);
-  const [timeTogether, setTimeTogether] = useState('');
-  const [compliment, setCompliment] = useState('');
-  const [showLetter, setShowLetter] = useState(false);
-  const [bucketList, setBucketList] = useState([]);
-  const [konamiCode, setKonamiCode] = useState([]);
-  const [showSecret, setShowSecret] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [activeSection, setActiveSection] = useState(0);
-  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
-  const [cursorTrail, setCursorTrail] = useState([]);
-  
-  const canvasRef = useRef(null);
-  const isDrawing = useRef(false);
-  const { scrollYProgress } = useScroll();
-  const containerRef = useRef(null);
-  
-  // Your surname - only for login
-  const YOUR_SURNAME = 'Al-Hussain';
-  
-  // Her first name
-  const HER_FIRST_NAME = 'Iqra';
-  
-  // Anniversary date
-  const ANNIVERSARY_DATE = new Date('2024-11-28');
-  
-  // Beautiful Bengali-inspired nicknames
-  const nicknames = [
-    { name: 'জান', meaning: 'Jaan - Life', icon: '💝' },
-    { name: 'মন', meaning: 'Mon - Heart', icon: '💗' },
-    { name: 'আলো', meaning: 'Alo - Light', icon: '✨' },
-    { name: 'চাঁদ', meaning: 'Chand - Moon', icon: '🌙' },
-    { name: 'তারা', meaning: 'Tara - Star', icon: '⭐' },
-    { name: 'সোনা', meaning: 'Shona - Gold', icon: '🌟' },
-    { name: 'ময়না', meaning: 'Moyna - Songbird', icon: '🕊️' },
-    { name: 'পাখি', meaning: 'Pakhi - Bird', icon: '🦋' }
-  ];
+const API_BASE = "/api";
 
-  // Reasons I love you
-  const reasons = [
-    "The way your eyes crinkle when you smile, like the universe winking at me",
-    "How you say my name, like it's the most important word in any language",
-    "Your laugh that sounds like wind chimes on a summer afternoon",
-    "The way you talk in your sleep, sharing secrets only I get to hear",
-    "How you remember the smallest details about everyone you meet",
-    "Your habit of collecting pretty leaves and pressing them in books",
-    "The way you dance when you think no one is watching",
-    "How you hum while cooking, creating music with every stir",
-    "Your stubbornness that frustrates me but also inspires me",
-    "The way you look at the stars and dream of infinite possibilities",
-    "How you cry at happy endings because you believe in love that much",
-    "Your handwriting that looks like poetry even when it's just a grocery list",
-    "The way you gently correct my Bengali with so much patience",
-    "How you light up when talking about your dreams for our future",
-    "Your habit of saving the last bite of something delicious for me",
-    "The way you scrunch your nose when you're concentrating",
-    "How you sing Taylor Swift in the shower at full volume",
-    "Your kindness that doesn't seek recognition or reward",
-    "The way you make ordinary moments feel like celebrations",
-    "How you believe in me even when I don't believe in myself"
-  ];
+export default function App() {
+  const [user, setUser] = useState(null); 
+  const [usernameInput, setUsernameInput] = useState("");
+  const [currentView, setCurrentView] = useState('login');
 
-  // Poetic compliments
-  const compliments = [
-    "You are the poetry I didn't know how to write",
-    "Your smile is the sunrise of my every morning",
-    "In a world of trends, you are a timeless classic",
-    "You have a heart that deserves to be written about in novels",
-    "Your presence is my favorite kind of peace",
-    "You are the kind of beautiful that makes artists cry",
-    "Your soul has the warmth of a thousand suns",
-    "Loving you is like breathing - I don't think about it, I just do it",
-    "You are the plot twist in my story I never saw coming",
-    "Your voice is the melody my heart has been waiting for",
-    "You are made of stardust and gentle dreams",
-    "Your existence is proof that magic is real",
-    "You have a way of making silence feel like conversation",
-    "Your heart is the home my soul has been searching for",
-    "You are the answer to prayers I never knew how to say"
-  ];
-
-  // Bucket list items
-  const initialBucketList = [
-    { id: 1, text: "Watch the cherry blossoms bloom in Japan", completed: false, icon: Cherry },
-    { id: 2, text: "Get lost in the streets of Venice together", completed: false, icon: Compass },
-    { id: 3, text: "Write our names in the sand on a secluded beach", completed: false, icon: Heart },
-    { id: 4, text: "Read poetry to each other under the northern lights", completed: false, icon: Moon },
-    { id: 5, text: "Take a train ride through the Swiss Alps", completed: false, icon: Plane },
-    { id: 6, text: "Have a picnic under the cherry moon", completed: false, icon: Star },
-    { id: 7, text: "Learn to cook each other's favorite childhood dishes", completed: false, icon: Coffee },
-    { id: 8, text: "Star gaze in the Sahara desert", completed: false, icon: Star },
-    { id: 9, text: "Visit a library and pick out books for each other", completed: false, icon: Book },
-    { id: 10, text: "Watch the sunrise from a mountaintop", completed: false, icon: Sun }
-  ];
-
-  // Memories timeline
-  const memories = [
-    { 
-      id: 1, 
-      date: "November 28, 2024", 
-      title: "The Day Our Stories Merged", 
-      description: "I still remember exactly what you were wearing. I didn't know it then, but my life had just begun.",
-      icon: "💕",
-      color: "#ff6b6b"
-    },
-    { 
-      id: 2, 
-      date: "December 15, 2024", 
-      title: "First 'I Love You'", 
-      description: "Three words that changed everything. You said it softly, like a secret you were finally ready to share.",
-      icon: "💗",
-      color: "#ff8e8e"
-    },
-    { 
-      id: 3, 
-      date: "January 1, 2025", 
-      title: "New Year, New Us", 
-      description: "We watched fireworks and you leaned on my shoulder. I made a silent wish that every year would start with you.",
-      icon: "✨",
-      color: "#ffb3b3"
-    },
-    { 
-      id: 4, 
-      date: "February 14, 2025", 
-      title: "Our First Valentine's", 
-      description: "You said you didn't expect anything. The look on your face when you saw what I made will live in my heart forever.",
-      icon: "🌹",
-      color: "#ff9494"
-    },
-    { 
-      id: 5, 
-      date: "March 20, 2025", 
-      title: "Spring Together", 
-      description: "We planted flowers that somehow survived despite my terrible gardening. Like us, they grew anyway.",
-      icon: "🌸",
-      color: "#ffa07a"
-    },
-    { 
-      id: 6, 
-      date: "June 10, 2025", 
-      title: "The Beach Day", 
-      description: "You collected seashells in your dress pockets. I collected memories of you laughing at the waves.",
-      icon: "🌊",
-      color: "#87ceeb"
-    }
-  ];
-
-  // Favorites gallery
-  const favorites = [
-    { category: "Movie", item: "Eternal Sunshine of the Spotless Mind", emoji: "🎬", icon: Film, color: "#ff6b6b" },
-    { category: "Song", item: "Lover - Taylor Swift", emoji: "🎵", icon: Music, color: "#ff8e8e" },
-    { category: "Food", item: "Sushi & Ramen", emoji: "🍜", icon: Coffee, color: "#ffb3b3" },
-    { category: "Coffee", item: "Vanilla Latte with Oat Milk", emoji: "☕", icon: Coffee, color: "#8b4513" },
-    { category: "Book", item: "The Seven Husbands of Evelyn Hugo", emoji: "📚", icon: Book, color: "#6b5b95" },
-    { category: "Season", item: "Autumn - When the leaves change", emoji: "🍂", icon: Calendar, color: "#d2691e" },
-    { category: "Animal", item: "Elephants - Gentle giants", emoji: "🐘", icon: Heart, color: "#708090" },
-    { category: "Place", item: "The beach at sunset", emoji: "🌅", icon: MapPin, color: "#ff7f50" }
-  ];
-
-  // Parallax effects
-  const y1 = useTransform(scrollYProgress, [0, 1], [0, -200]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, -400]);
-  const y3 = useTransform(scrollYProgress, [0, 1], [0, -600]);
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
-
-  // Konami code sequence
-  const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-
-  // Initialize bucket list
-  useEffect(() => {
-    setBucketList(initialBucketList);
-  }, []);
-
-  // Calculate time together
-  useEffect(() => {
-    const diffTime = Math.abs(new Date() - ANNIVERSARY_DATE);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const years = Math.floor(diffDays / 365);
-    const months = Math.floor((diffDays % 365) / 30);
-    const days = diffDays % 30;
-    setTimeTogether(`${years} ${years === 1 ? 'year' : 'years'}, ${months} ${months === 1 ? 'month' : 'months'}, ${days} ${days === 1 ? 'day' : 'days'}`);
-  }, []);
-
-  // Custom cursor effect
-  useEffect(() => {
-    const moveCursor = (e) => {
-      setCursorPosition({ x: e.clientX, y: e.clientY });
-      setCursorTrail(prev => [...prev.slice(-8), { x: e.clientX, y: e.clientY, id: Date.now() }]);
-    };
-    
-    window.addEventListener('mousemove', moveCursor);
-    return () => window.removeEventListener('mousemove', moveCursor);
-  }, []);
-
-  // Konami code listener
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      setKonamiCode(prev => {
-        const newCode = [...prev, e.key];
-        if (newCode.length > konamiSequence.length) {
-          newCode.shift();
-        }
-        
-        if (JSON.stringify(newCode) === JSON.stringify(konamiSequence)) {
-          setShowSecret(true);
-          setTimeout(() => setShowSecret(false), 5000);
-        }
-        
-        return newCode;
-      });
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Scratch card initialization - ONLY when not authenticated
-  useEffect(() => {
-    if (canvasRef.current && !isAuthenticated) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      canvas.width = 400;
-      canvas.height = 200;
-      
-      // Gradient background
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, '#ff6b6b');
-      gradient.addColorStop(1, '#ff8e8e');
-      
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Gold sparkles
-      ctx.fillStyle = '#ffd700';
-      for (let i = 0; i < 200; i++) {
-        ctx.fillRect(
-          Math.random() * canvas.width,
-          Math.random() * canvas.height,
-          2,
-          2
-        );
-      }
-      
-      ctx.font = 'bold 28px "Playfair Display", serif';
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('✨ SCRATCH HERE ✨', canvas.width/2, canvas.height/2);
-    }
-  }, [isAuthenticated]);
-
-  // Track active section for animations - only when authenticated
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    
-    const handleScroll = () => {
-      const sections = document.querySelectorAll('section');
-      const scrollPosition = window.scrollY + window.innerHeight / 2;
-      
-      sections.forEach((section, index) => {
-        const top = section.offsetTop;
-        const bottom = top + section.offsetHeight;
-        
-        if (scrollPosition > top && scrollPosition < bottom) {
-          setActiveSection(index);
-        }
-      });
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isAuthenticated]);
-
-  // Confetti timeout
-  useEffect(() => {
-    if (showConfetti) {
-      setTimeout(() => setShowConfetti(false), 5000);
-    }
-  }, [showConfetti]);
-
-  // Name entry handler
-  const handleNameSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const name = formData.get('fullName');
-    
-    if (name.toLowerCase().includes(YOUR_SURNAME.toLowerCase())) {
-      setHerName(name);
-      setIsAuthenticated(true);
-      setShowConfetti(true);
-    } else {
-      alert(`Only ${YOUR_SURNAME}s are allowed in this heart ❤️`);
-    }
+    try {
+      const res = await axios.post(`${API_BASE}/login`, { username: usernameInput });
+      setUser(res.data);
+    } catch (err) { alert("Login Failed."); }
   };
 
-  // Reason jar handler
-  const getRandomReason = () => {
-    const availableReasons = reasons.filter(r => !usedReasons.includes(r));
-    if (availableReasons.length === 0) {
-      setUsedReasons([]);
-      const newReason = reasons[Math.floor(Math.random() * reasons.length)];
-      setSelectedReason(newReason);
-      setUsedReasons([newReason]);
-    } else {
-      const newReason = availableReasons[Math.floor(Math.random() * availableReasons.length)];
-      setSelectedReason(newReason);
-      setUsedReasons([...usedReasons, newReason]);
-    }
-  };
+  if (currentView === 'presentation') {
+  return <Presentation onClose={() => setCurrentView('login')} />;
+}
+  if (currentView === 'presentation2') {
+  return <Presentation2 onClose={() => setCurrentView('login')} />;
+}
 
-  // Scratch card handlers
-  const startDrawing = (e) => {
-    isDrawing.current = true;
-    draw(e);
-  };
-
-  const stopDrawing = () => {
-    isDrawing.current = false;
-  };
-
-  const draw = (e) => {
-    if (!isDrawing.current) return;
-    
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    
-    let clientX, clientY;
-    if (e.touches) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-    
-    const x = (clientX - rect.left) * scaleX;
-    const y = (clientY - rect.top) * scaleY;
-    
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.arc(x, y, 25, 0, Math.PI * 2);
-    ctx.fill();
-    
-    checkScratchPercentage();
-  };
-
-  const checkScratchPercentage = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
-    
-    let scratchedPixels = 0;
-    for (let i = 3; i < pixels.length; i += 4) {
-      if (pixels[i] === 0) scratchedPixels++;
-    }
-    
-    const percentage = (scratchedPixels / (canvas.width * canvas.height)) * 100;
-    setScratchPercentage(percentage);
-    if (percentage > 40 && !isScratched) setIsScratched(true);
-  };
-
-  const resetCard = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#ff6b6b');
-    gradient.addColorStop(1, '#ff8e8e');
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = '#ffd700';
-    for (let i = 0; i < 200; i++) {
-      ctx.fillRect(
-        Math.random() * canvas.width,
-        Math.random() * canvas.height,
-        2,
-        2
-      );
-    }
-    
-    ctx.font = 'bold 28px "Playfair Display", serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('✨ SCRATCH HERE ✨', canvas.width/2, canvas.height/2);
-    
-    setIsScratched(false);
-    setScratchPercentage(0);
-  };
-
-  // Compliment generator
-  const generateCompliment = () => {
-    const randomCompliment = compliments[Math.floor(Math.random() * compliments.length)];
-    setCompliment(randomCompliment);
-  };
-
-  // Bucket list toggle
-  const toggleBucketItem = (id) => {
-    setBucketList(bucketList.map(item => 
-      item.id === id ? { ...item, completed: !item.completed } : item
-    ));
-  };
+  // 1. STYLED LOGIN GATEWAY
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 font-sans selection:bg-indigo-500/30">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-950 to-slate-950"></div>
+        <form onSubmit={handleLogin} className="relative bg-white/5 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-2xl w-full max-w-md space-y-8">
+          <div className="text-center space-y-2">
+            <h1 className="text-4xl font-extrabold text-white tracking-tighter">Nex<span className="text-indigo-500">Hire</span></h1>
+            <p className="text-slate-400 text-xs font-black uppercase tracking-[0.3em]">Professional Gateway</p>
+          </div>
+          <div className="space-y-4">
+            <div className="relative group">
+              <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-500 transition-colors" size={20} />
+              <input 
+                type="text" 
+                required 
+                placeholder="Username" 
+                className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-slate-800 rounded-2xl text-white placeholder:text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium" 
+                value={usernameInput} 
+                onChange={(e) => setUsernameInput(e.target.value)} 
+              />
+            </div>
+            <button type="submit" className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98]">Sign In</button>
+          </div>
+          <p className="text-center text-[10px] text-slate-500 font-bold uppercase tracking-widest pt-4 border-t border-white/5">
+            Crafted by <span className="text-indigo-400">Nawaf Al Hussain Khondokar</span>
+          </p>
+          <button 
+            type="button"
+            onClick={() => setCurrentView('presentation')}
+            className="w-full mt-6 group flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300"
+          >
+            <Sparkles size={14} className="text-indigo-500 group-hover:text-white group-hover:rotate-12 transition-all" />
+            View Project Presentation v1
+          </button>
+          <button 
+            type="button"
+            onClick={() => setCurrentView('presentation2')}
+            className="w-full mt-6 group flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300"
+          >
+            <Sparkles size={14} className="text-indigo-500 group-hover:text-white group-hover:rotate-12 transition-all" />
+            View Project Presentation v2
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
-    <div className="app" ref={containerRef}>
-      {/* Custom Cursor - Only show when authenticated */}
-      {isAuthenticated && (
-        <>
-          <motion.div 
-            className="custom-cursor"
-            style={{ 
-              left: cursorPosition.x - 15, 
-              top: cursorPosition.y - 15,
-              position: 'fixed',
-              width: '30px',
-              height: '30px',
-              pointerEvents: 'none',
-              zIndex: 99999
-            }}
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.7, 1, 0.7]
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity
-            }}
-          >
-            <Heart size={30} fill="#ff6b6b" color="#ff6b6b" />
-          </motion.div>
-          
-          {/* Cursor Trail */}
-          {cursorTrail.map((pos, i) => (
-            <motion.div
-              key={pos.id}
-              className="cursor-trail"
-              style={{
-                left: pos.x - 8,
-                top: pos.y - 8,
-                position: 'fixed',
-                pointerEvents: 'none',
-                zIndex: 99998
-              }}
-              initial={{ opacity: 0.5, scale: 0.5 }}
-              animate={{ opacity: 0, scale: 1.5 }}
-              transition={{ duration: 0.8 }}
-            >
-              <Heart size={16} fill={`rgba(255, 107, 107, ${0.3 - i * 0.03})`} color="transparent" />
-            </motion.div>
-          ))}
-        </>
-      )}
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans selection:bg-indigo-100">
+      {/* NEXHIRE TOP NAVIGATION */}
+      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-5 flex justify-between items-center sticky top-0 z-50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-xl shadow-slate-200">
+            <Sparkles size={20} fill="currentColor"/>
+          </div>
+          <span className="font-black text-2xl tracking-tighter text-slate-900">Nex<span className="text-indigo-600">Hire</span></span>
+        </div>
+        <div className="flex items-center gap-6">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-black text-slate-900 tracking-tight">{user.Username}</p>
+            <p className="text-[10px] text-indigo-600 font-black uppercase tracking-widest">{user.RoleID === 1 ? 'Administrator' : user.RoleID === 2 ? 'Recruiter' : 'Talent Partner'}</p>
+          </div>
+          <div className="h-8 w-[1px] bg-slate-100 mx-2"></div>
+          <button onClick={() => setUser(null)} className="group p-2.5 bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-xl transition-all">
+            <LogOut size={20} className="group-active:scale-90 transition-transform" />
+          </button>
+        </div>
+      </nav>
 
-      <AnimatePresence mode="wait">
-        {!isAuthenticated ? (
-          /* LOGIN SCREEN - This will show first because isAuthenticated starts as false */
-          <motion.div 
-            key="name-entry"
-            className="name-entry"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {/* Animated background gradient */}
-            <div className="entry-gradient" />
-            
-            {/* Floating hearts */}
-            <div className="floating-hearts">
-              {[...Array(15)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="heart-bg"
-                  initial={{ 
-                    x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                    y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-                    rotate: Math.random() * 360,
-                    scale: 0
-                  }}
-                  animate={{ 
-                    y: -100,
-                    rotate: 360,
-                    scale: [0, 1, 0],
-                    opacity: [0, 0.3, 0]
-                  }}
-                  transition={{
-                    duration: 8 + Math.random() * 8,
-                    repeat: Infinity,
-                    delay: i * 0.5,
-                    ease: "easeInOut"
-                  }}
-                >
-                  <Heart size={24 + i * 4} fill="rgba(255, 107, 107, 0.1)" color="#ff6b6b" />
-                </motion.div>
-              ))}
+      <main className="flex-1 p-8 max-w-[1600px] mx-auto w-full">
+        {user.RoleID === 1 && <AdminDashboard />}
+        {user.RoleID === 2 && <RecruiterDashboard user={user} />}
+        {user.RoleID === 3 && <CandidateDashboard user={user} />}
+      </main>
+      
+      {/* SIGNATURE FOOTER */}
+      <footer className="py-10 border-t border-slate-100 flex flex-col items-center gap-3">
+        <div className="flex items-center gap-0 text-slate-900 font-black text-lg tracking-tighter">
+           Nex<span className="text-indigo-600">Hire</span>
+        </div>
+        <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
+          Platform architect: <span className="text-indigo-600">Nawaf Al Hussain Khondokar</span>
+        </p>
+      </footer>
+    </div>
+  );
+}
+
+const BiasAnalysis = ({ data, title, subtitle, xKey }) => {
+  // 1. Transform Strings to Numbers and handle the lowercase keys
+  const chartData = data?.map(item => {
+    // 1. Find the X-axis value dynamically (handles location, experience, etc.)
+    // This looks for the xKey exactly, or the lowercase version of it
+    const xValue = item[xKey] || item[xKey.toLowerCase()] || item.location || item.experiencelevel;
+
+    return {
+      ...item,
+      // Map metrics using lowercase keys from your JSON
+      applicants: Number(item.totalapplicants || 0),
+      rate: Number(item.hireratepercent || 0),
+      // Assign the found value to 'label'
+      label: xValue 
+    };
+  });
+
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 group">
+      <div className="mb-8">
+        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
+          <span className="w-1.5 h-4 bg-indigo-600 rounded-full group-hover:h-6 transition-all"></span> {title}
+        </h3>
+        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">{subtitle}</p>
+      </div>
+      <div className="h-72" style={{ minHeight: '288px' }}>
+        <ResponsiveContainer width="100%" height="100%" key={chartData?.length}>
+          <ComposedChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+            <XAxis 
+              dataKey="label" 
+              fontSize={10} 
+              fontWeight="900" 
+              axisLine={false} 
+              tickLine={false} 
+              tick={{fill: '#64748b'}} 
+            />
+            <YAxis yAxisId="left" orientation="left" stroke="#cbd5e1" fontSize={10} axisLine={false} tickLine={false} />
+            <YAxis yAxisId="right" orientation="right" stroke="#4f46e5" fontSize={10} axisLine={false} tickLine={false} />
+            <Tooltip 
+              cursor={{fill: '#f8fafc'}}
+              contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', padding: '15px' }} 
+            />
+            {/* USE THE NEW MAPPED KEYS HERE */}
+            <Bar yAxisId="left" dataKey="applicants" fill="#e2e8f0" name="Applicants" radius={[8, 8, 0, 0]} barSize={40} />
+            <Line yAxisId="right" type="monotone" dataKey="rate" stroke="#4f46e5" strokeWidth={4} dot={{ r: 6, fill: '#4f46e5', strokeWidth: 3, stroke: '#fff' }} activeDot={{ r: 8 }} name="Hire Rate %" />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+// --- SHARED COMPONENT: BOTTLENECK ALERTS ---
+const BottleneckAlerts = ({ data }) => {
+  const bottlenecks = data.filter(stage => stage.AvgDaysInStage > 7);
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:shadow-red-200/20 group h-full">
+      <div className="flex justify-between items-start mb-8">
+        <div>
+          <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
+            <span className="w-1.5 h-4 bg-red-500 rounded-full group-hover:h-6 transition-all"></span>
+            Pipeline <span className="text-red-600 ml-1">Bottlenecks</span>
+          </h3>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Exceeding 7-day target</p>
+        </div>
+        <div className="p-2 bg-red-50 text-red-500 rounded-xl">
+          <AlertCircle size={18} />
+        </div>
+      </div>
+      <div className="space-y-4">
+        {bottlenecks.length > 0 ? bottlenecks.map((item, idx) => (
+          <div key={idx} className="flex items-center justify-between p-4 bg-red-50/30 border border-red-100/50 rounded-2xl group/item hover:bg-red-50 transition-colors">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-red-600 font-black text-xs border border-red-100">
+                {item.AvgDaysInStage}d
+              </div>
+              <div>
+                <p className="text-[11px] font-black uppercase text-slate-900 tracking-tight">{item.StatusName}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{item.ApplicationsInStage} Candidates Stuck</p>
+              </div>
             </div>
-
-            <motion.div 
-              className="entry-container"
-              initial={{ scale: 0.9, y: 30, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              transition={{ 
-                type: "spring",
-                damping: 20,
-                stiffness: 100,
-                duration: 0.8 
-              }}
-            >
-              <motion.div 
-                className="entry-icon"
-                animate={{ 
-                  rotate: [0, 10, -10, 10, 0],
-                  scale: [1, 1.2, 1, 1.2, 1]
-                }}
-                transition={{ duration: 5, repeat: Infinity }}
-              >
-                <Gem size={80} color="#ff6b6b" strokeWidth={1.5} />
-              </motion.div>
-              
-              <motion.h1
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                For My Valentine
-              </motion.h1>
-              
-              <motion.p 
-                className="subtitle"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                Enter with your full name, beloved
-              </motion.p>
-              
-              <form onSubmit={handleNameSubmit}>
-                <motion.div
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <input
-                    type="text"
-                    name="fullName"
-                    placeholder="Your Full Name"
-                    className="name-input"
-                    autoFocus
-                  />
-                </motion.div>
-                
-                <motion.button
-                  type="submit"
-                  className="enter-button"
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Heart size={20} fill="white" color="white" />
-                  <span>Open Your Heart</span>
-                  <Sparkles size={20} color="white" />
-                </motion.button>
-              </form>
-              
-              <motion.p 
-                className="hint"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.6 }}
-                transition={{ delay: 0.8 }}
-              >
-                Just add my surname, my love 💕
-              </motion.p>
-            </motion.div>
-          </motion.div>
-        ) : (
-          /* MAIN WEBSITE - Only shows after successful login */
-          <motion.div
-            key="main-site"
-            className="main-site"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {/* Confetti Celebration */}
-            {showConfetti && (
-              <div className="confetti-container">
-                {[...Array(80)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="confetti"
-                    initial={{ 
-                      y: -50, 
-                      x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                      rotate: 0,
-                      scale: 0
-                    }}
-                    animate={{ 
-                      y: (typeof window !== 'undefined' ? window.innerHeight : 1000) + 100,
-                      rotate: 720,
-                      scale: [0, 1, 0.8, 1, 0]
-                    }}
-                    transition={{ 
-                      duration: 4 + Math.random() * 2,
-                      ease: "easeOut",
-                      delay: Math.random() * 2
-                    }}
-                  >
-                    {i % 3 === 0 ? (
-                      <Heart size={20 + Math.random() * 10} fill={`hsl(${Math.random() * 60 + 320}, 80%, 70%)`} color="transparent" />
-                    ) : i % 3 === 1 ? (
-                      <Star size={20 + Math.random() * 10} fill={`hsl(${Math.random() * 60 + 40}, 80%, 70%)`} color="transparent" />
-                    ) : (
-                      <Sparkles size={20 + Math.random() * 10} color={`hsl(${Math.random() * 60 + 280}, 80%, 70%)`} />
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-            )}
-
-            {/* Secret Easter Egg */}
-            {showSecret && (
-              <motion.div 
-                className="secret-easter-egg"
-                initial={{ scale: 0, opacity: 0, rotate: -180 }}
-                animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                exit={{ scale: 0, opacity: 0, rotate: 180 }}
-                transition={{ type: "spring", damping: 12 }}
-              >
-                <div className="secret-content">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  >
-                    <Crown size={60} color="#ffd700" />
-                  </motion.div>
-                  <h3>✨ Secret Unlocked! ✨</h3>
-                  <p>You found the Konami code, my little gamer</p>
-                  <motion.div 
-                    className="secret-message"
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    <Heart size={24} fill="#ff6b6b" color="#ff6b6b" />
-                    <span>I love you more than video games</span>
-                    <Heart size={24} fill="#ff6b6b" color="#ff6b6b" />
-                  </motion.div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Floating Nicknames - Constellation */}
-            <div className="nickname-constellation">
-              {nicknames.map((nickname, i) => {
-                const angle = (i / nicknames.length) * Math.PI * 2;
-                const radius = 200 + i * 30;
-                const x = Math.cos(angle) * radius;
-                const y = Math.sin(angle) * radius;
-                
-                return (
-                  <motion.div
-                    key={i}
-                    className="nickname-star"
-                    initial={{ 
-                      x: 0,
-                      y: 0,
-                      scale: 0,
-                      opacity: 0
-                    }}
-                    animate={{ 
-                      x: [0, x, x * 0.8, x],
-                      y: [0, y, y * 0.8, y],
-                      scale: 1,
-                      opacity: 1
-                    }}
-                    transition={{
-                      duration: 2,
-                      delay: i * 0.2,
-                      ease: "easeOut"
-                    }}
-                    whileHover={{ 
-                      scale: 1.3,
-                      transition: { duration: 0.2 }
-                    }}
-                  >
-                    <div className="nickname-glow" />
-                    <div className="nickname-icon">{nickname.icon}</div>
-                    <div className="nickname-tooltip">
-                      <span className="nickname-name">{nickname.name}</span>
-                      <span className="nickname-meaning">{nickname.meaning}</span>
-                    </div>
-                  </motion.div>
-                );
-              })}
-              
-              {/* Constellation lines */}
-              <svg className="constellation-lines" width="100%" height="100%">
-                {nicknames.map((_, i) => {
-                  const angle1 = (i / nicknames.length) * Math.PI * 2;
-                  const radius1 = 200 + i * 30;
-                  const x1 = Math.cos(angle1) * radius1 + (typeof window !== 'undefined' ? window.innerWidth / 2 : 500);
-                  const y1 = Math.sin(angle1) * radius1 + (typeof window !== 'undefined' ? window.innerHeight / 2 : 500);
-                  
-                  const nextI = (i + 1) % nicknames.length;
-                  const angle2 = (nextI / nicknames.length) * Math.PI * 2;
-                  const radius2 = 200 + nextI * 30;
-                  const x2 = Math.cos(angle2) * radius2 + (typeof window !== 'undefined' ? window.innerWidth / 2 : 500);
-                  const y2 = Math.sin(angle2) * radius2 + (typeof window !== 'undefined' ? window.innerHeight / 2 : 500);
-                  
-                  return (
-                    <motion.line
-                      key={i}
-                      x1={x1}
-                      y1={y1}
-                      x2={x2}
-                      y2={y2}
-                      stroke="rgba(255, 107, 107, 0.2)"
-                      strokeWidth="1"
-                      strokeDasharray="5,5"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 1 + i * 0.1 }}
-                    />
-                  );
-                })}
-              </svg>
+            <ChevronRight size={14} className="text-red-300 group-hover/item:translate-x-1 transition-transform"/>
+          </div>
+        )) : (
+          <div className="text-center py-10 bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
+                <CheckCircle className="text-emerald-500" size={24} />
             </div>
-
-            {/* LANDING SECTION */}
-            <section className="landing-section">
-              <motion.div className="parallax-layer layer-1" style={{ y: y1 }} />
-              <motion.div className="parallax-layer layer-2" style={{ y: y2 }} />
-              <motion.div className="parallax-layer layer-3" style={{ y: y3 }} />
-              
-              <div className="landing-content">
-                <motion.div
-                  initial={{ scale: 0, rotate: -180 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", damping: 15, duration: 1.2 }}
-                  className="hero-image-wrapper"
-                >
-                  <div className="hero-image-glow" />
-                  <div className="hero-image-frame">
-                    <div className="hero-image">
-                      <div className="placeholder-photo">
-                        <Camera size={60} color="#ff6b6b" />
-                        <p className="photo-caption">Our story begins here</p>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-                
-                <motion.h1
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.4, duration: 0.8 }}
-                >
-                  Happy Valentine's Day,
-                  <motion.span 
-                    className="name-highlight"
-                    animate={{ 
-                      color: ['#ff6b6b', '#ff8e8e', '#ffb3b3', '#ff6b6b'],
-                      textShadow: [
-                        '0 0 20px rgba(255,107,107,0.3)',
-                        '0 0 40px rgba(255,107,107,0.5)',
-                        '0 0 20px rgba(255,107,107,0.3)'
-                      ]
-                    }}
-                    transition={{ duration: 4, repeat: Infinity }}
-                  >
-                    {' '}{HER_FIRST_NAME}
-                  </motion.span>
-                </motion.h1>
-                
-                <motion.div
-                  className="time-container"
-                  initial={{ y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.6, duration: 0.8 }}
-                >
-                  <div className="time-icon">
-                    <Clock size={24} color="#ff8e8e" />
-                  </div>
-                  <div className="time-content">
-                    <span className="time-label">Time since we became us:</span>
-                    <span className="time-value">{timeTogether}</span>
-                  </div>
-                </motion.div>
-                
-                <motion.div
-                  className="scroll-indicator"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 0.7, y: 0 }}
-                  transition={{ 
-                    delay: 1.2, 
-                    duration: 0.8,
-                    repeat: Infinity,
-                    repeatType: "reverse"
-                  }}
-                >
-                  <span>Discover our story</span>
-                  <motion.div
-                    animate={{ y: [0, 10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    <Heart size={20} color="#ff8e8e" />
-                  </motion.div>
-                </motion.div>
-              </div>
-            </section>
-
-            {/* MEMORY TIMELINE */}
-            <section className="timeline-section">
-              <motion.h2 
-                className="section-title"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-              >
-                <span className="title-icon">
-                  <Feather size={40} color="#ff8e8e" />
-                </span>
-                Our Journey Together
-              </motion.h2>
-              
-              <div className="timeline-modern">
-                {memories.map((memory, index) => {
-                  return (
-                    <motion.div 
-                      key={memory.id}
-                      className={`timeline-card ${index % 2 === 0 ? 'left' : 'right'}`}
-                      initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50, y: 30 }}
-                      whileInView={{ opacity: 1, x: 0, y: 0 }}
-                      viewport={{ once: true, margin: "-50px" }}
-                      transition={{ delay: index * 0.15, type: "spring", damping: 15 }}
-                    >
-                      <div className="timeline-card-content" style={{ borderColor: memory.color }}>
-                        <div className="timeline-card-icon" style={{ background: `linear-gradient(135deg, ${memory.color}, ${memory.color}dd)` }}>
-                          <span className="timeline-emoji">{memory.icon}</span>
-                        </div>
-                        <div className="timeline-card-date">
-                          <Calendar size={14} color={memory.color} />
-                          <span>{memory.date}</span>
-                        </div>
-                        <h3>{memory.title}</h3>
-                        <p>{memory.description}</p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* REASON JAR */}
-            <section className="reason-jar-section">
-              <motion.h2 
-                className="section-title"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                <span className="title-icon">
-                  <Gem size={40} color="#ff8e8e" />
-                </span>
-                Reasons I Love You
-              </motion.h2>
-              
-              <div className="jar-container-modern">
-                <motion.div 
-                  className="jar-modern"
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  whileInView={{ scale: 1, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ type: "spring", damping: 15 }}
-                >
-                  <div className="jar-glow" />
-                  <div className="jar-lid-modern">
-                    <motion.div 
-                      className="lid-crystal"
-                      animate={{ 
-                        rotate: [0, 5, -5, 0],
-                        y: [0, -2, 2, 0]
-                      }}
-                      transition={{ duration: 6, repeat: Infinity }}
-                    >
-                      <Crown size={32} color="#ffd700" />
-                    </motion.div>
-                  </div>
-                  <div className="jar-body-modern">
-                    <div className="jar-glass" />
-                    <div className="jar-content-modern">
-                      <AnimatePresence mode="wait">
-                        {selectedReason ? (
-                          <motion.div
-                            key={selectedReason}
-                            className="reason-card"
-                            initial={{ scale: 0, rotateY: 180, opacity: 0 }}
-                            animate={{ scale: 1, rotateY: 0, opacity: 1 }}
-                            exit={{ scale: 0, rotateY: -180, opacity: 0 }}
-                            transition={{ type: "spring", damping: 20 }}
-                          >
-                            <div className="reason-card-inner">
-                              <Heart size={24} fill="#ff6b6b" color="#ff6b6b" className="reason-icon" />
-                              <p>{selectedReason}</p>
-                            </div>
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            className="jar-placeholder-modern"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                          >
-                            <div className="placeholder-stars">
-                              {[...Array(5)].map((_, i) => (
-                                <motion.div
-                                  key={i}
-                                  animate={{ 
-                                    scale: [1, 1.2, 1],
-                                    rotate: [0, 180, 360]
-                                  }}
-                                  transition={{ 
-                                    duration: 3,
-                                    delay: i * 0.2,
-                                    repeat: Infinity 
-                                  }}
-                                >
-                                  <Star size={24 + i * 4} fill="#ffd700" color="#ffd700" opacity={0.3} />
-                                </motion.div>
-                              ))}
-                            </div>
-                            <p>Gently touch the crystal to reveal a reason</p>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                    
-                    {/* Floating hearts */}
-                    {[...Array(20)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="floating-heart-modern"
-                        initial={{ 
-                          x: Math.random() * 300 - 150,
-                          y: Math.random() * 400,
-                          scale: 0,
-                          opacity: 0
-                        }}
-                        animate={{ 
-                          y: [-30, -60, -30],
-                          scale: [0, 0.8, 0],
-                          opacity: [0, 0.4, 0]
-                        }}
-                        transition={{
-                          duration: 4 + Math.random() * 3,
-                          repeat: Infinity,
-                          delay: Math.random() * 5,
-                          ease: "easeInOut"
-                        }}
-                      >
-                        <Heart size={12 + Math.random() * 12} fill={`rgba(255, ${107 + Math.random() * 50}, ${107 + Math.random() * 50}, 0.2)`} color="transparent" />
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-                
-                <motion.button
-                  className="pull-reason-modern"
-                  onClick={getRandomReason}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                >
-                  <Sparkles size={20} />
-                  <span>Pull a New Reason</span>
-                  <Heart size={20} />
-                </motion.button>
-                
-                <motion.div 
-                  className="reason-progress"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                >
-                  <div className="progress-text">
-                    <span>{usedReasons.length} reasons discovered</span>
-                    <span>{reasons.length} total</span>
-                  </div>
-                  <div className="progress-bar-modern">
-                    <motion.div 
-                      className="progress-fill"
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${(usedReasons.length / reasons.length) * 100}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.8 }}
-                    />
-                  </div>
-                </motion.div>
-              </div>
-            </section>
-
-            {/* SCRATCH CARD */}
-            <section className="scratch-card-section-modern">
-              <motion.h2
-                className="section-title"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                <span className="title-icon">
-                  <Gift size={40} color="#ff8e8e" />
-                </span>
-                Scratch to Reveal Your Gift
-              </motion.h2>
-              
-              <div className="scratch-container-modern">
-                <div className="scratch-card-modern">
-                  <AnimatePresence mode="wait">
-                    {isScratched ? (
-                      <motion.div
-                        key="prize"
-                        className="prize-content-modern"
-                        initial={{ scale: 0.8, opacity: 0, rotateY: 180 }}
-                        animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-                        exit={{ scale: 0.8, opacity: 0, rotateY: -180 }}
-                        transition={{ type: "spring", damping: 15 }}
-                      >
-                        <div className="prize-decoration">
-                          <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                          >
-                            <Infinity size={80} color="#ffd700" opacity={0.2} />
-                          </motion.div>
-                        </div>
-                        <div className="prize-icon-modern">
-                          <Crown size={60} color="#ffd700" />
-                        </div>
-                        <h3>One Lifetime Supply of Love</h3>
-                        <div className="prize-list">
-                          <motion.div 
-                            className="prize-item"
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.1 }}
-                          >
-                            <Heart size={18} fill="#ff6b6b" color="#ff6b6b" />
-                            <span>Unlimited hugs</span>
-                          </motion.div>
-                          <motion.div 
-                            className="prize-item"
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                          >
-                            <Coffee size={18} color="#ff8e8e" />
-                            <span>Breakfast in bed</span>
-                          </motion.div>
-                          <motion.div 
-                            className="prize-item"
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                          >
-                            <Film size={18} color="#ffb3b3" />
-                            <span>Movie night of your choice</span>
-                          </motion.div>
-                          <motion.div 
-                            className="prize-item"
-                            initial={{ x: -20, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.4 }}
-                          >
-                            <Moon size={18} color="#87ceeb" />
-                            <span>Bedtime stories forever</span>
-                          </motion.div>
-                        </div>
-                        <motion.button
-                          className="reset-button-modern"
-                          onClick={resetCard}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          <Sparkles size={18} />
-                          <span>Scratch Another Gift</span>
-                        </motion.button>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="scratch"
-                        className="scratch-area-modern"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <div className="canvas-wrapper">
-                          <canvas
-                            ref={canvasRef}
-                            onMouseDown={startDrawing}
-                            onMouseMove={draw}
-                            onMouseUp={stopDrawing}
-                            onMouseLeave={stopDrawing}
-                            onTouchStart={startDrawing}
-                            onTouchMove={draw}
-                            onTouchEnd={stopDrawing}
-                          />
-                          <div className="canvas-overlay">
-                            <Sparkles size={24} color="#ffffff" />
-                            <span>Scratch Here</span>
-                          </div>
-                        </div>
-                        <div className="scratch-progress-modern">
-                          <div className="progress-info">
-                            <span>{Math.min(Math.round(scratchPercentage), 100)}% revealed</span>
-                          </div>
-                          <div className="progress-track">
-                            <motion.div 
-                              className="progress-fill-modern"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${Math.min(scratchPercentage, 100)}%` }}
-                              transition={{ duration: 0.3 }}
-                            />
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </section>
-
-            {/* WORD CLOUD */}
-            <section className="word-cloud-section-modern">
-              <motion.h2
-                className="section-title"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                <span className="title-icon">
-                  <Star size={40} color="#ff8e8e" />
-                </span>
-                When I Think of You
-              </motion.h2>
-              
-              <div className="word-cloud-artistic">
-                {[
-                  { word: 'Beautiful', size: 48, color: '#ff6b6b' },
-                  { word: 'Smart', size: 42, color: '#ff8e8e' },
-                  { word: 'Kind', size: 46, color: '#ffb3b3' },
-                  { word: 'Strong', size: 40, color: '#ff9494' },
-                  { word: 'Creative', size: 38, color: '#ffa07a' },
-                  { word: 'Passionate', size: 44, color: '#ff7f50' },
-                  { word: 'Sweet', size: 36, color: '#ff69b4' },
-                  { word: 'Caring', size: 41, color: '#ff85a2' },
-                  { word: 'Amazing', size: 50, color: '#ff6b8b' },
-                  { word: 'Perfect', size: 39, color: '#ff8c8c' },
-                  { word: 'Mine', size: 52, color: '#ff6b6b' },
-                  { word: 'Dreamer', size: 37, color: '#ffa07a' },
-                  { word: 'Gentle', size: 35, color: '#ffb6c1' },
-                  { word: 'Radiant', size: 43, color: '#ffaa8a' }
-                ].map((item, i) => {
-                  const angle = (i / 14) * Math.PI * 2;
-                  const radius = 200 + (i % 3) * 50;
-                  const x = Math.cos(angle) * radius;
-                  const y = Math.sin(angle) * radius;
-                  
-                  return (
-                    <motion.div
-                      key={item.word}
-                      className="cloud-word-artistic"
-                      initial={{ opacity: 0, scale: 0 }}
-                      whileInView={{ 
-                        opacity: 1, 
-                        scale: 1,
-                        x: x,
-                        y: y
-                      }}
-                      viewport={{ once: true }}
-                      transition={{ 
-                        delay: i * 0.05,
-                        type: "spring",
-                        damping: 15
-                      }}
-                      whileHover={{ 
-                        scale: 1.3,
-                        zIndex: 100,
-                        transition: { duration: 0.2 }
-                      }}
-                      style={{
-                        fontSize: `${item.size}px`,
-                        color: item.color,
-                        textShadow: `0 0 20px ${item.color}40`,
-                        left: '50%',
-                        top: '50%',
-                        position: 'absolute',
-                        transform: 'translate(-50%, -50%)'
-                      }}
-                    >
-                      {item.word}
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* FAVORITES GALLERY */}
-            <section className="favorites-section-modern">
-              <motion.h2
-                className="section-title"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                <span className="title-icon">
-                  <Compass size={40} color="#ff8e8e" />
-                </span>
-                Things You Love
-              </motion.h2>
-              
-              <div className="favorites-grid-modern">
-                {favorites.map((fav, index) => {
-                  const IconComponent = fav.icon;
-                  
-                  return (
-                    <motion.div
-                      key={fav.category}
-                      className="favorite-card-modern"
-                      initial={{ opacity: 0, y: 30, rotateX: -15 }}
-                      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.08, type: "spring", damping: 15 }}
-                      whileHover={{ 
-                        y: -10,
-                        scale: 1.05,
-                        boxShadow: `0 20px 40px ${fav.color}40`
-                      }}
-                      style={{ borderColor: fav.color }}
-                    >
-                      <div className="favorite-card-header" style={{ background: `linear-gradient(135deg, ${fav.color}20, transparent)` }}>
-                        <div className="favorite-icon-wrapper" style={{ color: fav.color }}>
-                          <IconComponent size={32} />
-                        </div>
-                        <span className="favorite-emoji">{fav.emoji}</span>
-                      </div>
-                      <div className="favorite-card-body">
-                        <h3 style={{ color: fav.color }}>{fav.category}</h3>
-                        <p>{fav.item}</p>
-                      </div>
-                      <div className="favorite-card-footer">
-                        <Heart size={16} color={fav.color} fill={fav.color} opacity={0.3} />
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* FUTURE BUCKET LIST */}
-            <section className="bucket-list-section-modern">
-              <motion.h2
-                className="section-title"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                <span className="title-icon">
-                  <Compass size={40} color="#ff8e8e" />
-                </span>
-                Our Future Adventures
-              </motion.h2>
-              
-              <div className="bucket-list-modern">
-                {bucketList.map((item, index) => {
-                  const IconComponent = item.icon;
-                  
-                  return (
-                    <motion.div
-                      key={item.id}
-                      className={`bucket-item-modern ${item.completed ? 'completed' : ''}`}
-                      initial={{ opacity: 0, x: -30 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true, margin: "-50px" }}
-                      transition={{ delay: index * 0.05, type: "spring", damping: 18 }}
-                      whileHover={{ x: 10 }}
-                    >
-                      <div className="bucket-item-content">
-                        <div className="bucket-icon">
-                          <IconComponent size={24} color={item.completed ? '#4caf50' : '#ff8e8e'} />
-                        </div>
-                        <span className="bucket-text">{item.text}</span>
-                      </div>
-                      <motion.button
-                        className="bucket-check-modern"
-                        onClick={() => toggleBucketItem(item.id)}
-                        whileHover={{ scale: 1.2 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        {item.completed ? (
-                          <Heart size={24} fill="#4caf50" color="#4caf50" />
-                        ) : (
-                          <Heart size={24} fill="transparent" color="#ff8e8e" />
-                        )}
-                      </motion.button>
-                    </motion.div>
-                  );
-                })}
-              </div>
-              
-              <motion.p 
-                className="bucket-note-modern"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-              >
-                Every adventure begins with us, side by side
-              </motion.p>
-            </section>
-
-            {/* LOVE LETTER */}
-            <section className="love-letter-section-modern">
-              <motion.h2
-                className="section-title"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                <span className="title-icon">
-                  <Feather size={40} color="#ff8e8e" />
-                </span>
-                A Letter For You
-              </motion.h2>
-              
-              <motion.div 
-                className="love-letter-container-modern"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-              >
-                <div className="letter-paper">
-                  <div className="letter-paper-texture" />
-                  
-                  <div className="letter-header-modern">
-                    <span className="letter-date">February 14, 2026</span>
-                    <motion.div 
-                      className="letter-seal"
-                      whileHover={{ scale: 1.1, rotate: 10 }}
-                    >
-                      <Heart size={32} fill="#ff6b6b" color="#ff6b6b" />
-                    </motion.div>
-                  </div>
-                  
-                  <div className="letter-body-modern">
-                    <h3 className="letter-salutation">My Dearest {HER_FIRST_NAME},</h3>
-                    
-                    <p>
-                      I've written this letter a thousand times in my mind, but words still feel 
-                      inadequate to capture what you mean to me. You are not just a chapter in my story - 
-                      you have become the entire book.
-                    </p>
-                    
-                    <p>
-                      Before you, I thought I understood love. But you showed me that love isn't just 
-                      about grand gestures or perfect moments. It's in the way you <motion.span 
-                        className="highlight-text"
-                        onClick={() => setShowLetter(!showLetter)}
-                        whileHover={{ scale: 1.05 }}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        hold my hand
-                      </motion.span> when I'm anxious. It's in the songs you hum while making tea. 
-                      It's in the way you say my name like it's the most precious word you know.
-                    </p>
-                    
-                    <AnimatePresence>
-                      {showLetter && (
-                        <motion.div 
-                          className="letter-memory"
-                          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                          transition={{ type: "spring", damping: 15 }}
-                        >
-                          <div className="memory-icon">
-                            <Star size={24} fill="#ffd700" color="#ffd700" />
-                          </div>
-                          <p>Remember our first sunset together? You said the sky looked like it was painted just for us. Every sunset since, I think of you.</p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                    
-                    <p>
-                      You have made me a believer in forever. Not in some abstract, distant future, 
-                      but in the small eternities we create together - a shared glance across a crowded 
-                      room, a quiet Sunday morning, a laugh that echoes into the night.
-                    </p>
-                    
-                    <p>
-                      This website is just a glimpse of the infinite ways I love you. Every line of code, 
-                      every animation, every word - they're all whispers of a much louder truth: 
-                      you are my home, my heart, my everything.
-                    </p>
-                    
-                    <div className="letter-signature-modern">
-                      <div className="signature-line">
-                        <Feather size={20} color="#ff8e8e" />
-                        <span>Forever yours</span>
-                        <Feather size={20} color="#ff8e8e" />
-                      </div>
-                      <div className="signature-name">
-                        [Your Name]
-                        <Heart size={16} fill="#ff6b6b" color="#ff6b6b" />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="letter-decoration">
-                    {[...Array(5)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="decoration-heart"
-                        animate={{
-                          scale: [1, 1.2, 1],
-                          opacity: [0.1, 0.3, 0.1]
-                        }}
-                        transition={{
-                          duration: 3,
-                          delay: i * 0.5,
-                          repeat: Infinity
-                        }}
-                      >
-                        <Heart size={16 + i * 4} fill="#ff6b6b" color="transparent" opacity={0.1} />
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            </section>
-
-            {/* COMPLIMENT GENERATOR */}
-            <section className="compliment-section-modern">
-              <motion.h2
-                className="section-title"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                <span className="title-icon">
-                  <Sparkles size={40} color="#ff8e8e" />
-                </span>
-                Need a Little Magic?
-              </motion.h2>
-              
-              <motion.div 
-                className="compliment-machine-modern"
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ type: "spring", damping: 15 }}
-              >
-                <div className="machine-glow" />
-                
-                <div className="machine-content">
-                  <AnimatePresence mode="wait">
-                    {compliment ? (
-                      <motion.div
-                        key={compliment}
-                        className="compliment-display-modern"
-                        initial={{ scale: 0, rotateY: 180, opacity: 0 }}
-                        animate={{ scale: 1, rotateY: 0, opacity: 1 }}
-                        exit={{ scale: 0, rotateY: -180, opacity: 0 }}
-                        transition={{ type: "spring", damping: 20 }}
-                      >
-                        <div className="compliment-quote-mark">"</div>
-                        <p>{compliment}</p>
-                        <div className="compliment-quote-mark closing">"</div>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        className="compliment-placeholder-modern"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <div className="placeholder-icon">
-                          <motion.div
-                            animate={{ 
-                              rotate: [0, 180, 360],
-                              scale: [1, 1.2, 1]
-                            }}
-                            transition={{ 
-                              duration: 6,
-                              repeat: Infinity,
-                              ease: "linear"
-                            }}
-                          >
-                            <Star size={48} fill="#ffd700" color="#ffd700" opacity={0.3} />
-                          </motion.div>
-                        </div>
-                        <p>Press the button for a little magic</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-                
-                <motion.button
-                  className="compliment-button-modern"
-                  onClick={generateCompliment}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Sparkles size={20} />
-                  <span>Give Me Magic</span>
-                  <Heart size={20} fill="white" color="white" />
-                </motion.button>
-                
-                {compliment && (
-                  <motion.div 
-                    className="compliment-footer"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <span>{compliments.length} reasons you're extraordinary</span>
-                  </motion.div>
-                )}
-              </motion.div>
-            </section>
-
-            {/* GIFT REVEAL */}
-            <section className="gift-reveal-section-modern">
-              <motion.div className="gift-container-modern">
-                <motion.h2
-                  className="section-title"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                >
-                  <span className="title-icon">
-                    <Gift size={40} color="#ff8e8e" />
-                  </span>
-                  One More Surprise...
-                </motion.h2>
-                
-                <div className="gift-showcase">
-                  <motion.div 
-                    className="gift-box-modern"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    whileInView={{ scale: 1, opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ type: "spring", damping: 12 }}
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    <div className="gift-lid-modern">
-                      <motion.div 
-                        className="gift-ribbon-modern"
-                        animate={{ 
-                          y: [0, -5, 0],
-                          rotate: [0, 5, -5, 0]
-                        }}
-                        transition={{ duration: 4, repeat: Infinity }}
-                      >
-                        <Crown size={32} color="#ffd700" />
-                      </motion.div>
-                    </div>
-                    
-                    <div className="gift-body-modern">
-                      <div className="gift-pattern">
-                        {[...Array(6)].map((_, i) => (
-                          <Heart key={i} size={24} fill="#ffd700" color="transparent" opacity={0.2} />
-                        ))}
-                      </div>
-                      
-                      <div className="gift-bow-modern">
-                        <div className="bow-left" />
-                        <div className="bow-right" />
-                        <div className="bow-center" />
-                      </div>
-                      
-                      <motion.div 
-                        className="gift-tag-modern"
-                        animate={{ 
-                          rotate: [-2, 2, -2],
-                          x: [0, 3, -3, 0]
-                        }}
-                        transition={{ duration: 5, repeat: Infinity }}
-                      >
-                        <div className="tag-content">
-                          <span className="tag-to">To: {HER_FIRST_NAME}</span>
-                          <Heart size={12} fill="#ff6b6b" color="#ff6b6b" />
-                          <span className="tag-from">From: Your Valentine</span>
-                        </div>
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                  
-                  <motion.div 
-                    className="gift-message-modern"
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <div className="message-card">
-                      <h3>Your real gift awaits...</h3>
-                      
-                      <div className="gift-hint-modern">
-                        <motion.div
-                          animate={{ 
-                            scale: [1, 1.2, 1],
-                            rotate: [0, 10, -10, 0]
-                          }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        >
-                          <Heart size={32} fill="#ff6b6b" color="#ff6b6b" />
-                        </motion.div>
-                        <p className="hint-text">Check under your pillow</p>
-                      </div>
-                      
-                      <div className="voucher-card">
-                        <div className="voucher-decoration">
-                          <Sparkles size={20} color="#ffd700" />
-                          <Star size={16} fill="#ffd700" color="#ffd700" />
-                          <Sparkles size={20} color="#ffd700" />
-                        </div>
-                        
-                        <h4>One Special Date Night</h4>
-                        <p className="voucher-description">Redeemable anytime, anywhere of your choosing</p>
-                        
-                        <div className="voucher-details">
-                          <div className="detail-item">
-                            <Film size={16} color="#ff8e8e" />
-                            <span>Movie of your choice</span>
-                          </div>
-                          <div className="detail-item">
-                            <Coffee size={16} color="#ff8e8e" />
-                            <span>Dinner anywhere</span>
-                          </div>
-                          <div className="detail-item">
-                            <Heart size={16} fill="#ff8e8e" color="#ff8e8e" />
-                            <span>Unlimited hand-holding</span>
-                          </div>
-                        </div>
-                        
-                        <div className="voucher-validity">
-                          <Infinity size={16} color="#ffd700" />
-                          <span>Valid forever and always</span>
-                          <Infinity size={16} color="#ffd700" />
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
-              </motion.div>
-            </section>
-
-            {/* FOOTER */}
-            <footer className="footer-modern">
-              <motion.div
-                className="footer-content"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-              >
-                <div className="footer-hearts">
-                  {[...Array(3)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 10, -10, 0]
-                      }}
-                      transition={{
-                        duration: 2,
-                        delay: i * 0.3,
-                        repeat: Infinity
-                      }}
-                    >
-                      <Heart size={24 + i * 4} fill="#ff6b6b" color="#ff6b6b" opacity={0.6 - i * 0.1} />
-                    </motion.div>
-                  ))}
-                </div>
-                
-                <p className="footer-message">
-                  Made with infinite love, just for you, {HER_FIRST_NAME}
-                </p>
-                
-                <div className="footer-divider">
-                  <Feather size={16} color="#ff8e8e" />
-                  <span>✦</span>
-                  <Feather size={16} color="#ff8e8e" />
-                </div>
-                
-                <p className="footer-date">
-                  Valentine's Day 2026 • Our first of many
-                </p>
-                
-                <div className="footer-constellation">
-                  {nicknames.slice(0, 3).map((nickname, i) => (
-                    <span key={i} className="footer-nickname">
-                      {nickname.icon} {nickname.name}
-                    </span>
-                  ))}
-                </div>
-              </motion.div>
-            </footer>
-          </motion.div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Flow State: Healthy</p>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 };
 
-export default App;
+// --- SHARED COMPONENT: RECRUITER LEADERBOARD ---
+const RecruiterLeaderboard = ({ data }) => {
+  const sortedData = [...data]
+    .map(r => ({
+      ...r,
+      hires: Number(r.successfulhires || 0),
+      interviews: Number(r.interviewsconducted || 0),
+      name: r.recruitername
+    }))
+    .sort((a, b) => b.hires - a.hires)
+    .slice(0, 5);
+
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm h-full">
+      <div className="mb-8">
+        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
+          <span className="w-1.5 h-4 bg-indigo-600 rounded-full"></span>
+          Top <span className="text-indigo-600 ml-1">Recruiters</span>
+        </h3>
+        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Hiring Efficiency Intel</p>
+      </div>
+
+      <div className="space-y-6">
+        {sortedData.map((recruiter, idx) => {
+          const conversionRate = recruiter.interviews > 0 
+            ? ((recruiter.hires / recruiter.interviews) * 100).toFixed(0) 
+            : 0;
+
+          return (
+            <div key={idx} className="space-y-2 group">
+              <div className="flex justify-between items-end">
+                <p className="text-[11px] font-black uppercase text-slate-700 tracking-tight group-hover:text-indigo-600 transition-colors">
+                  {recruiter.name}
+                </p>
+                <p className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+                  {conversionRate}% Conv.
+                </p>
+              </div>
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-slate-900 h-full transition-all duration-1000 ease-out group-hover:bg-indigo-600" 
+                  style={{ width: `${conversionRate}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-widest px-1">
+                <span>{recruiter.interviews} Interviews</span>
+                <span>{recruiter.hires} Hires</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// --- SHARED COMPONENT: VACANCY UTILIZATION ---
+const VacancyUtilization = ({ data }) => {
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm h-full">
+      {/* Header section must be inside the same parent div */}
+      <div className="mb-8">
+        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
+          <span className="w-1.5 h-4 bg-emerald-500 rounded-full"></span>
+          Vacancy <span className="text-emerald-600 ml-1">Utilization</span>
+        </h3>
+        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Fulfillment Analytics</p>
+      </div>
+
+      <div className="space-y-6">
+        {data.slice(0, 5).map((job, idx) => {
+          // Normalize keys and convert to numbers
+          const filled = Number(job.filledpositions || 0);
+          const remaining = Number(job.remainingvacancies || 0);
+          const totalApps = Number(job.totalapplications || 0);
+          const title = job.jobtitle;
+          
+          const totalVacancies = filled + remaining;
+          const percent = totalVacancies > 0 ? (filled / totalVacancies) * 100 : 0;
+          const isCritical = percent < 25;
+
+          return (
+            <div key={idx} className="space-y-2">
+              <div className="flex justify-between items-center">
+                <p className="text-[11px] font-black uppercase text-slate-900 truncate max-w-[140px] tracking-tighter">
+                  {title}
+                </p>
+                <span className={`text-[9px] font-black px-2 py-1 rounded-lg uppercase ${isCritical ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                  {filled} / {totalVacancies} Filled
+                </span>
+              </div>
+              <div className="w-full bg-slate-100 h-3 rounded-xl overflow-hidden p-0.5 border border-slate-200/50">
+                <div 
+                  className={`h-full rounded-lg transition-all duration-1000 ${isCritical ? 'bg-red-500' : 'bg-emerald-500'}`}
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-[8px] font-black text-slate-400 uppercase tracking-[0.15em]">
+                <span>{totalApps} Applied</span>
+                <span>{remaining} Left</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// --- SHARED COMPONENT: SKILL GAP RADAR ---
+const SkillGapRadar = ({ data }) => {
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm h-full flex flex-col">
+      <div className="mb-6">
+        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
+          <span className="w-1.5 h-4 bg-violet-600 rounded-full"></span>
+          Skill <span className="text-violet-600 ml-1">Gap Analysis</span>
+        </h3>
+        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Candidate Proficiency Matrix</p>
+      </div>
+      <div className="flex-1 min-h-[280px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data.slice(0, 6)}>
+            <PolarGrid stroke="#e2e8f0" />
+            <PolarAngleAxis dataKey="skillname" tick={{ fontSize: 9, fontWeight: '900', fill: '#64748b', letterSpacing: '0.05em' }} />
+            <PolarRadiusAxis angle={30} domain={[0, 10]} tick={false} axisLine={false} />
+            <Radar
+              name="Proficiency"
+              dataKey="skillgap"
+              stroke="#7c3aed"
+              strokeWidth={3}
+              fill="#7c3aed"
+              fillOpacity={0.15}
+            />
+            <Tooltip 
+              contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', padding: '12px' }} 
+            />
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
+// --- SHARED COMPONENT: GHOSTING ALERT ---
+const GhostingAlert = ({ data }) => {
+  const highRisk = data.filter(c => c.DaysSinceLastContact > 14);
+
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm h-full flex flex-col">
+      <div className="flex justify-between items-start mb-8">
+        <div>
+          <h3 className="text-sm font-black uppercase tracking-widest text-orange-600 rounded-full group-hover:h-6  flex items-center gap-2">
+             <span className="w-1.5 h-4 bg-orange-500 rounded-full"></span>
+             Ghosting <span className="text-slate-900 ml-1">Alerts</span>
+          </h3>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Inactivity {'>'} 14 Days</p>
+        </div>
+        <div className="bg-orange-100 text-orange-600 p-2 rounded-xl border border-orange-200">
+          <ShieldAlert size={18} />
+        </div>
+      </div>
+      
+      <div className="space-y-3 overflow-y-auto max-h-64 pr-2 custom-scrollbar">
+        {highRisk.length > 0 ? highRisk.map((candidate, idx) => (
+          <div key={idx} className="p-4 bg-orange-50/30 border border-orange-100/50 rounded-2xl flex justify-between items-center group hover:bg-orange-50 transition-colors">
+            <div>
+              <p className="text-[11px] font-black uppercase text-slate-800 tracking-tight">{candidate.CandidateName}</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{candidate.JobTitle}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs font-black text-orange-600">{candidate.DaysSinceLastContact}d</p>
+              <p className="text-[8px] font-black text-orange-400 uppercase tracking-widest">No Response</p>
+            </div>
+          </div>
+        )) : (
+          <div className="flex-1 flex flex-col items-center justify-center py-10 text-center bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
+            <Check size={24} className="text-emerald-500 mb-2" />
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Queue Clean</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// --- SHARED COMPONENT: USER PROVISIONING MODAL ---
+const UserModal = ({ isOpen, onClose, onSave }) => {
+  const [formData, setFormData] = useState({ 
+    username: '', email: '', password: '', 
+    fullName: '', location: '', yearsOfExperience: 0 
+  });
+
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    if (!formData.username || !formData.email || !formData.password) {
+      alert("Required: Username, Email, Password");
+      return;
+    }
+    onSave(formData);
+  };
+
+  const inputClass = "w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-300";
+  const labelClass = "text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 block ml-1";
+
+  return (
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-[100] p-4">
+      <div className="bg-white rounded-[3rem] w-full max-w-xl p-10 shadow-2xl relative border border-white/20 animate-in fade-in zoom-in duration-300">
+        <button onClick={onClose} className="absolute top-8 right-8 text-slate-300 hover:text-slate-900 transition-colors"><X size={24}/></button>
+        
+        <header className="mb-8">
+            <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Provision <span className="text-indigo-600">Candidate</span></h3>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">New Talent Profile Activation</p>
+        </header>
+        
+        <div className="grid grid-cols-2 gap-6">
+          <div className="col-span-1">
+            <label className={labelClass}>Username</label>
+            <input placeholder="jdoe_dev" className={inputClass} onChange={(e) => setFormData({...formData, username: e.target.value})} />
+          </div>
+          <div className="col-span-1">
+            <label className={labelClass}>Email Address</label>
+            <input placeholder="john@company.com" className={inputClass} onChange={(e) => setFormData({...formData, email: e.target.value})} />
+          </div>
+          <div className="col-span-2">
+            <label className={labelClass}>Full Legal Name</label>
+            <input placeholder="John Doe" className={inputClass} onChange={(e) => setFormData({...formData, fullName: e.target.value})} />
+          </div>
+          <div className="col-span-1">
+            <label className={labelClass}>Location</label>
+            <input placeholder="New York, NY" className={inputClass} onChange={(e) => setFormData({...formData, location: e.target.value})} />
+          </div>
+          <div className="col-span-1">
+            <label className={labelClass}>Years of Exp</label>
+            <input type="number" placeholder="5" className={inputClass} onChange={(e) => setFormData({...formData, yearsOfExperience: parseInt(e.target.value) || 0})} />
+          </div>
+          <div className="col-span-2 pt-4 border-t border-slate-50 mt-2">
+            <label className={labelClass}>Security: Initial Password</label>
+            <input type="password" placeholder="••••••••" className={`${inputClass} bg-indigo-50/30 border-indigo-100`} onChange={(e) => setFormData({...formData, password: e.target.value})} />
+          </div>
+        </div>
+
+        <div className="flex gap-4 mt-10">
+          <button onClick={onClose} className="flex-1 py-4 text-[11px] font-black uppercase text-slate-400 hover:text-slate-900 transition-colors tracking-widest">Abort</button>
+          <button onClick={handleSubmit} className="flex-[2] py-4 bg-slate-900 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200 active:scale-[0.98]">Deploy Profile</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- SHARED COMPONENT: APPLICATION FUNNEL CARD ---
+const ApplicationFunnelCard = ({ data }) => {
+  const maxVal = data.length > 0 ? Math.max(...data.map(d => d.ApplicationCount)) : 0;
+
+  return (
+    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col h-full group">
+      <div className="mb-10">
+        <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 flex items-center gap-2">
+          <span className="w-1.5 h-4 bg-slate-900 rounded-full group-hover:bg-indigo-600 transition-colors"></span>
+          Application <span className="text-indigo-600 ml-1">Funnel</span>
+        </h3>
+        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 ml-3.5">Conversion Pipeline Intel</p>
+      </div>
+
+      <div className="space-y-6 flex-1 flex flex-col justify-center">
+        {data.map((stage, index) => (
+          <div key={index} className="space-y-2">
+            <div className="flex justify-between items-end">
+              <span className="text-[10px] font-black uppercase text-slate-600 tracking-tight">{stage.StatusName}</span>
+              <span className="text-sm font-black text-slate-900">{stage.ApplicationCount}</span>
+            </div>
+            <div className="h-3 bg-slate-50 rounded-xl overflow-hidden border border-slate-100 p-0.5">
+              <div 
+                className="h-full bg-slate-900 rounded-lg transition-all duration-1000 ease-out group-hover:bg-indigo-600"
+                style={{ width: `${maxVal > 0 ? (stage.ApplicationCount / maxVal) * 100 : 0}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+// --- MAIN ADMIN DASHBOARD ---
+function AdminDashboard({ user }) {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [locationBias, setLocationBias] = useState([]);
+  const [experienceBias, setExperienceBias] = useState([]);
+  const [bottlenecks, setBottlenecks] = useState([]);
+  const [recruiterPerf, setRecruiterPerf] = useState([]);
+  const [vacancyData, setVacancyData] = useState([]);
+  const [skillGaps, setSkillGaps] = useState([]);
+  const [reports, setReports] = useState({ selected: 'vw_ApplicationFunnel', data: [] });
+  const [users, setUsers] = useState([]);
+  const [audit, setAudit] = useState([]);
+  const [silentRejections, setSilentRejections] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [funnelData, setFunnelData] = useState([]);
+  const [jobList, setJobList] = useState([]);
+  const [candidateList, setCandidateList] = useState([]);
+  const [appDetailedList, setAppDetailedList] = useState([]);
+  const [skillList, setSkillList] = useState([]);
+  const [newSkillName, setNewSkillName] = useState('');
+  const [jobArchive, setJobArchive] = useState([]);
+  const [appArchive, setAppArchive] = useState([]);
+  const [entitySubTab, setEntitySubTab] = useState('jobs');
+
+  // LOGIC REMAINS UNTOUCHED
+  const handleSaveCandidate = async (formData) => {
+    try {
+      await axios.post(`${API_BASE}/admin/users/candidate`, formData);
+      setIsModalOpen(false);
+      fetchUsers();
+      alert("Candidate user created successfully!");
+    } catch (err) {
+      alert("Creation failed: " + (err.response?.data?.error || err.message));
+    }
+  };
+
+  const fetchArchives = async () => {
+    try {
+      const [jobs, apps] = await Promise.all([
+        axios.get(`${API_BASE}/admin/archives/jobs`),
+        axios.get(`${API_BASE}/admin/archives/applications`)
+      ]);
+      setJobArchive(jobs.data);
+      setAppArchive(apps.data);
+    } catch (err) { console.error(err); }
+  };
+
+  const reportList = [
+    'vw_ApplicationFunnel', 'vw_SkillGapAnalysis', 'vw_TimeToHire', 
+    'vw_RecruiterPerformance', 'vw_Bias_Location', 'vw_Bias_Experience',
+    'vw_HiringBottlenecks', 'vw_SilentRejections', 'vw_VacancyUtilization'
+  ];
+
+  useEffect(() => {
+    if (activeTab === 'overview') loadOverview();
+    if (activeTab === 'users') fetchUsers();
+    if (activeTab === 'reports') loadReport(reports.selected);
+    if (activeTab === 'entities') fetchEntities();
+    if (activeTab === 'maintenance') fetchArchives();
+  }, [activeTab]);
+
+  const loadOverview = async () => {
+    try {
+      const [auditRes, locRes, expRes, bottleRes, perfRes, vacRes, skillRes, silentRes, funnelRes] = await Promise.all([
+        axios.get(`${API_BASE}/admin/audit-logs`),
+        axios.get(`${API_BASE}/admin/reports/vw_Bias_Location`),
+        axios.get(`${API_BASE}/admin/reports/vw_Bias_Experience`),
+        axios.get(`${API_BASE}/admin/reports/vw_HiringBottlenecks`),
+        axios.get(`${API_BASE}/admin/reports/vw_RecruiterPerformance`),
+        axios.get(`${API_BASE}/admin/reports/vw_VacancyUtilization`),
+        axios.get(`${API_BASE}/admin/reports/vw_SkillGapAnalysis`),
+        axios.get(`${API_BASE}/admin/reports/vw_SilentRejections`),
+        axios.get(`${API_BASE}/admin/analytics/funnel`)
+      ]);
+      setAudit(auditRes.data);
+      setLocationBias(locRes.data);
+      setExperienceBias(expRes.data);
+      setBottlenecks(bottleRes.data);
+      setRecruiterPerf(perfRes.data);
+      setVacancyData(vacRes.data);
+      setSkillGaps(skillRes.data);
+      setSilentRejections(silentRes.data);
+      setFunnelData(funnelRes.data);
+    } catch (err) { console.error(err); }
+  };
+
+  const fetchUsers = () => { axios.get(`${API_BASE}/admin/users`).then(res => setUsers(res.data)); };
+
+  const toggleUserStatus = async (userId) => {
+    try {
+      await axios.put(`${API_BASE}/admin/users/${userId}/toggle`);
+      fetchUsers();
+    } catch (err) { alert("Update failed"); }
+  };
+
+  const loadReport = (view) => {
+    axios.get(`${API_BASE}/admin/reports/${view}`).then(res => 
+      setReports(prev => ({ ...prev, selected: view, data: res.data }))
+    );
+  };
+
+  const fetchEntities = async () => {
+    try {
+      const [jobs, candidates, apps, skills] = await Promise.all([
+        axios.get(`${API_BASE}/admin/jobs?t=${Date.now()}`),
+        axios.get(`${API_BASE}/admin/candidates?t=${Date.now()}`),
+        axios.get(`${API_BASE}/admin/applications-detailed?t=${Date.now()}`),
+        axios.get(`${API_BASE}/admin/skills?t=${Date.now()}`)
+      ]);
+      setJobList(jobs.data);
+      setCandidateList(candidates.data);
+      setAppDetailedList(apps.data);
+      setSkillList(skills.data || []);
+    } catch (err) { console.error(err); }
+  };
+
+  const handleAddSkill = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API_BASE}/admin/skills`, { SkillName: newSkillName });
+      setNewSkillName('');
+      fetchEntities();
+    } catch (err) { alert(err.response?.data?.error || "Error"); }
+  };
+
+  const runMaintenance = async (proc) => {
+    try {
+      await axios.post(`${API_BASE}/admin/maintenance`, { procedure: proc });
+      alert(`${proc} success!`);
+      fetchArchives();
+    } catch (err) { alert(err.message); }
+  };
+
+  const filteredUsers = (users || []).filter(u => {
+    const matchesSearch = u.Username.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = roleFilter === 'all' || u.RoleID.toString() === roleFilter.toString();
+    return matchesSearch && matchesRole;
+  });
+
+  // STYLES
+  const tabBtnClass = (t) => `px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === t ? 'bg-slate-900 text-white shadow-lg shadow-slate-200 scale-105' : 'text-slate-400 hover:bg-slate-50'}`;
+  const subTabBtnClass = (sub) => `text-[10px] font-black uppercase px-6 py-2 rounded-full transition-all ${entitySubTab === sub ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`;
+
+  return (
+    <div className="p-8 max-w-[1600px] mx-auto space-y-8 animate-in fade-in duration-700">
+      
+      {/* GLOBAL ADMIN HEADER */}
+      <header className="flex flex-col md:flex-row justify-between items-center bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm gap-6">
+        <div>
+          <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Admin<span className="text-indigo-600">Intelligence</span></h2>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">System Control & Heuristics</p>
+        </div>
+        <nav className="flex bg-slate-50 p-1.5 rounded-[1.5rem] border border-slate-100">
+          {['overview', 'users', 'entities', 'reports', 'maintenance'].map(t => (
+            <button key={t} onClick={() => setActiveTab(t)} className={tabBtnClass(t)}> {t} </button>
+          ))}
+        </nav>
+      </header>
+
+      {activeTab === 'overview' && (
+        <div className="space-y-8">
+          {/* BIAS ANALYTICS SECTION */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white rounded-[3rem] p-2 border border-slate-100 shadow-sm"><BiasAnalysis data={locationBias} title="Geographic Bias" subtitle="Regional Hire Velocity" xKey="Location" /></div>
+            <div className="bg-white rounded-[3rem] p-2 border border-slate-100 shadow-sm"><BiasAnalysis data={experienceBias} title="Experience Bias" subtitle="Experience Band Performance" xKey="ExperienceGroup" /></div>
+          </div>
+
+          {/* SHARED INTEL GRID */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+             <SkillGapRadar data={skillGaps} />
+             <RecruiterLeaderboard data={recruiterPerf} />
+             <VacancyUtilization data={vacancyData} />
+             <GhostingAlert data={silentRejections} />
+             <BottleneckAlerts data={bottlenecks} />
+             <ApplicationFunnelCard data={funnelData} />
+          </div>
+
+          {/* AUDIT TRAIL */}
+          <section className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+                   <span className="w-1.5 h-4 bg-slate-900 rounded-full"></span> System Logs
+                </h3>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 ml-3.5">Real-time Transactional Audit</p>
+              </div>
+              <ShieldAlert size={20} className="text-slate-200" />
+            </div>
+            <div className="overflow-x-auto rounded-2xl border border-slate-50">
+              <table className="w-full text-left">
+                <thead className="bg-slate-50/50 border-b border-slate-100">
+                  <tr className="text-[9px] font-black uppercase text-slate-400 tracking-widest">
+                    <th className="p-5">Object</th><th className="p-5">Op</th><th className="p-5">Change</th><th className="p-5">User</th><th className="p-5 text-right">Time</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {audit.slice(0, 10).map(log => (
+                    <tr key={log.AuditID} className="hover:bg-slate-50/50 transition-colors group">
+                      <td className="p-5 text-[11px] font-black text-slate-900 uppercase">{log.TableName}</td>
+                      <td className="p-5 text-[10px] font-black"><span className="px-2 py-1 rounded bg-indigo-50 text-indigo-600">{log.Operation}</span></td>
+                      <td className="p-5 text-[10px] font-medium text-slate-500 max-w-xs truncate">{log.OldValue} <span className="text-slate-300">→</span> {log.NewValue}</td>
+                      <td className="p-5 font-mono text-[10px] text-slate-400 italic font-bold">{log.ChangedBy}</td>
+                      <td className="p-5 text-[10px] text-slate-400 text-right font-bold">{new Date(log.ChangedAt).toLocaleTimeString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {activeTab === 'users' && (
+        <div className="space-y-6">
+          <div className="flex flex-col lg:row justify-between items-center bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm gap-6">
+            <div className="flex items-center gap-4">
+              <div className="bg-indigo-600 text-white p-3 rounded-2xl shadow-lg shadow-indigo-100"><Users size={20} /></div>
+              <div>
+                <h3 className="text-lg font-black uppercase tracking-tight text-slate-900">User <span className="text-indigo-600">Registry</span></h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Global Identity Access Management</p>
+              </div>
+            </div>
+
+            <div className="flex flex-1 max-w-3xl gap-4 w-full">
+              <div className="relative flex-1 group">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={16} />
+                <input 
+                  type="text" placeholder="FILTER BY IDENTITY..." 
+                  className="w-full bg-slate-50 border border-slate-100 rounded-[1.25rem] pl-12 pr-6 py-4 text-[11px] font-black uppercase tracking-widest focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all"
+                  value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <select 
+                className="bg-slate-50 border border-slate-100 rounded-[1.25rem] px-6 py-4 text-[11px] font-black uppercase tracking-widest outline-none cursor-pointer focus:ring-4 focus:ring-indigo-500/5"
+                value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}
+              >
+                <option value="all">All Roles</option>
+                <option value="1">Admins</option>
+                <option value="2">Recruiters</option>
+                <option value="3">Candidates</option>
+              </select>
+            </div>
+
+            <button onClick={() => setIsModalOpen(true)} className="px-8 py-4 bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest rounded-[1.25rem] hover:bg-indigo-600 transition-all flex items-center gap-3 shadow-xl shadow-slate-200">
+              <UserPlus size={16} /> Create Candidate
+            </button>
+          </div>
+
+          <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+            <table className="w-full text-left">
+              <thead className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <tr><th className="px-10 py-6">Username</th><th className="px-10 py-6">Role</th><th className="px-10 py-6">Status</th><th className="px-10 py-6 text-right">Operational Toggle</th></tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {filteredUsers.map(u => (
+                  <tr key={u.UserID} className="hover:bg-slate-50/30 transition-colors group">
+                    <td className="px-10 py-6 font-black text-slate-900 flex items-center gap-4 text-xs uppercase tracking-tight">
+                      <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white text-[11px] shadow-sm group-hover:bg-indigo-600 transition-colors">{u.Username.substring(0, 2).toUpperCase()}</div>
+                      {u.Username}
+                    </td>
+                    <td className="px-10 py-6">
+                      <span className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-lg ${u.RoleID === 1 ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : u.RoleID === 2 ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-slate-50 text-slate-600 border border-slate-100'}`}>
+                        {u.RoleID === 1 ? 'Admin' : u.RoleID === 2 ? 'Recruiter' : 'Candidate'}
+                      </span>
+                    </td>
+                    <td className="px-10 py-6">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${u.IsActive ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></span>
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${u.IsActive ? 'text-emerald-600' : 'text-red-600'}`}> {u.IsActive ? 'Active' : 'Offline'} </span>
+                      </div>
+                    </td>
+                    <td className="px-10 py-6 text-right">
+                      <button onClick={() => toggleUserStatus(u.UserID)} className={`text-[10px] font-black uppercase px-6 py-2.5 rounded-xl transition-all ${u.IsActive ? 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white'}`}>
+                        {u.IsActive ? 'Revoke Access' : 'Restore Access'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <UserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSaveCandidate} />
+        </div>
+      )}
+
+      {activeTab === 'entities' && (
+  <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 pb-10">
+    
+    {/* SUB-NAVIGATION TOGGLE */}
+    <div className="flex gap-4 bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm w-fit mx-auto">
+      {['jobs', 'applications', 'candidates', 'skills'].map(sub => (
+        <button 
+          key={sub} 
+          onClick={() => setEntitySubTab(sub)} 
+          className={subTabBtnClass(sub)}
+        > 
+          {sub} 
+        </button>
+      ))}
+    </div>
+
+    {/* SKILL INJECTION FORM (Conditional) */}
+    {entitySubTab === 'skills' && (
+      <div className="bg-indigo-50/50 p-6 rounded-[2.5rem] border border-dashed border-indigo-200 flex flex-col items-center">
+        <form onSubmit={handleAddSkill} className="flex gap-4 w-full max-w-3xl">
+          <input 
+            type="text" 
+            placeholder="INJECT NEW SKILL INTO SYSTEM..." 
+            className="flex-1 bg-white border border-indigo-100 rounded-2xl px-6 py-4 text-[11px] font-black uppercase outline-none shadow-sm focus:ring-4 focus:ring-indigo-500/10"
+            value={newSkillName} 
+            onChange={(e) => setNewSkillName(e.target.value)}
+          />
+          <button type="submit" className="px-10 py-4 bg-slate-900 text-white text-[11px] font-black uppercase rounded-2xl hover:bg-indigo-600 shadow-xl transition-all">
+            Append Skill
+          </button>
+        </form>
+      </div>
+    )}
+
+    {/* DATA REGISTRY TABLE */}
+    <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+      <table className="w-full text-left">
+        <thead className="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+          <tr>
+            {entitySubTab === 'jobs' && (
+              <>
+                <th className="p-8">Title Pattern</th>
+                <th className="p-8">Node</th>
+                <th className="p-8">Min Tenure</th>
+                <th className="p-8 text-right">Slot Count</th>
+              </>
+            )}
+            {entitySubTab === 'applications' && (
+              <>
+                <th className="p-8">Subject</th>
+                <th className="p-8">Application Vector</th>
+                <th className="p-8">State</th>
+                <th className="p-8 text-right">Origin Date</th>
+              </>
+            )}
+            {entitySubTab === 'candidates' && (
+              <>
+                <th className="p-8">Name</th>
+                <th className="p-8">Experience</th>
+                <th className="p-8">Location</th>
+                <th className="p-8 text-right">Email Path</th>
+              </>
+            )}
+            {entitySubTab === 'skills' && (
+              <>
+                <th className="p-8">UID</th>
+                <th className="p-8">Skill Definition</th>
+                <th className="p-8 text-right">Integrity</th>
+              </>
+            )}
+          </tr>
+        </thead>
+        
+        <tbody className="divide-y divide-slate-50">
+          {/* JOBS DATA */}
+          {entitySubTab === 'jobs' && jobList.map(j => (
+            <tr key={j.JobID} className="hover:bg-slate-50/50 group transition-colors">
+              <td className="p-8 font-black uppercase text-xs text-slate-900 tracking-tight">{j.JobTitle}</td>
+              <td className="p-8 text-[11px] font-bold text-slate-400">{j.Location}</td>
+              <td className="p-8 font-mono text-[11px] font-black text-indigo-600">{j.MinExperience} YRS</td>
+              <td className="p-8 text-right font-black text-slate-900">{j.Vacancies}</td>
+            </tr>
+          ))}
+
+          {/* APPLICATIONS DATA */}
+          {entitySubTab === 'applications' && appDetailedList.map(a => (
+            <tr key={a.ApplicationID} className="hover:bg-slate-50/50 group transition-colors">
+              <td className="p-8 font-black uppercase text-xs text-slate-900">{a.FullName}</td>
+              <td className="p-8 text-[11px] font-bold text-slate-400">{a.JobTitle}</td>
+              <td className="p-8"> 
+                <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg font-black uppercase text-[10px] tracking-widest">
+                  {a.StatusName}
+                </span> 
+              </td>
+              <td className="p-8 text-right text-[10px] font-black text-slate-300">
+                {new Date(a.AppliedDate).toLocaleDateString()}
+              </td>
+            </tr>
+          ))}
+
+          {/* CANDIDATES DATA - Corrected Variable and Properties */}
+          {entitySubTab === 'candidates' && candidateList.map(c => (
+            <tr key={c.CandidateID} className="hover:bg-slate-50/50 group transition-colors">
+              <td className="p-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-slate-900 text-white rounded-lg flex items-center justify-center text-[10px] font-black italic">
+                    {(c.FullName || "??").substring(0, 2).toUpperCase()}
+                  </div>
+                  <span className="font-black uppercase text-xs text-slate-900">{c.FullName}</span>
+                </div>
+              </td>
+              <td className="p-8 font-mono text-[11px] font-black text-indigo-600">
+                {c.YearsOfExperience || 0} YRS
+              </td>
+              <td className="p-8 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
+                {c.Location || 'NODE_UNSET'}
+              </td>
+              <td className="p-8 text-right text-[15px] font-black text-slate-400 italic font-mono opacity-80">
+                {c.Email || 'PRIVATE@SYSTEM.INT'}
+              </td>
+            </tr>
+          ))}
+
+          {/* SKILLS DATA */}
+          {entitySubTab === 'skills' && skillList.map(s => (
+            <tr key={s.SkillID} className="hover:bg-slate-50/50 group">
+              <td className="p-8 font-mono text-[12px] text-slate-500"># {s.SkillID}</td>
+              <td className="p-8 font-black uppercase text-xs text-slate-800">{s.SkillName}</td>
+              <td className="p-8 text-right"> 
+                <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-full border border-slate-100">
+                  Immutable
+                </span> 
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* EMPTY STATE HANDLER */}
+      {((entitySubTab === 'jobs' && jobList.length === 0) || 
+        (entitySubTab === 'candidates' && candidateList.length === 0)) && (
+        <div className="p-20 text-center text-slate-300 italic font-bold text-xs uppercase tracking-[0.3em]">
+          No data entries detected in this node.
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
+      {activeTab === 'reports' && (
+        <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center gap-6 max-w-2xl mx-auto">
+            <div className="p-3 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-100"><BarChart3 size={20} /></div>
+            <div className="flex-1">
+               <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-1">Select Heuristic Model</label>
+               <select 
+                className="w-full bg-transparent font-black text-sm outline-none cursor-pointer text-slate-900 uppercase tracking-tight"
+                value={reports.selected} onChange={(e) => loadReport(e.target.value)}
+              >
+                {reportList.map(r => <option key={r} value={r}>{r.replace('vw_', '').split('_').join(' ')}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden p-2">
+            <div className="overflow-x-auto rounded-[2.5rem] border border-slate-50">
+              <table className="w-full text-left">
+                <thead className="bg-slate-50 border-b border-slate-100">
+                  {reports.data[0] && <tr className="text-[9px] font-black uppercase text-slate-400 tracking-widest">
+                    {Object.keys(reports.data[0]).map(k => <th key={k} className="p-6">{k}</th>)}
+                  </tr>}
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {reports.data.map((row, i) => (
+                    <tr key={i} className="hover:bg-indigo-50/30 transition-colors">
+                      {Object.values(row).map((v, j) => <td key={j} className="p-6 text-[11px] font-bold text-slate-700 tracking-tight">{v?.toString() || 'NULL'}</td>)}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'maintenance' && (
+        <div className="space-y-12 animate-in zoom-in-95 duration-500">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="p-12 bg-white border border-slate-100 rounded-[3rem] text-center space-y-6 shadow-sm group hover:shadow-2xl transition-all">
+              <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto text-slate-900 font-black text-xl border border-slate-100 group-hover:bg-slate-900 group-hover:text-white transition-all">DB</div>
+              <div>
+                <h4 className="font-black uppercase tracking-tight text-xl text-slate-900">Data Archival</h4>
+                <p className="text-[11px] font-medium text-slate-400 leading-relaxed uppercase tracking-widest mt-2">Prune system state: Offload stale objects</p>
+              </div>
+              <button onClick={() => runMaintenance('sp_ArchiveOldData')} className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase text-xs tracking-widest hover:bg-black transition-all shadow-xl shadow-slate-200">Initiate sp_ArchiveOldData</button>
+            </div>
+
+            <div className="p-12 bg-white border border-slate-100 rounded-[3rem] text-center space-y-6 shadow-sm group hover:shadow-2xl transition-all">
+              <div className="w-20 h-20 bg-rose-50 rounded-[2rem] flex items-center justify-center mx-auto text-rose-600 font-black text-xl border border-rose-100 group-hover:bg-rose-600 group-hover:text-white transition-all">RG</div>
+              <div>
+                <h4 className="font-black uppercase tracking-tight text-xl text-rose-600">Compliance Flush</h4>
+                <p className="text-[11px] font-medium text-slate-400 leading-relaxed uppercase tracking-widest mt-2">PII Anonymization: GDPR Compliance Loop</p>
+              </div>
+              <button onClick={() => runMaintenance('sp_AnonymizeArchivedCandidates')} className="w-full py-5 bg-rose-600 text-white rounded-[1.5rem] font-black uppercase text-xs tracking-widest hover:bg-rose-700 transition-all shadow-xl shadow-rose-100">Initiate sp_AnonymizeFlush</button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            {/* Archive Lists */}
+            {[ { title: 'Job Archive Vector', data: jobArchive, color: 'slate' }, { title: 'Application Archive Vector', data: appArchive, color: 'rose' } ].map((archive, i) => (
+              <div key={i} className="bg-white border border-slate-100 rounded-[3rem] p-10 shadow-sm h-[500px] flex flex-col">
+                <h3 className={`font-black uppercase text-sm mb-8 flex items-center gap-3 ${archive.color === 'rose' ? 'text-rose-600' : 'text-slate-900'}`}>
+                  <span className={`w-2 h-5 rounded-full ${archive.color === 'rose' ? 'bg-rose-500' : 'bg-slate-900'}`}></span>
+                  {archive.title}
+                </h3>
+                <div className="overflow-y-auto flex-1 custom-scrollbar pr-4">
+                  <table className="w-full text-left">
+                    <thead className="sticky top-0 bg-white border-b border-slate-50 uppercase font-black text-[9px] text-slate-300 tracking-[0.2em]">
+                      <tr><th className="pb-4">Name</th><th className="pb-4">Job Title</th><th className="pb-4 text-right">Commit Date</th></tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {archive.data.length > 0 ? archive.data.map((item, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="py-5 font-black uppercase text-[11px] text-slate-800 tracking-tight">{item.FullName || `ID: ${item.CandidateID}`}</td>
+                          <td className="py-5 font-black uppercase text-[11px] text-slate-800 tracking-tight">{item.JobTitle || item.FullName || `ID: ${item.CandidateID}`}</td>
+                          <td className="py-5 text-right text-[10px] font-black text-slate-400">{new Date(item.ArchivedAt).toLocaleDateString()}</td>
+                        </tr>
+                      )) : (
+                        <tr><td colSpan="2" className="py-20 text-center text-[10px] font-black text-slate-300 uppercase italic tracking-widest">No Archived Records Found</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- RECRUITER DASHBOARD (RE-ENGINEERED: INTEL DESIGN ETHOS) ---
+function RecruiterDashboard({ user }) {
+  const [matches, setMatches] = useState([]);
+  const [myJobs, setMyJobs] = useState([]);
+  const [archivedJobs, setArchivedJobs] = useState([]);
+  const [activeTab, setActiveTab] = useState('active');
+  const [availableSkills, setAvailableSkills] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null); 
+  
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const [summary, setSummary] = useState({ ActiveJobs: 0, NewApplications: 0, InterviewsToday: 0 });
+
+  const [schedStart, setSchedStart] = useState("");
+  const [schedEnd, setSchedEnd] = useState("");
+
+  const [newJob, setNewJob] = useState({ 
+    title: '', description: '', location: '', minExp: 0, vacancies: 1, requirements: [] 
+  });
+
+  const fetchData = async () => {
+    try {
+      const [activeRes, archivedRes, skillsRes, summaryRes] = await Promise.all([
+        axios.get(`${API_BASE}/recruiter/jobs/${user.UserID}`),
+        axios.get(`${API_BASE}/recruiter/jobs/archived/${user.UserID}`),
+        axios.get(`${API_BASE}/skills`),
+        axios.get(`${API_BASE}/recruiter/summary/${user.UserID}`)
+      ]);
+      
+      setMyJobs(activeRes.data);
+      setArchivedJobs(archivedRes.data);
+      setAvailableSkills(skillsRes.data);
+      setSummary(summaryRes.data);
+
+      if (activeRes.data.length > 0 && !selectedJob) {
+        setSelectedJob(activeRes.data[0]);
+      }
+    } catch (err) { console.error("Data fetch error", err); }
+  };
+
+  const loadMatches = (jobId) => {
+    axios.get(`${API_BASE}/recruiter/matches/${jobId}`)
+      .then(res => setMatches(res.data))
+      .catch(() => setMatches([]));
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  useEffect(() => {
+    if (selectedJob) {
+      loadMatches(selectedJob.JobID);
+    }
+  }, [selectedJob]);
+
+  const handleStatusUpdate = async (applicationId, newStatusId, statusLabel) => {
+    try {
+        const res = await axios.put(`${API_BASE}/recruiter/applications/${applicationId}/status`, {
+            newStatusId,
+            userId: user.UserID,
+            notes: `Candidate moved to ${statusLabel} via Dashboard.`
+        });
+        alert(res.data.message);
+        setShowMatchModal(false);
+        if (selectedJob) loadMatches(selectedJob.JobID);
+        fetchData();
+    } catch (err) {
+        alert("Status Update Failed: " + (err.response?.data?.error || "Invalid transition."));
+    }
+  };
+
+  const handleScheduleSubmit = async (e) => {
+    e.preventDefault();
+    const formattedStart = schedStart.replace('T', ' ') + ":00";
+    const formattedEnd = schedEnd.replace('T', ' ') + ":00";
+
+    try {
+        const response = await axios.post(`${API_BASE}/recruiter/interviews`, {
+            applicationId: selectedMatch.ApplicationID,
+            recruiterUserId: user.UserID,
+            startTime: formattedStart,
+            endTime: formattedEnd
+        });
+        alert(response.data.message);
+        setSchedStart("");
+        setSchedEnd("");
+        setShowMatchModal(false);
+        fetchData();
+    } catch (err) {
+        alert("Scheduling Error: " + (err.response?.data?.error || "Check recruiter availability."));
+    }
+  };
+
+  const handlePostJob = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API_BASE}/recruiter/jobs`, { ...newJob, userId: user.UserID });
+      setShowForm(false);
+      setNewJob({ title: '', description: '', location: '', minExp: 0, vacancies: 1, requirements: [] });
+      fetchData();
+      alert("Job Published!");
+    } catch (err) { alert("Error: " + (err.response?.data?.error || "Check database.")); }
+  };
+
+  const handleDeleteJob = async (jobId, e) => {
+    e.stopPropagation();
+    if (!window.confirm("Archive this job?")) return;
+    try {
+        await axios.delete(`${API_BASE}/recruiter/jobs/${jobId}`);
+        if (selectedJob?.JobID === jobId) setSelectedJob(null);
+        fetchData();
+    } catch (err) { alert("Error archiving job."); }
+  };
+
+  const handleRestoreJob = async (jobId, e) => {
+    e.stopPropagation();
+    try {
+        await axios.put(`${API_BASE}/recruiter/jobs/restore/${jobId}`);
+        fetchData();
+    } catch (err) { alert("Error restoring job."); }
+  };
+
+  const handleHireCandidate = async (applicationId) => {
+    if(!window.confirm("Confirm hiring? This will decrement vacancies and record the status change.")) return;
+    try {
+      const res = await axios.post(`${API_BASE}/recruiter/hire`, {
+        applicationId: applicationId,
+        userId: user.UserID
+      });
+      alert(res.data.message);
+      setShowMatchModal(false);
+      fetchData(); 
+      if(selectedJob) loadMatches(selectedJob.JobID); 
+    } catch (err) {
+      alert("Hiring Failed: " + (err.response?.data?.error || "Server Error"));
+    }
+  };
+
+  const toggleSkill = (skillId) => {
+    const exists = newJob.requirements.find(r => r.skillId === skillId);
+    if (exists) {
+      setNewJob({ ...newJob, requirements: newJob.requirements.filter(r => r.skillId !== skillId) });
+    } else {
+      setNewJob({ ...newJob, requirements: [...newJob.requirements, { skillId, minProficiency: 5, isMandatory: false }] });
+    }
+  };
+
+  const updateSkillReq = (skillId, field, value) => {
+    const updated = newJob.requirements.map(r => r.skillId === skillId ? { ...r, [field]: value } : r);
+    setNewJob({ ...newJob, requirements: updated });
+  };
+
+  const openMatchBreakdown = (match) => {
+    setSelectedMatch(match);
+    setShowMatchModal(true);
+  };
+
+  const runAutoReject = async () => {
+    const confirmed = window.confirm("Reject ALL unqualified candidates? Proceed?");
+    if (!confirmed) return;
+    setIsProcessing(true);
+    try {
+        const response = await axios.post(`${API_BASE}/recruiter/run-auto-reject`);
+        alert(response.data.message);
+        fetchData(); 
+    } catch (err) {
+        alert("Error: " + (err.response?.data?.error || "Execution failed"));
+    } finally {
+        setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="space-y-10 relative animate-in fade-in slide-in-from-bottom-4 duration-700">
+      
+      {/* MODAL SECTION - INTEL OVERLAY */}
+      {showMatchModal && selectedMatch && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+            <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onClick={() => setShowMatchModal(false)}></div>
+            <div className="bg-white w-full max-w-2xl rounded-[40px] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in duration-300">
+                <div className="p-8 border-b bg-slate-50 flex justify-between items-center">
+                    <div>
+                        <h3 className="text-2xl font-black uppercase tracking-tighter">{selectedMatch.FullName}</h3>
+                        <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mt-1">Personnel Match Report • SCORE: {selectedMatch.TotalMatchScore}</p>
+                    </div>
+                    <button onClick={() => setShowMatchModal(false)} className="p-3 hover:bg-slate-200 rounded-full transition"><X size={20}/></button>
+                </div>
+                
+                <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="bg-slate-100 p-6 rounded-3xl text-black">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Exp Index</p>
+                            <p className="text-3xl font-black">+{selectedMatch.ExperienceScore}</p>
+                        </div>
+                        <div className="bg-indigo-600 p-6 rounded-3xl text-white">
+                            <p className="text-[9px] font-black text-indigo-200 uppercase tracking-widest mb-1">Geographic Bonus</p>
+                            <p className="text-3xl font-black">+{selectedMatch.LocationBonus}</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4 pt-4">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Skill Alignment Analysis</h4>
+                        {selectedMatch.SkillsDetails?.map((s, idx) => (
+                            <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                <div className="flex justify-between text-xs font-black uppercase mb-3">
+                                    <span>{s.SkillName} {s.IsMandatory && <span className="text-red-500 font-bold ml-1">CRITICAL</span>}</span>
+                                    <span className={s.CandidateLevel >= s.RequiredLevel ? "text-emerald-600" : "text-amber-600"}>
+                                        LVL {s.CandidateLevel} / {s.RequiredLevel}
+                                    </span>
+                                </div>
+                                <div className="h-1.5 bg-slate-200 rounded-full relative">
+                                    <div className="absolute h-full bg-indigo-600 rounded-full transition-all duration-1000" style={{ width: `${s.CandidateLevel * 10}%` }}></div>
+                                    <div className="absolute h-4 w-1 bg-indigo-500 -top-1.5 rounded-full" style={{ left: `${s.RequiredLevel * 10}%` }}></div>
+                                </div>
+                            </div>
+                        )) || <div className="text-center py-10 text-slate-400 italic text-sm">No skill data linked.</div>}
+                    </div>
+
+                    {selectedMatch.StatusID === 3 && (
+                        <div className="mt-8 p-8 bg-indigo-50 rounded-[32px] border border-indigo-100">
+                            <h4 className="text-sm font-black uppercase mb-6 flex items-center gap-2 tracking-tight">
+                                <Calendar size={18} className="text-indigo-600" /> Interface: Schedule Session
+                            </h4>
+                            <form onSubmit={handleScheduleSubmit} className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[9px] font-black text-slate-400 block mb-1 uppercase tracking-widest">Inception</label>
+                                        <input type="datetime-local" required className="w-full p-3 bg-white border-2 border-transparent focus:border-indigo-500 rounded-2xl text-xs font-bold outline-none transition" value={schedStart} onChange={(e) => setSchedStart(e.target.value)}/>
+                                    </div>
+                                    <div>
+                                        <label className="text-[9px] font-black text-slate-400 block mb-1 uppercase tracking-widest">Termination</label>
+                                        <input type="datetime-local" required className="w-full p-3 bg-white border-2 border-transparent focus:border-indigo-500 rounded-2xl text-xs font-bold outline-none transition" value={schedEnd} onChange={(e) => setSchedEnd(e.target.value)}/>
+                                    </div>
+                                </div>
+                                <button type="submit" className="w-full bg-indigo-600 text-white py-4 rounded-2xl text-xs font-black uppercase hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 tracking-widest">Transmit Interview Slot</button>
+                            </form>
+                        </div>
+                    )}
+                </div>
+
+                <div className="p-8 bg-slate-100 border-t border-slate-100 flex justify-between items-center">
+                    <div className="flex flex-col">
+                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">Current Protocol</span>
+                        <span className="text-sm font-black text-indigo-400 uppercase tracking-tighter">{selectedMatch.StatusName || 'Applied'}</span>
+                    </div>
+                    <div className="flex gap-3">
+                        {![4, 5].includes(selectedMatch.StatusID) && (
+                            <button onClick={() => handleStatusUpdate(selectedMatch.ApplicationID, 5, 'Rejected')} className="px-6 py-3 text-[10px] font-black uppercase bg-red-400 text-white rounded-2xl hover:bg-red-500 hover:text-white transition-all tracking-widest">Terminate</button>
+                        )}
+                        {(selectedMatch.StatusID === 1 || !selectedMatch.StatusID) && (
+                            <button onClick={() => handleStatusUpdate(selectedMatch.ApplicationID, 2, 'Screening')} className="px-6 py-3 text-[10px] font-black uppercase bg-indigo-600 text-white rounded-2xl shadow-lg hover:bg-indigo-700 transition-all tracking-widest">Initialize Screening</button>
+                        )}
+                        {selectedMatch.StatusID === 2 && (
+                            <button onClick={() => handleStatusUpdate(selectedMatch.ApplicationID, 3, 'Interview')} className="px-6 py-3 text-[10px] font-black uppercase bg-amber-500 text-white rounded-2xl shadow-lg hover:bg-amber-600 transition-all tracking-widest">Progress to Interview</button>
+                        )}
+                        {selectedMatch.StatusID === 3 && (
+                            <button onClick={() => handleHireCandidate(selectedMatch.ApplicationID)} className="px-8 py-3 text-[10px] font-black uppercase bg-emerald-600 text-white rounded-2xl shadow-lg hover:bg-emerald-700 transition-all flex items-center gap-2 tracking-widest"><UserPlus size={14}/> Execute Hire</button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
+
+      {/* HEADER SECTION - REBRANDED */}
+      <div className="flex flex-col md:flex-row justify-between items-center bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm gap-6">
+        <div>
+            <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Recruiter<span className="text-indigo-600">Intelligence</span></h2>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">Acquisition Flow & Selection Strategy</p>
+        </div>
+        <div className="flex gap-4">
+            <button
+                onClick={runAutoReject}
+                disabled={isProcessing}
+                className={`flex items-center gap-2 px-8 py-4 rounded-2xl text-[10px] font-black uppercase transition-all shadow-xl tracking-widest
+                    ${isProcessing 
+                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                        : 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border-2 border-red-200'
+                    }`}
+            >
+                <ShieldAlert size={16} />
+                {isProcessing ? "Purging Pipeline..." : "Auto-Purge Unqualified"}
+            </button>
+            <button onClick={() => setShowForm(!showForm)} className="bg-slate-900 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase flex items-center gap-2 shadow-2xl hover:bg-indigo-600  transition-all hover:text-white tracking-widest">
+                {showForm ? 'Abort Creation' : <><Plus size={18}/> Create Posting</>}
+            </button>
+        </div>
+      </div>
+
+      {/* --- COMMAND MODULES (SUMMARY METRICS) --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="bg-white p-8 rounded-[40px] border-2 border-slate-100 shadow-sm flex items-center justify-between group hover:border-indigo-500 transition-all">
+            <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Active Deployments</p>
+                <h3 className="text-4xl font-black text-slate-900">{summary.ActiveJobs}</h3>
+            </div>
+            <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-900 group-hover:bg-indigo-600 group-hover:text-white transition-all"><Briefcase size={32} /></div>
+        </div>
+        
+        <div className="bg-white p-8 rounded-[40px] border-2 border-slate-100 shadow-sm flex items-center justify-between group hover:border-amber-500 transition-all relative">
+            <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Awaiting Review</p>
+                <h3 className="text-4xl font-black text-slate-900">{summary.NewApplications}</h3>
+            </div>
+            <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-900 group-hover:bg-amber-500 group-hover:text-white transition-all"><Users size={32} /></div>
+            {summary.NewApplications > 0 && (
+                <span className="absolute -top-3 -right-3 bg-amber-500 text-white text-[9px] px-3 py-1.5 rounded-full font-black animate-bounce uppercase tracking-tighter border-4 border-white">Critcal Review</span>
+            )}
+        </div>
+
+        <div className="bg-white p-8 rounded-[40px] border-2 border-slate-100 shadow-sm flex items-center justify-between group hover:border-purple-500 transition-all">
+            <div className="space-y-1">
+                <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Interviews Today</p>
+                <h3 className="text-4xl font-black text-slate-900">{summary.InterviewsToday}</h3>
+            </div>
+            <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-900 group-hover:bg-purple-600 group-hover:text-white transition-all"><Calendar size={32} /></div>
+        </div>
+      </div>
+
+      {/* JOB POSTING CONSTRUCTOR */}
+      {showForm && (
+        <form onSubmit={handlePostJob} className="bg-slate-50 p-10 rounded-[48px] border-4 border-slate-900 shadow-2xl grid grid-cols-1 md:grid-cols-3 gap-10 animate-in slide-in-from-top-8 duration-500">
+            <div className="md:col-span-2 space-y-6">
+                <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-500 ml-2 tracking-widest">Job Designation</label>
+                    <input placeholder="e.g. Senior Intelligence Analyst" className="w-full p-5 bg-white border-2 border-transparent focus:border-indigo-500 rounded-[24px] outline-none font-bold shadow-sm transition" required value={newJob.title} onChange={e => setNewJob({...newJob, title: e.target.value})}/>
+                </div>
+                <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase text-slate-500 ml-2 tracking-widest">Description</label>
+                    <textarea placeholder="Outline the key objectives..." className="w-full p-5 bg-white border-2 border-transparent focus:border-indigo-500 rounded-[24px] outline-none h-40 font-bold shadow-sm transition" required value={newJob.description} onChange={e => setNewJob({...newJob, description: e.target.value})}/>
+                </div>
+                
+                <div className="pt-4">
+                    <h4 className="text-[10px] font-black uppercase text-slate-900 mb-6 tracking-[0.3em] flex items-center gap-2">
+                        <Settings size={14}/> Technical Requirements
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4">
+                        {availableSkills.map(skill => {
+                            const req = newJob.requirements.find(r => r.skillId === skill.SkillID);
+                            return (
+                                <div key={skill.SkillID} className={`p-4 rounded-2xl border-2 transition-all ${req ? 'border-indigo-600 bg-indigo-50 scale-[0.98]' : 'bg-white border-transparent'}`}>
+                                    <label className="flex items-center gap-3 cursor-pointer mb-3">
+                                        <input type="checkbox" checked={!!req} onChange={() => toggleSkill(skill.SkillID)} className="w-5 h-5 rounded accent-indigo-600" />
+                                        <span className="text-xs font-black uppercase tracking-tight">{skill.SkillName}</span>
+                                    </label>
+                                    {req && (
+                                        <div className="flex items-center justify-between gap-4 pt-2 border-t border-indigo-200">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[9px] font-black text-indigo-400">MIN LVL:</span>
+                                                <input type="number" min="1" max="10" className="w-12 p-1 text-[10px] border-2 border-indigo-200 rounded-lg font-black text-center" value={req.minProficiency} onChange={(e) => updateSkillReq(skill.SkillID, 'minProficiency', e.target.value)}/>
+                                            </div>
+                                            <label className="text-[9px] font-black flex items-center gap-2 text-indigo-600">
+                                                <input type="checkbox" checked={req.isMandatory} onChange={(e) => updateSkillReq(skill.SkillID, 'isMandatory', e.target.checked)} className="accent-indigo-600" /> MANDATORY
+                                            </label>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+            <div className="space-y-6">
+                <div className="bg-white p-8 rounded-[32px] shadow-sm space-y-6">
+                    <div>
+                        <label className="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Location</label>
+                        <input placeholder="Location" className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none font-bold transition" required value={newJob.location} onChange={e => setNewJob({...newJob, location: e.target.value})}/>
+                    </div>
+                    <div>
+                        <label className="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Experience Floor (Years)</label>
+                        <input type="number" className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none font-black transition" value={newJob.minExp} onChange={e => setNewJob({...newJob, minExp: e.target.value})}/>
+                    </div>
+                    <div>
+                        <label className="text-[10px] font-black uppercase text-slate-400 block mb-2 tracking-widest">Vacancies</label>
+                        <input type="number" className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 rounded-2xl outline-none font-black transition" value={newJob.vacancies} onChange={e => setNewJob({...newJob, vacancies: e.target.value})}/>
+                    </div>
+                    <button type="submit" className="w-full bg-slate-200 text-black py-6 rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl hover:bg-slate-900 hover:text-white transition-all transform active:scale-95">Publish</button>
+                </div>
+            </div>
+        </form>
+      )}
+
+      {/* MAIN INTELLIGENCE GRID */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="lg:col-span-2 space-y-6">
+            <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.4em] flex items-center gap-3">
+                <span className="w-8 h-1 bg-indigo-600 rounded-full"></span>
+                LIVE MATCH ENGINE {selectedJob && <span className="text-indigo-600">— {selectedJob.JobTitle}</span>}
+            </h3>
+            <div className="bg-white rounded-[40px] shadow-xl border-2 border-slate-100 overflow-hidden">
+                <table className="w-full text-left">
+                <thead className="bg-slate-100 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                    <tr>
+                        <th className="px-10 py-6">Candidate Name</th>
+                        <th className="px-10 py-6 text-center">Compatibility Index</th>
+                        <th className="px-10 py-6 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                    {matches.length > 0 ? matches.map((m, i) => (
+                        <tr key={i} className="group hover:bg-slate-50 transition-all duration-300">
+                            <td className="px-10 py-8">
+                                <div className="font-black text-slate-900 uppercase text-sm tracking-tight">{m.FullName}</div>
+                                <div className="text-[9px] font-black uppercase text-indigo-500 tracking-widest mt-1 flex items-center gap-1">
+                                    <div className="w-1 h-1 bg-indigo-500 rounded-full"></div> {m.StatusName}
+                                </div>
+                            </td>
+                            <td className="px-10 py-8 text-center">
+                                <span className="text-2xl font-black text-slate-900 bg-slate-100 px-4 py-2 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all">{m.TotalMatchScore}</span>
+                            </td>
+                            <td className="px-10 py-8 text-right">
+                                <button onClick={() => openMatchBreakdown(m)} className="bg-slate-900 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase hover:bg-indigo-600 transition-all tracking-widest shadow-lg shadow-slate-200">Review & Manage</button>
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr><td colSpan="3" className="px-10 py-20 text-center text-slate-400 text-[10px] font-black uppercase tracking-widest">No matching personnel identified for this posting.</td></tr>
+                    )}
+                </tbody>
+                </table>
+            </div>
+        </div>
+        
+        {/* SIDEBAR TABS (HARDWARE CONTROL BOARD) */}
+        <div className="space-y-6">
+            <div className="bg-slate-100 p-2 rounded-[28px] flex gap-2">
+                <button 
+                    onClick={() => setActiveTab('active')} 
+                    className={`flex-1 py-4 text-[9px] font-black uppercase tracking-[0.2em] rounded-[20px] transition-all duration-300 ${activeTab === 'active' ? 'bg-slate-900 text-white shadow-xl scale-105' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                    Active Deployments ({myJobs.length})
+                </button>
+                <button 
+                    onClick={() => setActiveTab('archive')} 
+                    className={`flex-1 py-4 text-[9px] font-black uppercase tracking-[0.2em] rounded-[20px] transition-all duration-300 ${activeTab === 'archive' ? 'bg-slate-900 text-white shadow-xl scale-105' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                    Archived ({archivedJobs.length})
+                </button>
+            </div>
+
+            <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
+                {(activeTab === 'active' ? myJobs : archivedJobs).map(job => (
+                    <div key={job.JobID} onClick={() => setSelectedJob(job)} className={`p-8 rounded-[32px] border-4 cursor-pointer transition-all relative group ${selectedJob?.JobID === job.JobID ? 'border-indigo-600 bg-white shadow-2xl translate-x-2' : 'bg-white border-transparent hover:border-slate-200'}`}>
+                        <div className="absolute top-6 right-6 flex gap-2">
+                            {activeTab === 'active' ? (
+                                <button onClick={(e) => handleDeleteJob(job.JobID, e)} className="text-slate-300 hover:text-red-500 transition-colors p-2"><Trash2 size={18}/></button>
+                            ) : (
+                                <button onClick={(e) => handleRestoreJob(job.JobID, e)} className="text-slate-300 hover:text-emerald-500 transition-colors p-2"><Clock size={18}/></button>
+                            )}
+                        </div>
+                        <div className="pr-10 mb-4">
+                            <h4 className={`font-black text-sm uppercase tracking-tight leading-tight ${selectedJob?.JobID === job.JobID ? 'text-indigo-600' : 'text-slate-900 group-hover:text-indigo-500'}`}>{job.JobTitle}</h4>
+                            <div className="flex gap-2 mt-2">
+                                <span className={`text-[8px] px-2 py-1 rounded-md font-black uppercase tracking-widest ${activeTab === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>{activeTab === 'active' ? 'Online' : 'Archived'}</span>
+                                <span className="text-[8px] px-2 py-1 bg-indigo-600 text-white rounded-md font-black uppercase tracking-widest">ID: {job.JobID}</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between border-t border-slate-50 pt-4 mt-4">
+                            <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest">{job.Location}</p>
+                            <p className="text-[9px] text-slate-900 font-black uppercase bg-slate-50 px-3 py-1 rounded-full">{job.Vacancies} OPENINGS</p>
+                        </div>
+                    </div>
+                ))}
+                { (activeTab === 'active' ? myJobs : archivedJobs).length === 0 && (
+                    <div className="text-center py-20 text-slate-400 text-[10px] font-black uppercase tracking-widest italic border-2 border-dashed border-slate-200 rounded-[32px]">No data strings found</div>
+                )}
+            </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// --- CANDIDATE DASHBOARD ---
+function CandidateDashboard({ user }) {
+  const [jobs, setJobs] = useState([]);
+  const [myApps, setMyApps] = useState([]);
+  const [profile, setProfile] = useState({ skills: [], docs: [] });
+  const [allSkills, setAllSkills] = useState([]);
+  const [interviews, setInterviews] = useState([]);
+  const [newSkill, setNewSkill] = useState({ id: "", level: 5 });
+  const [selectedGap, setSelectedGap] = useState(null);
+  const [inspectingJobId, setInspectingJobId] = useState(null);
+
+  const API_BASE = "/api";
+
+  const refreshData = async () => {
+    try {
+      const [jobsRes, appsRes, profileRes, docsRes, skillsRes, interviewRes] = await Promise.all([
+        axios.get(`${API_BASE}/candidate/recommendations/${user.UserID}`),
+        axios.get(`${API_BASE}/candidate/apps/${user.UserID}`),
+        axios.get(`${API_BASE}/candidate/profile/${user.UserID}`),
+        axios.get(`${API_BASE}/candidate/documents/${user.UserID}`),
+        axios.get(`${API_BASE}/skills`),
+        axios.get(`${API_BASE}/candidate/interviews/${user.UserID}`)
+      ]);
+      setJobs(jobsRes.data);
+      setMyApps(appsRes.data);
+      setProfile({ ...profileRes.data, docs: docsRes.data });
+      setAllSkills(skillsRes.data);
+      setInterviews(interviewRes.data);
+    } catch (err) {
+      console.error("Data refresh failed", err);
+    }
+  };
+
+  useEffect(() => { refreshData(); }, []);
+
+  const handleConfirmInterview = async (scheduleId) => {
+    try {
+      await axios.put(`${API_BASE}/candidate/interviews/confirm`, { 
+        scheduleId, 
+        userId: user.UserID 
+      });
+      refreshData();
+    } catch (err) {
+      alert("Confirmation failed: " + err.response?.data?.error || err.message);
+    }
+  };
+
+  const checkSkillGap = async (jobId) => {
+    if (inspectingJobId === jobId) { setInspectingJobId(null); return; }
+    try {
+      const res = await axios.get(`${API_BASE}/candidate/skill-gap/${jobId}/${user.UserID}`);
+      setSelectedGap(res.data);
+      setInspectingJobId(jobId);
+    } catch (err) { console.error("Failed to fetch skill gap"); }
+  };
+
+  const handleWithdraw = async (appId) => {
+    if (!window.confirm("Confirm withdrawal?")) return;
+    try {
+      await axios.post(`${API_BASE}/withdraw`, { appId, userId: user.UserID });
+      await refreshData();
+    } catch (err) { console.error(err); alert("Withdrawal failed."); }
+  };
+
+  const updateProfile = async () => {
+    await axios.put(`${API_BASE}/candidate/profile`, { userId: user.UserID, location: profile.Location, yearsOfExperience: profile.YearsOfExperience });
+    alert("Profile Updated");
+    refreshData();
+  };
+
+  const addSkill = async () => {
+    if(!newSkill.id) return;
+    await axios.post(`${API_BASE}/candidate/skills`, { userId: user.UserID, skillId: newSkill.id, proficiency: newSkill.level });
+    setNewSkill({ id: "", level: 5 });
+    refreshData();
+  };
+
+  const uploadDoc = async () => {
+    const name = prompt("Enter Document Name:");
+    if(name) {
+        await axios.post(`${API_BASE}/candidate/documents`, { userId: user.UserID, docName: name });
+        refreshData();
+    }
+  };
+
+  return (
+    <div className="space-y-10 max-w-7xl mx-auto p-6 pb-20">
+      
+      {/* HEADER SECTION */}
+      <header className="flex flex-col md:flex-row justify-between items-center bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm gap-6">
+        <div>
+          <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Dashboard<span className="text-indigo-600">.</span></h2>
+          <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-1">Welcome back, {user.Username}</p>
+        </div>
+        <div className="flex gap-3">
+            <div className="bg-white px-6 py-3 rounded-2xl shadow-sm flex items-center gap-3">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">System Active</span>
+            </div>
+        </div>
+      </header>
+
+      {/* SECTION 1: PROFILE & SKILLS */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <section className="lg:col-span-1 bg-white p-8 rounded-[40px] shadow-sm space-y-8">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 bg-slate-900 rounded-3xl flex items-center justify-center text-white shadow-xl rotate-3">
+              <UserCircle size={32} />
+            </div>
+            <div>
+              <h2 className="font-black text-xl uppercase tracking-tight">Talent Profile</h2>
+              <p className="text-[10px] text-indigo-600 font-black uppercase tracking-widest">Candidate ID: #{user.UserID}</p>
+            </div>
+          </div>
+
+          <div className="space-y-5">
+            <div className="group">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Preferred Location</label>
+              <input className="w-full mt-1.5 p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl text-sm font-bold transition-all outline-none" value={profile.Location || ""} onChange={e => setProfile({...profile, Location: e.target.value})}/>
+            </div>
+            <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Total Experience (Years)</label>
+              <input type="number" className="w-full mt-1.5 p-4 bg-slate-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl text-sm font-bold transition-all outline-none" value={profile.YearsOfExperience || 0} onChange={e => setProfile({...profile, YearsOfExperience: e.target.value})}/>
+            </div>
+            <button onClick={updateProfile} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase shadow-xl shadow-indigo-700/20 hover:bg-indigo-600 transition-all active:scale-[0.98]">Update Profile</button>
+          </div>
+
+          <div className="pt-6 border-t space-y-4">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verified Documents</h3>
+            <div className="space-y-2">
+              {profile.docs?.map(d => (
+                <div key={d.DocumentID} className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-transparent hover:border-slate-200 transition group cursor-default">
+                  <div className="flex items-center gap-3 text-xs font-bold text-slate-700">
+                    <div className="p-2 bg-white rounded-lg shadow-sm group-hover:text-indigo-600 transition">
+                        <FileText size={16}/> 
+                    </div>
+                    {d.DocumentName}
+                  </div>
+                  <CheckCircle size={14} className="text-emerald-500" />
+                </div>
+              ))}
+            </div>
+            <button onClick={uploadDoc} className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-400 hover:border-indigo-400 hover:text-indigo-500 hover:bg-indigo-50 transition-all">Add New Document</button>
+          </div>
+        </section>
+
+        <section className="lg:col-span-2 bg-white p-8 rounded-[40px]  shadow-sm flex flex-col">
+          <div className="flex justify-between items-center mb-10">
+            <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-3">
+              <div className="w-3 h-3 bg-indigo-600 rounded-full"></div> Professional Skills Matrix
+            </h3>
+            <span className="text-[10px] font-black bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full uppercase tracking-widest">
+                {profile.skills?.length || 0} Skills Active
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 flex-1">
+            <div className="space-y-8">
+              {profile.skills?.map(s => (
+                <div key={s.SkillID} className="group">
+                  <div className="flex justify-between text-[10px] font-black uppercase tracking-tighter mb-2">
+                    <span className="group-hover:text-indigo-600 transition">{s.SkillName}</span>
+                    <span className="text-slate-400">Level {s.ProficiencyLevel} / 10</span>
+                  </div>
+                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                    <div className="h-full bg-indigo-600 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(37,99,235,0.3)]" style={{ width: `${s.ProficiencyLevel * 10}%` }}></div>
+                  </div>
+                </div>
+              ))}
+              {profile.skills?.length === 0 && (
+                  <div className="h-full flex flex-col items-center justify-center text-slate-300 space-y-2 opacity-50 italic">
+                      <BarChart3 size={40} />
+                      <p className="text-xs font-bold uppercase tracking-widest">No skills added yet</p>
+                  </div>
+              )}
+            </div>
+            
+            <div className="bg-slate-50 p-8 rounded-[35px] space-y-6 h-fit text-white  border hover:border-indigo-600 hover:shadow-2xl hover:-translate-y-1 shadow-indigo-900/20">
+              <div>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">Skill Acquisition</h4>
+                  <p className="text-xs text-slate-400 font-bold">Add or update your expertise level to improve job matching.</p>
+              </div>
+              <select className="w-full p-4 bg-slate-100 hover:border-indigo-600 hover:shadow-2xl hover:-translate-y-1 border-none rounded-2xl text-sm font-bold text-black outline-none focus:ring-2 ring-indigo-500 transition-all" value={newSkill.id} onChange={e => setNewSkill({...newSkill, id: e.target.value})}>
+                <option value="">Select Skill...</option>
+                {allSkills.map(s => <option key={s.SkillID} value={s.SkillID} className="text-black">{s.SkillName}</option>)}
+              </select>
+              <div className="space-y-3">
+                 <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-black uppercase text-slate-400">Proficiency Level</label>
+                    <span className="font-black text-xl text-indigo-400">{newSkill.level}</span>
+                 </div>
+                 <input type="range" min="1" max="10" className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500" value={newSkill.level} onChange={e => setNewSkill({...newSkill, level: e.target.value})}/>
+              </div>
+              <button onClick={addSkill} className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase shadow-xl shadow-indigo-600/20 hover:bg-indigo-600 transition-all active:scale-[0.98]">Add Skill</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* UPCOMING INTERVIEWS */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+            <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
+                <Calendar className="text-indigo-600" /> Upcoming Interviews 
+            </h2>
+            <div className="h-px flex-1 bg-slate-100 mx-6 hidden md:block"></div>
+            <span className="bg-amber-100 text-amber-600 text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest">
+                {interviews.length} Scheduled
+            </span>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {interviews.length > 0 ? interviews.map((meeting) => (
+            <div key={meeting.ScheduleID} className="bg-white p-6 rounded-[35px] border-2 border-transparent shadow-sm hover:shadow-xl hover:border-slate-100 transition-all group relative">
+              <div className="flex justify-between items-start mb-6">
+                <div className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${meeting.TimeStatus === 'Upcoming' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
+                  {meeting.TimeStatus}
+                </div>
+                {meeting.CandidateConfirmed ? (
+                  <div className="flex items-center gap-1.5 text-emerald-500 text-[9px] font-black uppercase tracking-widest">
+                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div> Confirmed
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-amber-500 text-[9px] font-black uppercase tracking-widest animate-pulse">
+                    <AlertCircle size={14} /> Confirmation Required
+                  </div>
+                )}
+              </div>
+
+              <h3 className="font-black text-lg leading-tight group-hover:text-indigo-600 transition">{meeting.JobTitle}</h3>
+              <p className="text-xs text-slate-400 font-bold mb-6 italic tracking-tight">Interview with {meeting.RecruiterName}</p>
+              
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                <div className="bg-slate-50 p-3 rounded-2xl">
+                  <label className="text-[8px] font-black text-slate-400 uppercase block mb-1">Date</label>
+                  <div className="flex items-center gap-2 text-[11px] font-black">
+                    <Calendar size={12} className="text-indigo-500" />
+                    {new Date(meeting.InterviewStart).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                  </div>
+                </div>
+                <div className="bg-slate-50 p-3 rounded-2xl">
+                  <label className="text-[8px] font-black text-slate-400 uppercase block mb-1">Time</label>
+                  <div className="flex items-center gap-2 text-[11px] font-black">
+                    <Clock size={12} className="text-indigo-500" />
+                    {new Date(meeting.InterviewStart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+              </div>
+
+              {!meeting.CandidateConfirmed && meeting.TimeStatus === 'Upcoming' && (
+                <button 
+                  onClick={() => handleConfirmInterview(meeting.ScheduleID)}
+                  className="w-full py-4 bg-amber-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-600 transition shadow-lg shadow-amber-200"
+                >
+                  Confirm Attendance
+                </button>
+              )}
+            </div>
+          )) : (
+            <div className="col-span-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-[35px] p-16 text-center">
+              <Calendar size={48} className="mx-auto text-slate-200 mb-4" />
+              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">No upcoming interviews scheduled</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* JOBS & TRACKING */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <section className="lg:col-span-2 space-y-6">
+          <div className="flex items-center justify-between">
+              <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-3">
+                <Star className="text-indigo-600" /> AI Recommendations
+              </h2>
+              <span className="text-[9px] font-black bg-slate-900 text-white px-3 py-1 rounded-lg uppercase tracking-widest">Engine v2.0</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {jobs.map(job => {
+              const alreadyApplied = myApps.some(app => app.JobID === job.JobID);
+              return (
+                <div key={job.JobID} className={`bg-white p-7 rounded-[40px] border-2 transition-all relative overflow-hidden group ${alreadyApplied ? 'opacity-70 bg-slate-50 border-transparent' : 'hover:border-indigo-600 hover:shadow-2xl hover:-translate-y-1'}`}>
+                  {job.TotalMatchScore && !alreadyApplied && (
+                    <div className="absolute top-0 right-0 bg-indigo-600 text-white px-5 py-2.5 rounded-bl-[25px] font-black text-[10px] tracking-tighter">
+                      {Math.round(job.TotalMatchScore)}% MATCH
+                    </div>
+                  )}
+                  {alreadyApplied && (
+                    <div className="absolute top-0 right-0 bg-emerald-500 text-white px-5 py-2.5 rounded-bl-[25px] font-black text-[10px] flex items-center gap-1.5 tracking-widest">
+                      <Check size={12} strokeWidth={4} /> APPLIED
+                    </div>
+                  )}
+                  
+                  <div className="mb-6">
+                      <h3 className="font-black text-xl leading-tight mb-1 group-hover:text-indigo-600 transition">{job.JobTitle}</h3>
+                      <div className="flex items-center gap-2 text-[10px] text-slate-400 font-black uppercase tracking-widest">
+                          <span>{job.Location}</span>
+                          <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                          <span>{job.MinExperience}yr+ Exp</span>
+                      </div>
+                  </div>
+
+                  {inspectingJobId === job.JobID && selectedGap && (
+                    <div className="mb-6 p-5 bg-slate-50 rounded-[25px] space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                      <p className="text-[9px] font-black uppercase text-slate-600 tracking-widest border-b border-slate-300 pb-2">Gap Analysis</p>
+                      {selectedGap.map((skill, i) => (
+                        <div key={i} className="flex flex-col gap-1.5">
+                          <div className="flex items-center justify-between text-[10px] font-bold">
+                            <span className={`${skill.Status === 'Missing' ? 'text-rose-400' : 'text-slate-500'}`}>
+                              {skill.SkillName} {skill.IsMandatory ? '*' : ''}
+                            </span>
+                            <span className="text-slate-500">{skill.CandidateLevel}/{skill.RequiredLevel}</span>
+                          </div>
+                          <div className="h-1 bg-slate-300 rounded-full overflow-hidden">
+                              <div className={`h-full rounded-full ${skill.Status === 'Missing' ? 'bg-rose-500' : 'bg-emerald-500'}`} style={{ width: `${(skill.CandidateLevel/skill.RequiredLevel)*100}%` }}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                      <button onClick={() => checkSkillGap(job.JobID)} className="flex-1 py-4 bg-slate-50 border border-slate-200 text-slate-600 rounded-2xl font-black text-[10px] hover:bg-slate-100 transition-all uppercase tracking-widest">
+                        {inspectingJobId === job.JobID ? 'Close' : 'Analysis'}
+                      </button>
+                      {alreadyApplied ? (
+                        <button disabled className="flex-[2] py-4 bg-slate-200 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-not-allowed">Application Sent</button>
+                      ) : (
+                        <button onClick={() => axios.post(`${API_BASE}/apply`, { jobId: job.JobID, userId: user.UserID }).then(refreshData)} className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] hover:bg-indigo-600 transition-all uppercase tracking-widest shadow-lg shadow-indigo-200 active:scale-[0.98]">Quick Apply</button>
+                      )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="lg:col-span-1 space-y-6">
+          <h2 className="text-xl font-black uppercase tracking-tight">Active Tracking</h2>
+          <div className="bg-white rounded-[40px] border shadow-sm overflow-hidden divide-y divide-slate-50">
+            {myApps.length > 0 ? myApps.map(app => (
+              <div key={app.ApplicationID} className="p-6 flex items-center justify-between group hover:bg-slate-50 transition-colors">
+                <div className="min-w-0">
+                  <h4 className="font-black text-sm uppercase truncate w-36 mb-1">{app.JobTitle}</h4>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${
+                        app.StatusName === 'Rejected' ? 'bg-rose-500' : 
+                        app.StatusName === 'Hired' ? 'bg-emerald-500' : 'bg-indigo-500'
+                    }`}></span>
+                    <p className={`text-[10px] font-black uppercase tracking-widest ${
+                        app.StatusName === 'Rejected' ? 'text-rose-500' : 
+                        app.StatusName === 'Hired' ? 'text-emerald-500' : 'text-indigo-500'
+                    }`}> {app.StatusName} </p>
+                  </div>
+                </div>
+                <button onClick={() => handleWithdraw(app.ApplicationID)} className="p-3 text-slate-200 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
+                  <Trash2 size={18}/>
+                </button>
+              </div>
+            )) : (
+              <div className="p-20 text-center flex flex-col items-center gap-3">
+                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
+                    <Briefcase size={24} />
+                </div>
+                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">No Applications</p>
+              </div>
+            )}
+          </div>
+          
+          <div className="bg-indigo-600 rounded-[40px] p-8 text-white shadow-xl shadow-indigo-200 relative overflow-hidden group">
+              <div className="relative z-10">
+                <h4 className="font-black text-lg uppercase tracking-tight leading-tight mb-2">Need to polish your profile?</h4>
+                <p className="text-xs font-bold text-indigo-100 mb-6">Completing your skills matrix increases your visibility to recruiters by 40%.</p>
+                <div className="h-1.5 w-full bg-indigo-700 rounded-full mb-4">
+                    <div className="h-full bg-white rounded-full w-2/3"></div>
+                </div>
+                <p className="text-[9px] font-black uppercase tracking-widest text-indigo-200">Profile Completion: 65%</p>
+              </div>
+              <Plus className="absolute -bottom-4 -right-4 text-indigo-500 w-32 h-32 opacity-20 group-hover:rotate-90 transition-transform duration-1000" />
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
